@@ -233,20 +233,21 @@ fit_model_simplified <- function(
   )) %>%
     setdiff("intercept")
 
-  # Make sure there are no NAs in any of the columns
-  for(column in hierarchical_column_names) {
-    if(column == "intercept") next
-    if (column == area) {
-      check_nas_or_pops(data, column, year, population_data)
-    } else {
-      check_nas(data, column)
-    }
-  }
+  print("to do: check what NA check is needed")
+  # # Make sure there are no NAs in any of the columns
+  # for(column in hierarchical_column_names) {
+  #   if(column == "intercept") next
+  #   if (column == area) {
+  #     check_nas_or_pops(data, column, year, population_data)
+  #   } else {
+  #     check_nas(data, column)
+  #   }
+  # }
 
 
   ##### Load model #####
   if (compile_model){
-    stan_file_path <- file.path(here::here("documentation/code_for_hierarchicalmodels_seqrun", "hierfunctions_seq.stan"))
+    stan_file_path <- file.path(here::here("inst/stan/", "hierfunctions_seq.stan"))
     stan_model <- cmdstanr::cmdstan_model(
       stan_file = stan_file_path,
       force_recompile = force_recompile
@@ -384,120 +385,7 @@ fit_model_simplified <- function(
 }
 
 
-get_posterior_summaries_simplified <- function(
-    fit,
-    process_indicator_prefixes = c(""),
-    dm_indicator_prefixes = c(""),
-    process_params = c("Omega_raw", "Omega_sigma"),
-    dm_params = c("nonse")
-    ) {
-  params_to_collect <- dplyr::bind_rows(
-    expand.grid(
-      prefix = process_indicator_prefixes,
-      param = process_params),
-    expand.grid(
-      prefix = dm_indicator_prefixes,
-      param = dm_params)
-  ) |>
-    dplyr::mutate(prefixed_param_name = paste0(prefix, param))
 
-  # split parameters into those that are "fixable" in local fits and those that
-  # are "unfixable"
-  #  unfixable_param_names <- c("local_shrinkage_dm")
-  # unfixable_param_names <- c("BLA")
-  fixable_params_to_collect <- params_to_collect |>
-    #   dplyr::filter(!param %in% unfixable_param_names) |>
-    dplyr::pull(prefixed_param_name)
-
-  # unfixable_params_to_collect <- params_to_collect |>
-  #   dplyr::filter(param %in% unfixable_param_names) |>
-  #   dplyr::pull(prefixed_param_name)
-
-  # get parameter summaries for each group
-  # get parameter summaries for each group
-  print(
-    "Warning: in obtaining posterior summary in get_posterior_summary_one_fixable_param, we have hardcoded num_inds based on names of parameters."
-  )
-  fixable_combined_summary <- purrr::map(
-    fixable_params_to_collect,
-    get_posterior_summary_one_fixable_param,
-    fit = fit
-  ) |>
-    purrr::list_rbind()%>%
-    # LA added column wtith parname w/o []
-    dplyr::mutate(
-      variable_no_index = stringr::str_split_i(string = variable, pattern = fixed("["), i = 1)
-    )
-
-  # unfixable_combined_summary <- fit$samples$summary(unfixable_params_to_collect,
-  #                                                   "mean"#,
-  #                                                   #"median"
-  #                                                   )
-
-  return(fixable_combined_summary)
-  # return(dplyr::bind_rows(
-  #   fixable_combined_summary,
-  #   unfixable_combined_summary
-  #     ) %>%
-  #     # LA added column wtith parname w/o []
-  #   dplyr::mutate(
-  #     variable_no_index = stringr::str_split_i(string = variable, pattern = fixed("["), i = 1)
-  #   )
-  # )
-}
-
-
-
-extract_parameter_subhierarchical_simplified <- function(
-  hierarchical_data, # hierarchical_data, obtained from hierarchical_data(fit$geo_unit, fit$hierarchical_level)
-  subhierarchy, # selected hierarchical_level (example: "intercept" or "region")
-  parname, # selected parameter name (example: "Omega")
-  fit_samples #fit$samples
-) {
-
-
-  start <- hierarchical_data$model_matrix$index %>%
-    dplyr::filter(column == subhierarchy) %>%
-    dplyr::pull(i) %>%
-    min()
-
-  end <- hierarchical_data$model_matrix$index %>%
-    dplyr::filter(column == subhierarchy) %>%
-    dplyr::pull(i) %>%
-    max()
-
-  pars <- c(glue::glue("{parname}_star"))
-
-  star <- fit_samples$draws(pars) %>%
-    tidybayes::spread_draws((!!sym(pars[1]))[i]) %>%
-    dplyr::group_by(.chain, .iteration, .draw) %>%
-    tidyr::nest() %>%
-    dplyr::mutate(star = map(data, `[[`, glue::glue("{parname}_star"))) %>%
-    dplyr::select(-data)
-
-  uniq <- unique(hierarchical_data$model_matrix$mat[, 1:end, drop = FALSE])
-
-  titles <- c()
-  for(i in 1:nrow(uniq)) {
-    index <- rep(0, hierarchical_data$n_terms)
-    index[1:end] <- uniq[i, 1:end]
-    title <- hierarchical_data$model_matrix$index %>%
-      dplyr::filter(i == last(which(index == 1))) %>%
-      dplyr::pull(level)
-    titles <- c(titles, title)
-
-    star[[title]] = map_dbl(star[["star"]], function(star) {
-      index %*% star
-    })
-  }
-
-  star <- star %>%
-    tidyr::pivot_longer(cols = all_of(titles)) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(-star)
-
-  return(star)
-}
 
 
 

@@ -1,0 +1,270 @@
+---
+title: "Hierarchical models and seq model fits"
+author: "Leontine"
+format: html
+editor: visual
+---
+
+# Overview
+
+In this document we explain
+
+1.  how we set up a hierarchical model for a parameter;
+
+2.  how we fix higher level parameters for that set up when doing sequential runs.
+
+The current goal is to document the set up and include a simplified example of use, to help with code checks and to make it easier to do code updates. Longer term, we can see if we can pull out this related set of functions into a separate R package, to make it easier to use in other modeling exercises.
+
+The code set up was introduced in <https://github.com/AlkemaLab/BayesTransitionModels>
+
+# Set up
+
+Goal: create a simplified example that uses our data set and helper functions from the package (functions in R for processing, functions and code blocks in stan to set up the stan model).
+
+Load relevant packages, including our own
+
+```{r}
+#| include: false
+library(here) 
+library(tidyverse) 
+library(ggplot2) 
+library(haven) 
+library(stringr)
+library(cmdstanr) 
+library(bayesplot) # diagnostic plots 
+devtools::load_all(here::here())
+```
+
+Read in data and preprocess as usual
+
+```{r}
+#| include: false
+data_folder <- "data_raw" 
+dat <- read_csv(here::here(data_folder, "coverage_data.csv"))
+```
+
+Let's use columns `cluster` and `subcluster` and `iso`:
+
+```{r}
+dat %>% select(iso, cluster, subcluster)
+```
+
+Summary of clusters and subclusters, after selecting one row per country
+
+```{r}
+dat %>%
+  group_by(iso) %>%
+  filter(year == max(year)) %>%
+  select(country, iso, subcluster, cluster) %>%
+  group_by(cluster) %>%
+  summarize(nsubclusters = length(unique(subcluster)), ncountries = n())
+```
+
+# Model fitting
+
+## Model set up
+
+Let's consider the following model (we won't bother with logit-transforms):
+
+-   parameter to estimate = $\mu_c$ = country-specific coverage (during entire period)
+
+-   data model: $y_i \sim N(\mu_{c[i]}, \sigma_y^2)$
+
+-   hierarchical model for $\mu_c$:
+
+    -   $\mu_c \sim N(\mu_{s[c]}^{(subregion)}, \sigma_{\mu, across-country}^2)$ ,
+
+    -   $\mu_s^{(subregion)} \sim N(\mu_{r[s]}^{(region)}, \sigma_{\mu, across-subregions}^2)$,
+
+    -   $\mu_r^{(region)} \sim N(\mu^{(global)}, \sigma_{\mu, across-regions}^2)$
+
+Note that an equivalent specification of the hierarchical model (the one we'll use in the stan model) is as follows:
+
+-   $\mu_c =  \mu^{(global)} + \eta_{r[s[c]]]}^{(region)} + \eta_{s[c]}^{(subregion)} + \eta_c$ with
+
+-   $\eta_c \sim N(0, \sigma_{\mu, across-country}^2)$ ,
+
+-   $\eta_s^{(subregion)} \sim N(0, \sigma_{\mu, across-subregions}^2)$,
+
+-   $\eta_r^{(region)} \sim N(0, \sigma_{\mu, across-regions}^2)$
+
+In addition, in the stan model, we will use that we can write $\eta = \sigma\cdot \gamma$ where $\gamma \sim N(0,1)$. In addition, with the same set up, if $\mu^{(global)}$ has prior
+
+$$\mu^{(global)} \sim N(0, s_{\mu, global}^2),$$then we can write $\mu^{(global)} = s_{\mu, global}\cdot \gamma^{(global)}$, with $s$ being the fixed prior standard deviation (as opposed to a SD that's estimated). All that combined, we get
+
+-   $\mu_c =  s_{global}\cdot \gamma_{global} + \sigma_{\mu, region}\cdot \gamma_{r[s[c]]]}^{(region)} + \sigma_{\mu, subregion}\cdot\gamma_{s[c]}^{(subregion)} + \sigma_{\mu, country}\cdot\gamma_{\mu, c}$ with
+
+-   $\gamma \sim N(0,1)$ for each gamma (one global, $R$ region, $S$ subregions, $C$ countries.
+
+The set up and notation in stan/R, in terms of parameters, using parameter Omega as an example, is currently as follows:
+
+-   Omega_raw refers to the vector with ALL $\gamma$s, including the global one.The ordering is global-allregional-allsubregional-country.
+
+-   Omega_sigma referred to the vector of stacked sigmas, excluding $s_{\mu, global}$ (in the original package, it was called Omega_sigma_raw).
+
+-   Omega_star refers to the vector with (mu global and ALL $\eta$s). we get Omega_stars from Omega_raw and the vector ($s_{\mu, global}$ , Omega_sigma), using the stan `scale_blocks` function.
+
+-   Omega refers to the final $\mu$s at the country level. Matrix multiplication is used to obtain the Omega country vector from the Omega_stars. The full matrix `Omega_model_matrix` is a sparse matrix, with 1s and 0s (columns refer to $\mu_{global}$, the regional etas, the subregional etas, the country etas). The matrix multiplication is implemented using the stan function csr_matrix_times_vector, using a decomposition of `Omega_model_matrix` into different parts U, V, W.
+
+-   Because of the sequential fitting, for Omega_raw and Omega_sigma, we also had to distinguish between parameters that were fixed vs those that were estimated. We do so with the \_fixed and \_estimate additions, i.e. the vector of Omega_raws is produced from Omega_raw_fixed and Omega_raw_estimate.
+
+## Model fitting
+
+global model fit
+
+```{r}
+fit1a <- fit_model_simplified(runstep = "step1a",
+        hierarchical_level     = c("intercept",  "subcluster", "iso"),
+
+                  survey_df = dat,
+                  chains = 4)
+
+```
+
+create summary object
+
+```{r}
+fit1a$post_summ <- get_posterior_summaries_simplified(fit1a) %>%
+  dplyr::rename(median = mean)
+fit1a$post_summ 
+
+```
+
+do local fit... here we fix things but do get results for all countries
+
+```{r}
+#fit1a$samples <- NULL
+fit_local <- fit_model_simplified(runstep = "local_national",
+                  global_fit = fit1a,
+                  survey_df = dat,
+                  chains = 4)
+```
+
+```{r}
+#fit1a$samples$summary()$variable
+```
+
+#### Produce and check outputs
+
+in the simpler model used, various Omegas are defined in the transformed parameters block so we can check those directly. (Note that this not (yet) true for the transition model because the creation of parameters takes place within the transition function, see notes in last section on this).
+
+here just checking the sigmas and first Omega:
+
+```{r}
+
+fit <- fit1a
+ parname_list <- list( c("Omega_raw_estimate[1]",
+                          "Omega_sigma_estimate"))
+#    plot_dirandname <- file.path(fit$output_dir, paste0(runname, "diagnostics.pdf"))
+#    pdf(plot_dirandname, width = 11, height = 11)
+    for (i in 1:length(parname_list)){
+      parname <- parname_list[[i]]
+      samp <- fit$samples$draws(parname )
+      #mcmc_trace(samp)
+      p <- mcmc_dens_overlay(samp)
+      # for more than 1 parameter
+      #mcmc_pairs(samp)
+      print(p)
+    }
+#    dev.off()
+```
+
+Re pulling out information at non-country levels (ie estimates for regions and subregions): The orginal code set up in <https://github.com/AlkemaLab/BayesTransitionModels> includes helper functions to pull out various outputs, for example, $\mu$s at the regional or subnational level. We moved some over and use them in the package here. However, they are not yet very user friendly given limited documentation, hardcoding of prior SDs for global means, and reliance on overall fit object. It is work in progress to clean this up further. What I did here for the simplified example (and will move over to the general package later):
+
+-   To deal with the set up where things are fixed vs estimated, we let the stan model spit out the Omega_stars, that's what the original helper functions use as inputs.
+
+-   We clean up helper functions, so that they take in the Omega_stars, and specific other stan_data, and are better documented. See function extract_parameter_subhierarchical_simplified in fit_model_simplified R script, and its usage below.
+
+```{r}
+fit <- fit1a
+# some notes, to understand updates between this code base and original one
+# and where to find info 
+#fit1a$country_index is now fit$geo_unit
+# see fit1a$hierarchical_level for info
+# hierarchical_data(fit$geo_unit, fit$hierarchical_level)
+# note that subhierarchies are called column in hierarchical data
+Omega <- list()
+for(subhierarchy in fit$hierarchical_level) {
+  Omega[[subhierarchy]] <-
+    extract_parameter_subhierarchical_simplified (
+      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
+      subhierarchy = subhierarchy,
+      parname = "Omega",
+      fit_samples = fit$samples)
+}
+# Omega[[]] has posterior samples for the subhierarchy level
+# to get the summaries
+quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
+  tibble(
+    val = quantile(x, probs, na.rm = TRUE),
+    quant = probs
+  )
+}
+res_global <- map(Omega, function(tibble_samples) 
+  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
+res_global
+
+```
+
+```{r}
+fit <- fit_local
+Omega <- list()
+for(subhierarchy in fit$hierarchical_level) {
+  Omega[[subhierarchy]] <-
+    extract_parameter_subhierarchical_simplified (
+      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
+      subhierarchy = subhierarchy,
+      parname = "Omega",
+      fit_samples = fit$samples)
+}
+res_local <- map(Omega, function(tibble_samples) 
+  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
+res_local
+```
+
+checks that results from local model approximate those from global model
+
+at subcluster level
+
+```{r}
+bind_rows(res_local$subcluster %>% mutate(model = "local"),
+          res_global$subcluster %>% mutate(model = "global")) %>%
+  group_by(name, model) %>% 
+  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
+  ggplot(aes(y = y, x = name, color = model)) +
+  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
+  geom_point()     
+
+```
+
+at country level
+
+```{r}
+bind_rows(res_local$iso %>% mutate(model = "local"),
+          res_global$iso %>% mutate(model = "global")) %>%
+  group_by(name, model) %>% 
+  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
+  ggplot(aes(y = y, x = name, color = model)) +
+  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
+  geom_point()   
+```
+
+# Related notes and to dos to come back to
+
+-   To do next: clean code to fix parameters
+
+-   How to get the Omegas in full model set up: in the simpler model used here, various Omegas are defined in the transformed parameters block so we can check those directly. Note that this not (yet) true for the full transition model because the creation of parameters takes place within the process model function. Options to obtain the Omegas in the full model are to
+
+    1.  add them to generated quantities: pull out omegas with an `if {add_output_omegas}` type statement, re-using functions/statements introduced in the simpler file here.
+
+    2.  rewrite transformed parameter block and pull Omegas out of the process model function (not sure if that slows things down when not used).
+
+    3.  create them in R (would need more work to get functions going, could consider exposing stan functions)
+
+    Options 1-2 seem easiest to LA.
+
+-   This example does not yet get into estimation of parameter vectors and associated code for that (as we have for spline coefficients). Simplest way to set that up is to estimate the same parameter $\mu$ twice.
+
+-   More general, on how to organize stan functions: Stan functions lived in a separate `include` folder in the original code base. In the fpet2 package we ended up including stan functions in the stan model directly. That inclusion was needed to ship a precompiled model with the package for use in the webtool (using the `instantiate` package). We can move functions back to an `include` subfolder in this documentation/package.
+
+-   Note on approach used to get this example together (can be followed when extending further): Start subfolder for simplified model and code, added current stan_model and fit_model function and simplify to produce just the toy example.

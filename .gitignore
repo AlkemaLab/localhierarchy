@@ -2,3 +2,14 @@
 .Rhistory
 .RData
 .Ruserdata
+.stan
+private/
+inst/doc
+.exe
+.DS_Store
+/Meta/
+docs
+cache
+*.html
+*.pdf
+*.zip
