@@ -146,29 +146,6 @@ fit_local <- fit_model_simplified(runstep = "local_national",
 
 #### Produce and check outputs
 
-in the simpler model used, various mus are defined in the transformed parameters block so we can check those directly. (Note that this not (yet) true for the transition model because the creation of parameters takes place within the transition function, see notes in last section on this).
-
-here just checking the sigmas and first mu:
-
-```{r}
-
-fit <- fit1a
- parname_list <- list( c("mu_raw_estimate[1]",
-                          "mu_sigma_estimate"))
-#    plot_dirandname <- file.path(fit$output_dir, paste0(runname, "diagnostics.pdf"))
-#    pdf(plot_dirandname, width = 11, height = 11)
-    for (i in 1:length(parname_list)){
-      parname <- parname_list[[i]]
-      samp <- fit$samples$draws(parname )
-      #mcmc_trace(samp)
-      p <- mcmc_dens_overlay(samp)
-      # for more than 1 parameter
-      #mcmc_pairs(samp)
-      print(p)
-    }
-#    dev.off()
-```
-
 Re pulling out information at non-country levels (ie estimates for regions and subregions): The orginal code set up in <https://github.com/AlkemaLab/BayesTransitionModels> includes helper functions to pull out various outputs, for example, $\mu$s at the regional or subnational level. We moved some over and use them in the package here. However, they are not yet very user friendly given limited documentation, hardcoding of prior SDs for global means, and reliance on overall fit object. It is work in progress to clean this up further. What I did here for the simplified example (and will move over to the general package later):
 
 -   To deal with the set up where things are fixed vs estimated, we let the stan model spit out the mu_stars, that's what the original helper functions use as inputs.
@@ -268,3 +245,28 @@ bind_rows(res_local$iso %>% mutate(model = "local"),
 -   More general, on how to organize stan functions: Stan functions lived in a separate `include` folder in the original code base. In the fpet2 package we ended up including stan functions in the stan model directly. That inclusion was needed to ship a precompiled model with the package for use in the webtool (using the `instantiate` package). We can move functions back to an `include` subfolder in this documentation/package.
 
 -   Note on approach used to get this example together (can be followed when extending further): Start subfolder for simplified model and code, added current stan_model and fit_model function and simplify to produce just the toy example.
+
+# trace plots etc
+
+in the simpler model used, various mus are defined in the transformed parameters block so we can check those directly. (Note that this not (yet) true for the transition model because the creation of parameters takes place within the transition function, see notes in last section on this).
+
+here just checking the sigmas and first mu:
+
+```{r}
+
+fit <- fit1a
+ parname_list <- list( c("mu_raw_estimate[1]",
+                          "mu_sigma_estimate"))
+#    plot_dirandname <- file.path(fit$output_dir, paste0(runname, "diagnostics.pdf"))
+#    pdf(plot_dirandname, width = 11, height = 11)
+    for (i in 1:length(parname_list)){
+      parname <- parname_list[[i]]
+      samp <- fit$samples$draws(parname )
+      #mcmc_trace(samp)
+      p <- mcmc_dens_overlay(samp)
+      # for more than 1 parameter
+      #mcmc_pairs(samp)
+      print(p)
+    }
+#    dev.off()
+```

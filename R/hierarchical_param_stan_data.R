@@ -45,12 +45,15 @@ hierarchical_param_stan_data <- function(param_name, param_data,
 
     # extract relevant data
     globalfit_param_data = global_fit[[paste0(param_name, "_data")]]
-    # later on, these are used in order
-    # instead, use the indices as stored in the summary tibble
+    # later on, these are used in order in current version
+    # WIP: use the indices as stored in the summary tibble
     globalfit_param_post_summ_raw = global_fit$post_summ %>%
       filter(variable_no_index == paste0(param_name, "_raw"))
-    globalfit_param_post_summ_sigma = global_fit$post_summ %>%
-      filter(variable_no_index == paste0(param_name, "_sigma"))
+    #globalfit_param_post_summ_sigma = global_fit$post_summ %>%
+    #  filter(variable_no_index == paste0(param_name, "_sigma"))
+    is_matrix <- is_there_a_comma(globalfit_param_post_summ_raw$variable[1])
+    if (is_matrix)
+      stop("not yet implemented")
 
     # get number of fixed terms (etas): number of etas in
     # fixed hierarchical levels where that eta was in the global fit
@@ -69,7 +72,7 @@ hierarchical_param_stan_data <- function(param_name, param_data,
           return(nrow(global_index_subset))
         } else {
           # 0 or multiple matches
-          stop("We can't fix an eta, 0 or more than 1 match")
+          stop("We can't fix an eta, 0 (or more than 1) match")
         }
       }) |>
       sum()
@@ -92,7 +95,7 @@ hierarchical_param_stan_data <- function(param_name, param_data,
         index_global %>%
         filter(column == index_local$column[k] & level == index_local$level[k]) %>%
         pull(i)
-    }
+     }
 
     # number of sigmas to fix.
     # intercept is not included
@@ -101,16 +104,29 @@ hierarchical_param_stan_data <- function(param_name, param_data,
     result[[paste0(param_name, "_n_sigma_fixed")]] <- n_sigma_fixed
     result[[paste0(param_name, "_n_sigma_estimate")]] <- n_sigma - n_sigma_fixed
 
-
-
-    ### add estimates of the fixed terms, based on global fit
-    is_matrix <- is_there_a_comma(globalfit_param_post_summ_raw$variable[1])
+    # now plug in the values
     if (!is_matrix){
-      result[[paste0(param_name, "_raw_fixed")]] <- globalfit_param_post_summ_raw$median[indices_for_local]
-      result[[paste0(param_name, "_sigma_fixed")]] <- globalfit_param_post_summ_sigma$median[seq_len(n_sigma_fixed)]
+      results_sigma <- rep(NA, n_sigma_fixed)
+      for (k in 1:n_sigma_fixed){
+        results_sigma[k] <- global_fit$post_summ %>%
+          filter(variable == paste0(param_name, "_sigma[", k, "]")) %>%
+          pull(median)
+      }
+      results_eta <- rep(NA, length(index_local$column))
+      for (k in 1:length(index_local$column)){
+        results_eta[k] <- global_fit$post_summ %>%
+          filter(variable == paste0(param_name, "_raw[", indices_for_local[k], "]")) %>%
+          pull(median)
+      }
+      result[[paste0(param_name, "_raw_fixed")]] <- results_eta # globalfit_param_post_summ_raw$median[indices_for_local]
+      result[[paste0(param_name, "_sigma_fixed")]] <- results_sigma # globalfit_param_post_summ_sigma$median[seq_len(n_sigma_fixed)]
     } else {
-      result[[paste0(param_name, "_raw_fixed")]] <- create_a_matrix(globalfit_param_post_summ_raw[, c("variable", "median")])[indices_for_local, , drop = FALSE]
-      result[[paste0(param_name, "_sigma_fixed")]] <- create_a_matrix(globalfit_param_post_summ_sigma[, c("variable", "median")])[seq_len(n_sigma_fixed), , drop=FALSE]
+
+    } else {
+      # just loop over the 2nd index of the parameter!
+      # or make output for all a matrix (then do need to fix some things for 1param next steps)
+      #result[[paste0(param_name, "_raw_fixed")]] <- create_a_matrix(globalfit_param_post_summ_raw[, c("variable", "median")])[indices_for_local, , drop = FALSE]
+      #result[[paste0(param_name, "_sigma_fixed")]] <- create_a_matrix(globalfit_param_post_summ_sigma[, c("variable", "median")])[seq_len(n_sigma_fixed), , drop=FALSE]
     }
     print("We are fixing the following parameters:")
     print(result[[paste0(param_name, "_raw_fixed")]])
