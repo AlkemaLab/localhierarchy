@@ -227,13 +227,15 @@ fit_model_simplified <- function(
 
 
 
-  # Create district index for matching district and district index
-  hierarchical_column_names <- unique(c(
-    hierarchical_level
-  )) %>%
-    setdiff("intercept")
+
 
   print("to do: check what NA check is needed")
+  # no longer needed
+  # # Create district index for matching district and district index
+  # hierarchical_column_names <- unique(c(
+  #   hierarchical_level
+  # )) %>%
+  #   setdiff("intercept")
   # # Make sure there are no NAs in any of the columns
   # for(column in hierarchical_column_names) {
   #   if(column == "intercept") next
@@ -256,10 +258,12 @@ fit_model_simplified <- function(
 
   ##### Setup data for Stan #####
 
-  geo_unit_index <- data[!is.na(data[[area]]), ] %>%
-    dplyr::distinct(!!! syms(hierarchical_column_names)) %>%
-    dplyr::mutate(c = 1:n())
-
+  geo_unit_index <- get_geo_unit_index_data(data,
+                                            hierarchical_levels = c(hierarchical_level),
+                                            area = area)
+  # need it here after all
+  hierarchical_column_names <- unique(hierarchical_level) %>%
+    setdiff("intercept")
   data <- data %>%
     dplyr::left_join(geo_unit_index, by = hierarchical_column_names)
 
@@ -301,7 +305,7 @@ fit_model_simplified <- function(
 
   ##### Set up hierarchical structures ######
   hier_data <- hier_stan_data  <- list()
-  hier_data[["Omega_data"]] <- hierarchical_data(geo_unit_index, hierarchical_level)
+  hier_data[["mu_data"]] <- hierarchical_data(geo_unit_index_data = geo_unit_index, hierarchical_level = hierarchical_level)
   #hier_data[["a_data"]] <- hierarchical_data(geo_unit_index, hierarchical_splines)
   # hier_stan_data[["a"]] <- hierarchical_param_stan_data(
   #   global_fit = global_fit,
@@ -309,13 +313,14 @@ fit_model_simplified <- function(
   #   param_data = hier_data[["a_data"]],
   #   hierarchical_terms_fixed = hierarchical_splines_terms_fixed,
   #   hierarchical_sigmas_fixed = hierarchical_splines_sigmas_fixed)
-  hier_stan_data[["Omega"]] <- hierarchical_param_stan_data(
+  hier_stan_data[["mu"]] <- hierarchical_param_stan_data(
     global_fit = global_fit,
-    param_name ="Omega",
-    param_data = hier_data[["Omega_data"]],
+    param_name ="mu",
+    param_data = hier_data[["mu_data"]],
     hierarchical_terms_fixed = hierarchical_level_terms_fixed,
     hierarchical_sigmas_fixed = hierarchical_level_sigmas_fixed)
   # to check if this is needed for simplified stuff
+  # when working with >1 parameter
   hier_stan_data <- purrr::list_flatten(hier_stan_data, name_spec = "{inner}")
 
 
@@ -360,7 +365,7 @@ fit_model_simplified <- function(
   if (compile_model){
     result$stan_model <- stan_model
   }
-
+  #return(result)
 
 
 

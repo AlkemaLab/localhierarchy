@@ -96,17 +96,17 @@ $$\mu^{(global)} \sim N(0, s_{\mu, global}^2),$$then we can write $\mu^{(global)
 
 -   $\gamma \sim N(0,1)$ for each gamma (one global, $R$ region, $S$ subregions, $C$ countries.
 
-The set up and notation in stan/R, in terms of parameters, using parameter Omega as an example, is currently as follows:
+The set up and notation in stan/R, in terms of parameters, using parameter mu as an example, is currently as follows:
 
--   Omega_raw refers to the vector with ALL $\gamma$s, including the global one.The ordering is global-allregional-allsubregional-country.
+-   mu_raw refers to the vector with ALL $\gamma$s, including the global one.The ordering is global-allregional-allsubregional-country.
 
--   Omega_sigma referred to the vector of stacked sigmas, excluding $s_{\mu, global}$ (in the original package, it was called Omega_sigma_raw).
+-   mu_sigma referred to the vector of stacked sigmas, excluding $s_{\mu, global}$ (in the original package, it was called mu_sigma_raw).
 
--   Omega_star refers to the vector with (mu global and ALL $\eta$s). we get Omega_stars from Omega_raw and the vector ($s_{\mu, global}$ , Omega_sigma), using the stan `scale_blocks` function.
+-   mu_star refers to the vector with (mu global and ALL $\eta$s). we get mu_stars from mu_raw and the vector ($s_{\mu, global}$ , mu_sigma), using the stan `scale_blocks` function.
 
--   Omega refers to the final $\mu$s at the country level. Matrix multiplication is used to obtain the Omega country vector from the Omega_stars. The full matrix `Omega_model_matrix` is a sparse matrix, with 1s and 0s (columns refer to $\mu_{global}$, the regional etas, the subregional etas, the country etas). The matrix multiplication is implemented using the stan function csr_matrix_times_vector, using a decomposition of `Omega_model_matrix` into different parts U, V, W.
+-   mu refers to the final $\mu$s at the country level. Matrix multiplication is used to obtain the mu country vector from the mu_stars. The full matrix `mu_model_matrix` is a sparse matrix, with 1s and 0s (columns refer to $\mu_{global}$, the regional etas, the subregional etas, the country etas). The matrix multiplication is implemented using the stan function csr_matrix_times_vector, using a decomposition of `mu_model_matrix` into different parts U, V, W.
 
--   Because of the sequential fitting, for Omega_raw and Omega_sigma, we also had to distinguish between parameters that were fixed vs those that were estimated. We do so with the \_fixed and \_estimate additions, i.e. the vector of Omega_raws is produced from Omega_raw_fixed and Omega_raw_estimate.
+-   Because of the sequential fitting, for mu_raw and mu_sigma, we also had to distinguish between parameters that were fixed vs those that were estimated. We do so with the \_fixed and \_estimate additions, i.e. the vector of mu_raws is produced from mu_raw_fixed and mu_raw_estimate.
 
 ## Model fitting
 
@@ -146,15 +146,15 @@ fit_local <- fit_model_simplified(runstep = "local_national",
 
 #### Produce and check outputs
 
-in the simpler model used, various Omegas are defined in the transformed parameters block so we can check those directly. (Note that this not (yet) true for the transition model because the creation of parameters takes place within the transition function, see notes in last section on this).
+in the simpler model used, various mus are defined in the transformed parameters block so we can check those directly. (Note that this not (yet) true for the transition model because the creation of parameters takes place within the transition function, see notes in last section on this).
 
-here just checking the sigmas and first Omega:
+here just checking the sigmas and first mu:
 
 ```{r}
 
 fit <- fit1a
- parname_list <- list( c("Omega_raw_estimate[1]",
-                          "Omega_sigma_estimate"))
+ parname_list <- list( c("mu_raw_estimate[1]",
+                          "mu_sigma_estimate"))
 #    plot_dirandname <- file.path(fit$output_dir, paste0(runname, "diagnostics.pdf"))
 #    pdf(plot_dirandname, width = 11, height = 11)
     for (i in 1:length(parname_list)){
@@ -171,9 +171,9 @@ fit <- fit1a
 
 Re pulling out information at non-country levels (ie estimates for regions and subregions): The orginal code set up in <https://github.com/AlkemaLab/BayesTransitionModels> includes helper functions to pull out various outputs, for example, $\mu$s at the regional or subnational level. We moved some over and use them in the package here. However, they are not yet very user friendly given limited documentation, hardcoding of prior SDs for global means, and reliance on overall fit object. It is work in progress to clean this up further. What I did here for the simplified example (and will move over to the general package later):
 
--   To deal with the set up where things are fixed vs estimated, we let the stan model spit out the Omega_stars, that's what the original helper functions use as inputs.
+-   To deal with the set up where things are fixed vs estimated, we let the stan model spit out the mu_stars, that's what the original helper functions use as inputs.
 
--   We clean up helper functions, so that they take in the Omega_stars, and specific other stan_data, and are better documented. See function extract_parameter_subhierarchical_simplified in fit_model_simplified R script, and its usage below.
+-   We clean up helper functions, so that they take in the mu_stars, and specific other stan_data, and are better documented. See function extract_parameter_subhierarchical_simplified in fit_model_simplified R script, and its usage below.
 
 ```{r}
 fit <- fit1a
@@ -183,16 +183,16 @@ fit <- fit1a
 # see fit1a$hierarchical_level for info
 # hierarchical_data(fit$geo_unit, fit$hierarchical_level)
 # note that subhierarchies are called column in hierarchical data
-Omega <- list()
+mu <- list()
 for(subhierarchy in fit$hierarchical_level) {
-  Omega[[subhierarchy]] <-
+  mu[[subhierarchy]] <-
     extract_parameter_subhierarchical_simplified (
       hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
       subhierarchy = subhierarchy,
-      parname = "Omega",
+      parname = "mu",
       fit_samples = fit$samples)
 }
-# Omega[[]] has posterior samples for the subhierarchy level
+# mu[[]] has posterior samples for the subhierarchy level
 # to get the summaries
 quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
   tibble(
@@ -200,7 +200,7 @@ quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
     quant = probs
   )
 }
-res_global <- map(Omega, function(tibble_samples) 
+res_global <- map(mu, function(tibble_samples) 
   tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
 res_global
 
@@ -208,16 +208,16 @@ res_global
 
 ```{r}
 fit <- fit_local
-Omega <- list()
+mu <- list()
 for(subhierarchy in fit$hierarchical_level) {
-  Omega[[subhierarchy]] <-
+  mu[[subhierarchy]] <-
     extract_parameter_subhierarchical_simplified (
       hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
       subhierarchy = subhierarchy,
-      parname = "Omega",
+      parname = "mu",
       fit_samples = fit$samples)
 }
-res_local <- map(Omega, function(tibble_samples) 
+res_local <- map(mu, function(tibble_samples) 
   tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
 res_local
 ```
@@ -253,11 +253,11 @@ bind_rows(res_local$iso %>% mutate(model = "local"),
 
 -   To do next: clean code to fix parameters
 
--   How to get the Omegas in full model set up: in the simpler model used here, various Omegas are defined in the transformed parameters block so we can check those directly. Note that this not (yet) true for the full transition model because the creation of parameters takes place within the process model function. Options to obtain the Omegas in the full model are to
+-   How to get the mus in full model set up: in the simpler model used here, various mus are defined in the transformed parameters block so we can check those directly. Note that this not (yet) true for the full transition model because the creation of parameters takes place within the process model function. Options to obtain the mus in the full model are to
 
-    1.  add them to generated quantities: pull out omegas with an `if {add_output_omegas}` type statement, re-using functions/statements introduced in the simpler file here.
+    1.  add them to generated quantities: pull out mus with an `if {add_output_mus}` type statement, re-using functions/statements introduced in the simpler file here.
 
-    2.  rewrite transformed parameter block and pull Omegas out of the process model function (not sure if that slows things down when not used).
+    2.  rewrite transformed parameter block and pull mus out of the process model function (not sure if that slows things down when not used).
 
     3.  create them in R (would need more work to get functions going, could consider exposing stan functions)
 

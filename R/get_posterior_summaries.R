@@ -2,7 +2,7 @@ get_posterior_summaries_simplified <- function(
     fit,
     process_indicator_prefixes = c(""),
     dm_indicator_prefixes = c(""),
-    process_params = c("Omega_raw", "Omega_sigma"),
+    process_params = c("mu_raw", "mu_sigma"),
     dm_params = c("nonse")
 ) {
   params_to_collect <- dplyr::bind_rows(

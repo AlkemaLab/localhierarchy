@@ -1,8 +1,19 @@
 
+#' Title
+#'
+#' @param hierarchical_data
+#' @param subhierarchy
+#' @param parname
+#' @param fit_samples
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 extract_parameter_subhierarchical_simplified <- function(
     hierarchical_data, # hierarchical_data, obtained from hierarchical_data(fit$geo_unit, fit$hierarchical_level)
     subhierarchy, # selected hierarchical_level (example: "intercept" or "region")
-    parname, # selected parameter name (example: "Omega")
+    parname, # selected parameter name (example: "mu")
     fit_samples #fit$samples
 ) {
 
