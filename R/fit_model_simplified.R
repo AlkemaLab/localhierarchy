@@ -293,7 +293,7 @@ fit_model_simplified <- function(
       stop("fix_nonse was set to TRUE, but a global_fit was not provided.")
     }
     for (parname in "nonse"){
-      nonse_data[[paste0(parname, "_fixed")]] <- global_fit$post_summ %>% filter(variable == paste0(parname, "[1]")) %>% pull(median)
+      nonse_data[[paste0(parname, "_fixed")]] <- global_fit$post_summ %>% filter(variable == paste0(parname, "[1]")) %>% pull(postmean)
     }
   }# end fixing dm pars
 

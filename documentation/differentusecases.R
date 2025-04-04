@@ -38,8 +38,7 @@ fit1a <- fit_model_simplified(runstep = "step1a",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)
-fit1a$post_summ <- get_posterior_summaries(fit1a) %>%
-  dplyr::rename(median = mean)
+fit1a$post_summ <- get_posterior_summaries(fit1a)
 fit1a$post_summ
 fit_local <- fit_model_simplified(runstep = "local_national",
                                   global_fit = fit1a,
@@ -140,8 +139,7 @@ fit_globalsubnat <- fit_model_simplified(runstep = "global_subnational",
                               survey_df = dat_subnat,
                               global_fit = fit1a,
                               chains = 4)
-fit_globalsubnat$post_summ <- get_posterior_summaries(fit_globalsubnat) %>%
-  dplyr::rename(median = mean)
+fit_globalsubnat$post_summ <- get_posterior_summaries(fit_globalsubnat)
 fit_globalsubnat$post_summ %>%
   filter(variable_no_index == "mu_sigma")
 fit1a$post_summ %>%
@@ -236,8 +234,7 @@ fit1a_mult <- fit_model_simplified(runstep = "step1a",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)
-fit1a_mult$post_summ <- get_posterior_summaries(fit1a_mult) %>%
-  dplyr::rename(median = mean)
+fit1a_mult$post_summ <- get_posterior_summaries(fit1a_mult)
 fit1a_mult$post_summ %>% filter(variable %in% c("mu_raw[1,1]", "mu_raw[1,2]", "mu_raw[2,1]", "mu_raw[2,2]"))
 
 fit <- fit1a_mult
@@ -267,8 +264,7 @@ fit_subnational_mult <- fit_model_simplified(runstep = "global_subnational",
                                    area = "subnat",
                                    global_fit = fit1a_mult,
                                    chains = 4)
-fit_subnational_mult$post_summ <- get_posterior_summaries(fit_subnational_mult) %>%
-  dplyr::rename(median = mean)
+fit_subnational_mult$post_summ <- get_posterior_summaries(fit_subnational_mult)
 
 fit <- fit_subnational_mult
 mu <- list()

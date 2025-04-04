@@ -7,7 +7,7 @@
 #' @param fit fit object to summarize
 #' @param params vector of parnames to summarize (w/o index)
 #'
-#' @returns tibble with variable (parname with index used in model) and posterior mean
+#' @returns tibble with variable (parname with index used in model) and postmean (posterior mean)
 #' @export
 #'
 #' @examples
@@ -19,7 +19,7 @@ get_posterior_summaries <- function(
   # get parameter summaries for each group
   # new use of map with arguments to function
   # seq(1,2) %>% map(\(x) sum(x, 2))
-  fixable_combined_summary <-
+  combined_summary <-
     # purrr::map(
     # fixable_params_to_collect,
     # get_posterior_summary_one_param,
@@ -33,7 +33,7 @@ get_posterior_summaries <- function(
       variable_no_index = stringr::str_split_i(string = variable, pattern = fixed("["), i = 1)
     )
 
-  return(fixable_combined_summary)
+  return(combined_summary)
 }
 
 
@@ -50,7 +50,7 @@ get_posterior_summaries <- function(
 #' note that this does NOT get into hierarchical info (and is same for hier and nonhier param)
 #' it is just the stacking
 
-#' @returns tibble with variable (name with index) and posterior mean
+#' @returns tibble with variable (parname with index used in model) and postmean (posterior mean)
 #' @export
 #'
 #' @examples
@@ -72,12 +72,13 @@ get_posterior_summary_one_param <- function(
   param_fixed <- fit$stan_data[[paste0(param_name, "_fixed")]]
 
   # if there are no fixed param values, nothing to do other than update the
-  # variable name, dropping "_estimate"
+  # variable name, dropping "_estimate", and rename as postmean
   if (length(param_fixed) == 0) {
     return(
       param_estimate_summary |>
         dplyr::mutate(variable = gsub(pattern = "_estimate", replacement = "",
-                                      x = variable))
+                                      x = variable)) %>%
+        dplyr::rename(postmean = mean)
     )
   }
 
@@ -109,7 +110,7 @@ get_posterior_summary_one_param <- function(
   }
 
   # create a matching data structure from param_fixed
-  # result has columns variable (including indices), median or mean
+  # result has columns variable (including indices), and postmean
   param_fixed_summary <- param_array_to_indexed_df(
     param_values = param_fixed,
     num_inds = num_inds,
@@ -140,7 +141,8 @@ get_posterior_summary_one_param <- function(
       dplyr::select(variable, mean),
     param_estimate_summary |>
       dplyr::select(variable, mean)
-  )
+  ) %>%
+    dplyr::rename(postmean = mean)
 
   return(result)
 }

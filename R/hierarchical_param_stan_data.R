@@ -111,16 +111,16 @@ hierarchical_param_stan_data <- function(param_name, param_data,
       for (k in 1:n_sigma_fixed){
         results_sigma[k] <- global_fit$post_summ %>%
           filter(variable == paste0(param_name, "_sigma[", k, "]")) %>%
-          pull(median)
+          pull(postmean)
       }
       results_eta <- rep(NA, length(index_local$column))
       for (k in 1:length(index_local$column)){
         results_eta[k] <- global_fit$post_summ %>%
           filter(variable == paste0(param_name, "_raw[", indices_for_local[k], "]")) %>%
-          pull(median)
+          pull(postmean)
       }
-      result[[paste0(param_name, "_raw_fixed")]] <- results_eta # globalfit_param_post_summ_raw$median[indices_for_local]
-      result[[paste0(param_name, "_sigma_fixed")]] <- results_sigma # globalfit_param_post_summ_sigma$median[seq_len(n_sigma_fixed)]
+      result[[paste0(param_name, "_raw_fixed")]] <- results_eta # globalfit_param_post_summ_raw$postmean[indices_for_local]
+      result[[paste0(param_name, "_sigma_fixed")]] <- results_sigma # globalfit_param_post_summ_sigma$postmean[seq_len(n_sigma_fixed)]
     } else {
       # using old set up here
       # alternatively: just loop over the 2nd index of the parameter!
@@ -130,8 +130,8 @@ hierarchical_param_stan_data <- function(param_name, param_data,
         filter(variable_no_index == paste0(param_name, "_raw"))
       globalfit_param_post_summ_sigma = global_fit$post_summ %>%
         filter(variable_no_index == paste0(param_name, "_sigma"))
-      result[[paste0(param_name, "_raw_fixed")]] <- create_a_matrix(globalfit_param_post_summ_raw[, c("variable", "median")])[indices_for_local, , drop = FALSE]
-      result[[paste0(param_name, "_sigma_fixed")]] <- create_a_matrix(globalfit_param_post_summ_sigma[, c("variable", "median")])[seq_len(n_sigma_fixed), , drop=FALSE]
+      result[[paste0(param_name, "_raw_fixed")]] <- create_a_matrix(globalfit_param_post_summ_raw[, c("variable", "postmean")])[indices_for_local, , drop = FALSE]
+      result[[paste0(param_name, "_sigma_fixed")]] <- create_a_matrix(globalfit_param_post_summ_sigma[, c("variable", "postmean")])[seq_len(n_sigma_fixed), , drop=FALSE]
     }
     print("We are fixing the following parameters:")
     print(result[[paste0(param_name, "_raw_fixed")]])
