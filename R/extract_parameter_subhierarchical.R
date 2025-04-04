@@ -1,55 +1,75 @@
 
-#' Title
+#' extract_parameter_subhierarchical
 #'
-#' @param hierarchical_data
-#' @param subhierarchy
-#' @param parname
-#' @param fit_samples
+#' @param hierarchical_data hierarchical_data, obtained from hierarchical_data(fit$geo_unit, fit$hierarchical_level)
+#' @param subhierarchy selected hierarchical_level (example: "intercept" or "region")
+#' @param parname selected parameter name (example: "mu")
+#' @param fit_samples fit$samples including parname_star
+#' @param morethan1param does parname refer to more than 1 parameter (a vector)
 #'
-#' @returns
+#' @returns a tibble with posterior samples of the selected parameter mu at the subhierarchy level.
+#' these mus are obtained by summing up all relevant etas
+#' variables are `name`, `value`, `.draw/iteration/chain'
+#' and `k` referring to parameter index if morethan1param = TRUE
 #' @export
 #'
 #' @examples
-extract_parameter_subhierarchical_simplified <- function(
-    hierarchical_data, # hierarchical_data, obtained from hierarchical_data(fit$geo_unit, fit$hierarchical_level)
-    subhierarchy, # selected hierarchical_level (example: "intercept" or "region")
-    parname, # selected parameter name (example: "mu")
-    fit_samples #fit$samples
+extract_parameter_subhierarchical <- function(
+    hierarchical_data,
+    subhierarchy,
+    parname,
+    fit_samples,
+    morethan1param = FALSE
+
 ) {
 
+  # not currently used
+  # start <- hierarchical_data$model_matrix$index %>%
+  #   dplyr::filter(column == subhierarchy) %>%
+  #   dplyr::pull(i) %>%
+  #   min()
 
-  start <- hierarchical_data$model_matrix$index %>%
-    dplyr::filter(column == subhierarchy) %>%
-    dplyr::pull(i) %>%
-    min()
-
+  # end is used to determine the number of columns in model matrix to be used
   end <- hierarchical_data$model_matrix$index %>%
     dplyr::filter(column == subhierarchy) %>%
     dplyr::pull(i) %>%
     max()
 
+  # get the param_stars
   pars <- c(glue::glue("{parname}_star"))
-
-  star <- fit_samples$draws(pars) %>%
-    tidybayes::spread_draws((!!sym(pars[1]))[i]) %>%
-    dplyr::group_by(.chain, .iteration, .draw) %>%
+  if (!morethan1param){
+    star <- fit_samples$draws(pars) %>%
+      tidybayes::spread_draws((!!sym(pars[1]))[i]) %>%
+      dplyr::group_by(.chain, .iteration, .draw)
+  } else {
+    star <- fit_samples$draws(pars) %>%
+      tidybayes::spread_draws((!!sym(pars[1]))[i,k]) %>%
+      dplyr::group_by(.data$k, .data$.chain, .data$.iteration, .data$.draw)
+  }
+  star <-
+    star %>%
     tidyr::nest() %>%
     dplyr::mutate(star = map(data, `[[`, glue::glue("{parname}_star"))) %>%
     dplyr::select(-data)
+  # star has posterior samples of vectors of param_stars (etas)
 
+  # to get the summed up mu_stars, use unique model matrix rows
   uniq <- unique(hierarchical_data$model_matrix$mat[, 1:end, drop = FALSE])
-
   titles <- c()
   for(i in 1:nrow(uniq)) {
-    index <- rep(0, hierarchical_data$n_terms)
-    index[1:end] <- uniq[i, 1:end]
+    # here mult_vector refers to a vector with 0s after end
+    # and the row of the model matrix before end
+    mult_vector <- rep(0, hierarchical_data$n_terms)
+    mult_vector[1:end] <- uniq[i, 1:end]
+
+    # title refers to name of unit in the hierarchical level
     title <- hierarchical_data$model_matrix$index %>%
-      dplyr::filter(i == last(which(index == 1))) %>%
+      dplyr::filter(i == last(which(mult_vector == 1))) %>%
       dplyr::pull(level)
     titles <- c(titles, title)
 
     star[[title]] = map_dbl(star[["star"]], function(star) {
-      index %*% star
+      mult_vector %*% star
     })
   }
 
@@ -61,54 +81,3 @@ extract_parameter_subhierarchical_simplified <- function(
   return(star)
 }
 
-# repeated code to get this going
-extract_parameter_subhierarchical_simplified_kparam <- function(
-    hierarchical_data, # hierarchical_data, obtained from hierarchical_data(fit$geo_unit, fit$hierarchical_level)
-    subhierarchy, # selected hierarchical_level (example: "intercept" or "region")
-    parname, # selected parameter name (example: "mu")
-    fit_samples #fit$samples
-) {
-
-
-  start <- hierarchical_data$model_matrix$index %>%
-    dplyr::filter(column == subhierarchy) %>%
-    dplyr::pull(i) %>%
-    min()
-
-  end <- hierarchical_data$model_matrix$index %>%
-    dplyr::filter(column == subhierarchy) %>%
-    dplyr::pull(i) %>%
-    max()
-
-  pars <- c(glue::glue("{parname}_star"))
-
-  star <- fit_samples$draws(pars) %>%
-    tidybayes::spread_draws((!!sym(pars[1]))[i,k]) %>%
-    dplyr::group_by(.data$k, .data$.chain, .data$.iteration, .data$.draw) %>%
-    tidyr::nest() %>%
-    dplyr::mutate(star = map(data, `[[`, glue::glue("{parname}_star"))) %>%
-    dplyr::select(-data)
-
-  uniq <- unique(hierarchical_data$model_matrix$mat[, 1:end, drop = FALSE])
-
-  titles <- c()
-  for(i in 1:nrow(uniq)) {
-    index <- rep(0, hierarchical_data$n_terms)
-    index[1:end] <- uniq[i, 1:end]
-    title <- hierarchical_data$model_matrix$index %>%
-      dplyr::filter(i == last(which(index == 1))) %>%
-      dplyr::pull(level)
-    titles <- c(titles, title)
-
-    star[[title]] = map_dbl(star[["star"]], function(star) {
-      index %*% star
-    })
-  }
-
-  star <- star %>%
-    tidyr::pivot_longer(cols = all_of(titles)) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(-star)
-
-  return(star)
-}

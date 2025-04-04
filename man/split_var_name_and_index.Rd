@@ -2,14 +2,32 @@
 % Please edit documentation in R/hier_data_helpers.R
 \name{split_var_name_and_index}
 \alias{split_var_name_and_index}
-\title{For a data frame of estimates with a column that contains combined info
+\title{split_var_name_and_index
+For a data frame of estimates with a column that contains combined info
 about a variable name and row and/or column indices, add columns containing
 just the variable name and the indices.}
 \usage{
 split_var_name_and_index(estimate_df, num_inds)
 }
+\arguments{
+\item{estimate_df}{data frame with a column called `variable` that contains parname[i] or parname[i,j] entries}
+
+\item{num_inds}{number of indices in the variable name (used for 1 or 2)}
+}
+\value{
+data frame with the same columns as `estimate_df` plus columns containing
+just the variable name and the indices.
+}
 \description{
+split_var_name_and_index
 For a data frame of estimates with a column that contains combined info
 about a variable name and row and/or column indices, add columns containing
 just the variable name and the indices.
+}
+\examples{
+split_var_name_and_index(
+estimate_df = tibble(variable = c("a[1]", "a[2]")), num_inds = 1)
+split_var_name_and_index(
+estimate_df = tibble(variable = c("a[1,1]", "a[2,1]")), num_inds = 2)
+
 }

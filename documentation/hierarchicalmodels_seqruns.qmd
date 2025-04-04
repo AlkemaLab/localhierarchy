@@ -151,7 +151,16 @@ Re pulling out information at non-country levels (ie estimates for regions and s
 
 -   To deal with the set up where things are fixed vs estimated, we let the stan model spit out the mu_stars, that's what the original helper functions use as inputs.
 
--   We clean up helper functions, so that they take in the mu_stars, and specific other stan_data, and are better documented. See function extract_parameter_subhierarchical_simplified in fit_model_simplified R script, and its usage below.
+-   We clean up helper functions, so that they take in the mu_stars, and specific other stan_data, and are better documented. See function extract_parameter_subhierarchical in fit_model_simplified R script, and its usage below.
+
+```{r}
+quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
+  tibble(
+    val = quantile(x, probs, na.rm = TRUE),
+    quant = probs
+  )
+}
+```
 
 ```{r}
 fit <- fit1a
@@ -164,7 +173,7 @@ fit <- fit1a
 mu <- list()
 for(subhierarchy in fit$hierarchical_level) {
   mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical_simplified (
+    extract_parameter_subhierarchical (
       hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
       subhierarchy = subhierarchy,
       parname = "mu",
@@ -172,12 +181,7 @@ for(subhierarchy in fit$hierarchical_level) {
 }
 # mu[[]] has posterior samples for the subhierarchy level
 # to get the summaries
-quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
-  tibble(
-    val = quantile(x, probs, na.rm = TRUE),
-    quant = probs
-  )
-}
+
 res_global <- map(mu, function(tibble_samples) 
   tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
 res_global
@@ -189,7 +193,7 @@ fit <- fit_local
 mu <- list()
 for(subhierarchy in fit$hierarchical_level) {
   mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical_simplified (
+    extract_parameter_subhierarchical (
       hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
       subhierarchy = subhierarchy,
       parname = "mu",
@@ -278,7 +282,7 @@ when using a fit where things are fixed, fixed values and estimates are combined
 (this will be in test case for subnational, we could also add something like 1a and 1b)
 
 ```{r}
-prefixed_param_name
+#prefixed_param_name
 ```
 
 how this summary is used... global fit is used when creaiting the stan data
@@ -387,3 +391,4 @@ fit <- fit1a
     }
 #    dev.off()
 ```
+

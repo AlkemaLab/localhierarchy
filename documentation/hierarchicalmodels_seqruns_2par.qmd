@@ -90,6 +90,7 @@ fit_local <- fit_model_simplified(runstep = "local_national",
 check out extract_parameter_subhier function
 
 ```{r}
+fit <- fit1a
 subhierarchy <- fit$hierarchical_level[1]
 hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level)
 parname = "mu"
@@ -175,11 +176,12 @@ fit <- fit1a
 mu <- list()
 for(subhierarchy in fit$hierarchical_level) {
   mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical_simplified_kparam(
+    extract_parameter_subhierarchical(
       hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
       subhierarchy = subhierarchy,
       parname = "mu",
-      fit_samples = fit$samples)
+      fit_samples = fit$samples,
+      morethan1param = TRUE)
 }
 
 ```
@@ -200,12 +202,14 @@ fit <- fit_local
 mu <- list()
 for(subhierarchy in fit$hierarchical_level) {
   mu[[subhierarchy]] <-
-#    extract_parameter_subhierarchical_simplified (
-  extract_parameter_subhierarchical_simplified_kparam(
+#    extract_parameter_subhierarchical (
+  extract_parameter_subhierarchical(
     hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
       subhierarchy = subhierarchy,
       parname = "mu",
-      fit_samples = fit$samples)
+      fit_samples = fit$samples,
+          morethan1param = TRUE)
+
 }
 res_local <- map(mu, function(tibble_samples) 
 #  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))

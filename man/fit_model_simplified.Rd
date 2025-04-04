@@ -20,7 +20,9 @@ fit_model_simplified(
   seed = 1234,
   refresh = 200,
   adapt_delta = 0.9,
-  max_treedepth = 14
+  max_treedepth = 14,
+  stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq.stan")),
+  mu2param = FALSE
 )
 }
 \arguments{
