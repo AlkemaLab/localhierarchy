@@ -1,0 +1,190 @@
+---
+title: "hierarchical data"
+author: "leontine"
+format: html
+editor: visual
+---
+
+Load relevant packages, including our own and data
+
+```{r}
+#| include: false
+library(here) 
+library(tidyverse) 
+library(ggplot2) 
+library(haven) 
+library(stringr)
+library(cmdstanr) 
+library(bayesplot) # diagnostic plots 
+devtools::load_all(here::here())
+#data_folder <- "data_raw" 
+# calling survey_df data here, as internal to fit_model
+#data <- read_csv(here::here(data_folder, "coverage_data.csv"))
+```
+
+toy data set
+
+```{r}
+data <- tibble(subcluster = c("A", "A", "B", "B"), iso = c("iso1", "iso2", "iso3", "iso3"))
+```
+
+main info: hierarchical levels to use, and the level of interest
+
+(level of interest does not need to be the lowest level, not clear how thoroughly tested)
+
+```{r}
+hierarchical_level <- c("intercept",  "subcluster", "iso")
+area <- "iso"
+```
+
+Create district index for matching district and district index
+
+```{r}
+geo_unit_index <- get_geo_unit_index_data(data,
+                                          hierarchical_levels = c(hierarchical_level), 
+                                          area = area)
+geo_unit_index
+```
+
+Set up hierarchical structures
+
+```{r}
+# use in fit_model:
+#hier_data <-  list()
+#hier_data[["mu_data"]] <- 
+# here we just work with one object:
+hier_data <- hierarchical_data(geo_unit_index, hierarchical_level)
+#names(hier_data[["mu_data"]])
+names(hier_data)
+hier_data
+
+
+```
+
+for use in stan
+
+```{r}
+hier_stan_data <- hierarchical_param_stan_data(
+  global_fit = NULL,
+  param_name ="mu",
+  param_data = hier_data #[["mu_data"]] #,
+  # used only when fixing things 
+#  hierarchical_terms_fixed = hierarchical_level_terms_fixed,
+#  hierarchical_sigmas_fixed = hierarchical_level_sigmas_fixed
+)
+names(hier_stan_data)
+```
+
+```{r}
+hier_stan_data$mu_n_terms # number of etas + global mu
+length(unique(geo_unit_index$subcluster))
+length(unique(geo_unit_index$iso))
+  
+
+```
+
+```{r}
+hier_stan_data$mu_n_sigma # update: no longer includes prior sd for intercept 
+```
+
+Let's illustrate how these objects are used in R and in the stan model.
+
+For that, make up some values for the parameters based on
+
+```         
+"mu_n_terms"          "mu_n_sigma"
+```
+
+```{r}
+#mu_raw refers to the vector with ALL $\gamma$s, including the global one.The ordering is global-allregional-allsubregional-country.
+mu_raw <- seq(1, hier_stan_data$mu_n_terms)
+mu_raw
+#mu_sigma referred to the vector of stacked sigmas, excluding $s_{\mu, global}$ (in the #original package, it was called mu_sigma_raw).
+mu_sigma <- seq(1, hier_stan_data$mu_n_sigma)
+sprior <- 0.5
+
+
+```
+
+try to expose stan functions using cmdstanr (not rstan)
+
+<https://mc-stan.org/cmdstanr/reference/model-method-expose_functions.html>
+
+```{r}
+stan_file <- here("inst/stan/hierfunctions_seq.stan")
+mod <- cmdstan_model(stan_file, force_recompile = TRUE)  
+mod$expose_functions(global = TRUE) # to add to global environment 
+
+```
+
+#mu_star refers to the vector with (mu global and ALL $\eta$s). we get mu_stars from mu_raw \# and the vector ($s_{\mu, global}$ , mu_sigma), using the stan scale_blocks function.
+
+```{r}
+mu_star <- scale_blocks(mu_raw, c(sprior, mu_sigma), 
+             start = hier_stan_data$mu_re_start,
+             end = hier_stan_data$mu_re_end)
+mu_star
+```
+
+mu refers to the final $\mu$s at the country level. Matrix multiplication is used to obtain the mu country vector from the mu_stars. The full matrix mu_model_matrix is a sparse matrix, with 1s and 0s (columns refer to $\mu_{global}$, the regional etas, the subregional etas, the country etas). The matrix multiplication is implemented using the stan function csr_matrix_times_vector, using a decomposition of mu_model_matrix into different parts U, V, W.
+
+check if this is right
+
+```{r}
+mu <- hier_stan_data$mu_model_matrix%*%mu_star
+mu
+```
+
+# 
+
+```{r}
+hier_data$model_matrix
+```
+
+# Unsuccessful investigation into exposing stan build-in functions
+
+Need to expose (compile) the stan math functions as well, eg for for sparse matrices. see here for info
+
+<https://mc-stan.org/docs/functions-reference/sparse_matrix_operations.html#conversion-functions>
+
+<https://stan-dev.r-universe.dev/articles/StanHeaders/stanmath.html>
+
+<https://discourse.mc-stan.org/t/expose-stan-functions-with-stan-math-library-function/15771/6>
+
+help(stanFunction, package = "StanHeaders")
+
+first time around, i got an error
+
+Error in sourceCpp(code = code, env = env, rebuild = rebuild, cacheDir = cacheDir, : Error 1 occurred building shared library.
+
+Turns out that it may not work anyway:
+
+looks like csr_extract_w would be tricky... (was getting errors anyway with something along lines of StanHeaders::stanFunction("csr_extract_w"))
+
+<https://discourse.mc-stan.org/t/function-to-return-number-of-non-zero-elements-in-a-matrix/26123/7>
+
+looks like we just want model_matrix\*vector
+
+and can confirm if
+
+csr_matrix_times_vector
+
+```{r}
+#csr_extract_w()
+```
+
+```{r}
+# get_onehierparam(oneparam_sigma = c(sprior, mu_sigma),  
+#                  oneparam_raw_fixed = mu_raw[1], #numeric(0), 
+#                  oneparam_raw_estimate = mu_raw[-1],
+#                  oneparam_re_start = hier_stan_data$mu_re_start,
+#                  oneparam_re_end = hier_stan_data$mu_re_end, 
+#                  C = nrow(geo_unit_index), 
+#                  oneparam_n_terms = hier_stan_data$mu_n_terms, 
+#                  oneparam_n_terms_fixed = 1, #hier_stan_data$mu_n_terms_fixed, 
+#                  oneparam_n_terms_estimate = hier_stan_data$mu_n_terms_estimate -1,
+#       oneparam_model_matrix_w= csr_extract_w(hier_stan_data$mu_model_matrix), 
+#       oneparam_model_matrix_v = hier_stan_data$mu_model_matrix_v, 
+#       oneparam_model_matrix_u = hier_stan_data$mu_model_matrix_u
+#           )
+```

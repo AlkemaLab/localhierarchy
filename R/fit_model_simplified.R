@@ -137,7 +137,9 @@ fit_model_simplified <- function(
   seed = 1234,
   refresh = 200,
   adapt_delta = 0.9,
-  max_treedepth = 14
+  max_treedepth = 14,
+  stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq.stan")),
+  mu2param = FALSE
 ) {
 
   data <- survey_df # for now, just to keep the same name as in fpem
@@ -249,7 +251,6 @@ fit_model_simplified <- function(
 
   ##### Load model #####
   if (compile_model){
-    stan_file_path <- file.path(here::here("inst/stan/", "hierfunctions_seq.stan"))
     stan_model <- cmdstanr::cmdstan_model(
       stan_file = stan_file_path,
       force_recompile = force_recompile
@@ -302,6 +303,11 @@ fit_model_simplified <- function(
     geo_unit = array(ifelse(is.na(data$c), 0L, data$c)),
     y = array(data[[y]])
   )
+  # area = data[[area]]
+  if (mu2param){
+    # for 2 parameter model
+    stan_data[["k"]] <- 2
+  }
 
   ##### Set up hierarchical structures ######
   hier_data <- hier_stan_data  <- list()

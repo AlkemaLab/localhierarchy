@@ -1,8 +1,27 @@
 
+# what happens:
+# get estimate and/or fixed value
+# if there is a fixed value, need to use that
+# difficulty = figuring out what indices to use in summary
+# some messiness re mean or median
+
+
+
+#' Title
+#'
+#' @param fit fit object
+#' @param prefixed_param_name parameter name, can include an index
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 get_posterior_summary_one_fixable_param <- function(
     fit,
     prefixed_param_name) {
-  # extract parameter summaries for estimated parameters
+
+
+  # extract parameter summaries for estimated parameter
   estimate_param_name <- paste0(prefixed_param_name, "_estimate")
   #print(estimate_param_name)
   if (variable_exists_in_draws(fit, estimate_param_name)) {
@@ -33,18 +52,16 @@ get_posterior_summary_one_fixable_param <- function(
   }
 
   # what is the dimension of the array we're expecting?
-  # param_inf <- fit$stan_model$variables()[["parameters"]][[estimate_param_name]]
-  # num_inds <- param_inf[["dimensions"]]
+  param_inf <- fit$stan_model$variables()[["parameters"]][[estimate_param_name]]
+  num_inds <- param_inf[["dimensions"]]
   # update la: when reading in a run, this `fit$stan_model$variables()` does not exist
   # it's used here just to get the dimension, 1 or 2
   # easiest to check in main function, so passing here as an argument
-  # hardcoding here
-  #warning
-  print("Warning: in obtaining posterior summary in get_posterior_summary_one_fixable_param, we have hardcoded num_inds based on names of parameters.")
-  num_inds = ifelse(prefixed_param_name %in% c("a_raw", "a_sigma", "d_a_raw", "d_a_sigma",
-                                               "z_a_raw", "z_a_sigma"), 2, 1)
-
-
+  # # hardcoding here
+  # #warning
+  # print("Warning: in obtaining posterior summary in get_posterior_summary_one_fixable_param, we have hardcoded num_inds based on names of parameters.")
+  # num_inds = ifelse(prefixed_param_name %in% c("a_raw", "a_sigma", "d_a_raw", "d_a_sigma",
+  #                                              "z_a_raw", "z_a_sigma"), 2, 1)
 
   # process variable names in param_estimate_summary, splitting
   # into columns var_name, i, and possibly j, where i and j

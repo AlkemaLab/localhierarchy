@@ -113,8 +113,9 @@ The set up and notation in stan/R, in terms of parameters, using parameter mu as
 global model fit
 
 ```{r}
+ hierarchical_level     = c("intercept",  "subcluster", "iso")
 fit1a <- fit_model_simplified(runstep = "step1a",
-        hierarchical_level     = c("intercept",  "subcluster", "iso"),
+        hierarchical_level     =  hierarchical_level,
 
                   survey_df = dat,
                   chains = 4)
@@ -224,6 +225,122 @@ bind_rows(res_local$iso %>% mutate(model = "local"),
   ggplot(aes(y = y, x = name, color = model)) +
   geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
   geom_point()   
+```
+
+# summary object
+
+going through what's happening to create the summary object
+
+```{r}
+#get_posterior_summaries_simplified(fit1a) 
+fit <- fit1a
+process_indicator_prefixes = c("")
+dm_indicator_prefixes = c("")
+process_params = c("mu_raw", "mu_sigma")
+dm_params = c("nonse")
+
+
+
+
+```
+
+```{r}
+## part to get the names of parameters to fix
+params_to_collect <- dplyr::bind_rows(
+  expand.grid(
+    prefix = process_indicator_prefixes,
+    param = process_params),
+  expand.grid(
+    prefix = dm_indicator_prefixes,
+    param = dm_params)
+) |>
+  dplyr::mutate(prefixed_param_name = paste0(prefix, param))
+
+# split parameters into those that are "fixable" in local fits and those that
+# are "unfixable"
+#  unfixable_param_names <- c("local_shrinkage_dm")
+# unfixable_param_names <- c("BLA")
+fixable_params_to_collect <- params_to_collect |>
+  #   dplyr::filter(!param %in% unfixable_param_names) |>
+  dplyr::pull(prefixed_param_name)
+fixable_params_to_collect 
+```
+
+get results for 1 parameter name
+
+```{r}
+
+get_posterior_summary_one_fixable_param(prefixed_param_name = fixable_params_to_collect[1], fit = fit)
+```
+
+when using a fit where things are fixed, fixed values and estimates are combined
+
+(this will be in test case for subnational, we could also add something like 1a and 1b)
+
+```{r}
+prefixed_param_name
+```
+
+how this summary is used... global fit is used when creaiting the stan data
+
+hier data does not depend on fixed values
+
+Set up hierarchical structures, folow the hierdata.qmd
+
+```{r}
+#hierarchical_level <- c("intercept",  "subcluster", "iso")
+area <- "iso"
+```
+
+Create district index for matching district and district index
+
+```{r}
+geo_unit_index <- get_geo_unit_index_data(dat,
+                                          hierarchical_levels = c(hierarchical_level), 
+                                          area = area)
+geo_unit_index
+```
+
+```{r}
+# use in fit_model:
+#hier_data <-  list()
+#hier_data[["mu_data"]] <- 
+# here we just work with one object:
+hier_data <- hierarchical_data(geo_unit_index, hierarchical_level)
+#names(hier_data[["mu_data"]])
+names(hier_data)
+hier_data
+
+
+```
+
+```{r}
+hier_stan_data <- hierarchical_param_stan_data(
+  global_fit = fit1a,
+  param_name ="mu",
+  param_data = hier_data,
+  hierarchical_terms_fixed = hierarchical_level[1:2], 
+  hierarchical_sigmas_fixed = hierarchical_level[1:3]
+)
+names(hier_stan_data)
+```
+
+use for non-hierarchical parameters, sigma_y here (vector for the full fpet model)
+
+```{r, eval = FALSE}
+ ##### Set up handing of data model hyperparameters ######
+  nonse_data <- list(
+    "fix_nonse" = as.integer(fix_nonse),
+    "nonse_fixed" = numeric(0))
+  if (fix_nonse) {
+    if (is.null(global_fit)) {
+      stop("fix_nonse was set to TRUE, but a global_fit was not provided.")
+    }
+    for (parname in "nonse"){
+      nonse_data[[paste0(parname, "_fixed")]] <- global_fit$post_summ %>% filter(variable == paste0(parname, "[1]")) %>% pull(median)
+    }
+  }# end fixing dm pars
+
 ```
 
 # Related notes and to dos to come back to

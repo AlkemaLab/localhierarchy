@@ -73,9 +73,25 @@ variable_exists_in_draws <- function(fit, var_name) {
 }
 
 
+
+#' split_var_name_and_index
 #' For a data frame of estimates with a column that contains combined info
 #' about a variable name and row and/or column indices, add columns containing
 #' just the variable name and the indices.
+#'
+#' @param estimate_df data frame with a column called `variable` that contains parname[i] or parname[i,j] entries
+#' @param num_inds number of indices in the variable name (used for 1 or 2)
+#'
+#' @returns data frame with the same columns as `estimate_df` plus columns containing
+#' just the variable name and the indices.
+#' @export
+#'
+#' @examples
+#' split_var_name_and_index(
+#' estimate_df = tibble(variable = c("a[1]", "a[2]")), num_inds = 1)
+#' split_var_name_and_index(
+#' estimate_df = tibble(variable = c("a[1,1]", "a[2,1]")), num_inds = 2)
+#'
 split_var_name_and_index <- function(estimate_df, num_inds) {
   # column names for indices, starting from "i"
   ind_names <- letters[seq(from = 9, length = num_inds)]
@@ -98,6 +114,14 @@ split_var_name_and_index <- function(estimate_df, num_inds) {
 
   return(estimate_df)
 }
+# # if we get it wrong
+# split_var_name_and_index(
+#   estimate_df = tibble(variable = c("a[1,1]", "a[2,1]")),
+#   num_inds = 1)
+# split_var_name_and_index(
+#   estimate_df = tibble(variable = c("a[1]", "a[2]")),
+#   num_inds = 2)
+
 
 #' Starting from an array of parameter values (of dimension 1 or 2),
 #' create a data frame with columns `variable` with the combined parameter name

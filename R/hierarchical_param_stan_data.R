@@ -51,13 +51,11 @@ hierarchical_param_stan_data <- function(param_name, param_data,
       filter(variable_no_index == paste0(param_name, "_raw"))
     #globalfit_param_post_summ_sigma = global_fit$post_summ %>%
     #  filter(variable_no_index == paste0(param_name, "_sigma"))
-    is_matrix <- is_there_a_comma(globalfit_param_post_summ_raw$variable[1])
-    if (is_matrix)
-      stop("not yet implemented")
 
     # get number of fixed terms (etas): number of etas in
     # fixed hierarchical levels where that eta was in the global fit
     # this code checks whether there are matches for all requested etas
+    # this code is the same for 1par or parvector
     n_terms_fixed <- purrr::map2_int(
       param_data$model_matrix$index$column,
       param_data$model_matrix$index$level,
@@ -105,8 +103,13 @@ hierarchical_param_stan_data <- function(param_name, param_data,
     result[[paste0(param_name, "_n_sigma_estimate")]] <- n_sigma - n_sigma_fixed
 
     # now plug in the values
+    is_matrix <- is_there_a_comma(globalfit_param_post_summ_raw$variable[1])
+    #if (is_matrix)
+    #  stop("not yet implemented")
+
     if (!is_matrix){
       results_sigma <- rep(NA, n_sigma_fixed)
+      # here index k used for etas [not dimension of parvector]
       for (k in 1:n_sigma_fixed){
         results_sigma[k] <- global_fit$post_summ %>%
           filter(variable == paste0(param_name, "_sigma[", k, "]")) %>%
@@ -121,12 +124,16 @@ hierarchical_param_stan_data <- function(param_name, param_data,
       result[[paste0(param_name, "_raw_fixed")]] <- results_eta # globalfit_param_post_summ_raw$median[indices_for_local]
       result[[paste0(param_name, "_sigma_fixed")]] <- results_sigma # globalfit_param_post_summ_sigma$median[seq_len(n_sigma_fixed)]
     } else {
-
-    } else {
-      # just loop over the 2nd index of the parameter!
-      # or make output for all a matrix (then do need to fix some things for 1param next steps)
-      #result[[paste0(param_name, "_raw_fixed")]] <- create_a_matrix(globalfit_param_post_summ_raw[, c("variable", "median")])[indices_for_local, , drop = FALSE]
-      #result[[paste0(param_name, "_sigma_fixed")]] <- create_a_matrix(globalfit_param_post_summ_sigma[, c("variable", "median")])[seq_len(n_sigma_fixed), , drop=FALSE]
+      # using old set up here
+      # alternatively: just loop over the 2nd index of the parameter!
+      # extract relevant data
+      globalfit_param_data = global_fit[[paste0(param_name, "_data")]]
+      globalfit_param_post_summ_raw = global_fit$post_summ %>%
+        filter(variable_no_index == paste0(param_name, "_raw"))
+      globalfit_param_post_summ_sigma = global_fit$post_summ %>%
+        filter(variable_no_index == paste0(param_name, "_sigma"))
+      result[[paste0(param_name, "_raw_fixed")]] <- create_a_matrix(globalfit_param_post_summ_raw[, c("variable", "median")])[indices_for_local, , drop = FALSE]
+      result[[paste0(param_name, "_sigma_fixed")]] <- create_a_matrix(globalfit_param_post_summ_sigma[, c("variable", "median")])[seq_len(n_sigma_fixed), , drop=FALSE]
     }
     print("We are fixing the following parameters:")
     print(result[[paste0(param_name, "_raw_fixed")]])
