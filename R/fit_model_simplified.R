@@ -6,12 +6,12 @@
 #'
 #' @param survey_df tibble with survey data
 #' @param y column name of outcome.
-#' @param area column name of the area of each observation
+#' @param area column name of the area of each observation (geounit, iso or subnational region)
 #'
-#' @param runstep type of run, currently one of "step1a", "step1b", "local_national" (see Details).
-#' @param global_fit optional object of class `"fpemplus"`, used to obtain fixed
+#' @param runstep type of run, currently one of XXX (see Details).
+#' @param global_fit optional object of class XX, used to obtain fixed
 #'   values to use for some parameters in the current fit (see Details).
-#' @param iso_select ISO code to use for local national run
+#' @param area_select area name to use for local run (eg iso code or subnat region name)
 #'
 #' @param hierarchical_level vector specifying hierarchical structure used for mu
 #'
@@ -119,7 +119,7 @@ fit_model_simplified <- function(
   survey_df,
   y = "logit_indicator",
   area = "iso", # add default or set in function?
-  iso_select  = NULL, # used for local national run
+  area_select  = NULL, # used for local national run
   # rename as area_select
 
   # type of run is defined by runstep:
@@ -144,7 +144,10 @@ fit_model_simplified <- function(
   mu2param = FALSE
 ) {
 
-  data <- survey_df # for now, just to keep the same name as in fpem
+  if(length(hierarchical_level) == 0) {
+    stop("No hierarchical structure supplied. See the hierarchical_level argument.")
+  }
+
   if (!runstep %in% c("step1a", "local_national", "global_subnational", "local_subnational")){
     stop("runstep not yet implemented!")
   }
@@ -157,8 +160,8 @@ fit_model_simplified <- function(
     fix_nonse = FALSE
   } else {
     if (is.null(global_fit)){
-      # to do: finish this once we decide what to save where (and whether to use indicator names too)
       stop("Need a global fit for this run.")
+      # we can also add internal data
       # globalstepname <- dplyr::case_when(
       #   runstep == "step1b" ~ "1a",
       #   runstep == "local_national" ~ "1b",
@@ -172,9 +175,9 @@ fit_model_simplified <- function(
     }
 
     print("We use a global fit, and take selected or all settings from there.")
-    # minor to do: print these settings?
     print("Settings for hierarchical settings")
     hierarchical_level <- global_fit$hierarchical_level
+    print(hierarchical_level)
     # for hier stuff, we fix things according to the run
     if (runstep %in% c("local_national")) {
       print("For hierarchical terms, we fix things up to the 2nd-lowest level.")
@@ -203,69 +206,6 @@ fit_model_simplified <- function(
     }
   }
 
-  ##### Data processing  #####
-  if(length(hierarchical_level) == 0) {
-    stop("No hierarchical structure supplied for the level in reference year. See the hierarchical_level argument.")
-  }
-  # if a global fit was provided, check for consistency between
-  # settings for the global fit and settings for the current fit
-  # note: less relevant now that we take settings from global fit
-  if (!is.null(global_fit)) {
-    # check that levels in the hierarchies used in the global fit are all
-    # contained in the levels in the hierarchies used in this fit, and the
-    # first entries of the hierarchy to use for this fit match the hierarchical
-    # levels used for the global fit.
-    if (!all(global_fit$hierarchical_level %in% hierarchical_level)) {
-      stop("hierarchical_level must contain all levels that were used for the global fit.")
-    }
-    if (!all(global_fit$hierarchical_level == hierarchical_level[seq_along(global_fit$hierarchical_level)])) {
-      stop("The top levels of hierarchical_level must match the levels that were used for the global fit.")
-    }
-    # check that hierarchical terms and sigmas to fix are all contained at the
-    # top of the levels in the hierarchy used in the global fit
-    # to do: need to update checks...
-    #
-    # if (#!all(hierarchical_level_sigmas_fixed %in% global_fit$hierarchical_level) ||
-    #     !all(hierarchical_level_terms_fixed %in% global_fit$hierarchical_level)) {
-    #   stop("Hierarchical estimates to fix for hierarchical_level were not estimated in the global fit.")
-    # }
-    # if (#!all(hierarchical_level_sigmas_fixed == global_fit$hierarchical_level[seq_along(hierarchical_level_sigmas_fixed)]) ||
-    #     !all(hierarchical_level_terms_fixed == global_fit$hierarchical_level[seq_along(hierarchical_level_terms_fixed)])) {
-    #   stop("Hierarchical estimates to fix for hierarchical_level do not match the highest hierarchical_level levels estimated in the global fit.")
-    # }
-    #
-    # It is not valid to fix terms at a given hierarchy level without also fixing
-    # the sigma estimate at that hierarchy level.
-    # For example, if x = mu + z * sigma,
-    # it does not make sense to fix z without also fixing sigma.
-    # on the other hand, we might fix sigma but not z if we want to borrow information
-    # about variability from global fit, but the global fit didn't produce an estimate
-    # of z for the geo unit we're interested in, or we are ok with re-estimating it?
-    if (!all(hierarchical_level_terms_fixed %in% hierarchical_level_sigmas_fixed)) {
-      stop("All values of hierarchical_level_terms_fixed must also be contained in hierarchical_level_sigmas_fixed")
-    }
-  }
-
-
-
-
-
-  print("to do: check what NA check is needed")
-  # no longer needed
-  # # Create district index for matching district and district index
-  # hierarchical_column_names <- unique(c(
-  #   hierarchical_level
-  # )) %>%
-  #   setdiff("intercept")
-  # # Make sure there are no NAs in any of the columns
-  # for(column in hierarchical_column_names) {
-  #   if(column == "intercept") next
-  #   if (column == area) {
-  #     check_nas_or_pops(data, column, year, population_data)
-  #   } else {
-  #     check_nas(data, column)
-  #   }
-  # }
 
 
   ##### Load model #####
@@ -276,53 +216,57 @@ fit_model_simplified <- function(
     )
   }
 
-  ##### Setup data for Stan #####
-
-  geo_unit_index <- get_geo_unit_index_data(data,
+  ##### Data processing  and Setup data for Stan #####
+  # select data based on area_select
+  if (!is.null(area_select)){
+    survey_df <- survey_df %>%
+      dplyr::filter(!!rlang::sym(area) %in% area_select)
+  }
+  geo_unit_index <- get_geo_unit_index_data(survey_df,
                                             hierarchical_levels = c(hierarchical_level),
                                             area = area)
   # need it here after all
   hierarchical_column_names <- unique(hierarchical_level) %>%
     setdiff("intercept")
-  data <- data %>%
+  survey_df <- survey_df %>%
     dplyr::left_join(geo_unit_index, by = hierarchical_column_names)
+  # Make sure there are no NAs in any of the columns
+  for(column in hierarchical_column_names) {
+    if(column == "intercept") next
+    check_nas(survey_df, column)
+  }
 
-  # In "local" fits, ensure that for all hierarchy levels where any quantity is
-  # fixed, all geographic units in data used for the local fit also were present
-  #  in the global fit
-  # LA doesn't think this check is needed? also, gives error when just running with global fit but without fixing any hierarchies
-  # if (!is.null(global_fit)) {
-  #   fixed_hierarchy_levels <- unique(c(hierarchical_asymptote_sigmas_fixed,
-  #                                      hierarchical_asymptote_terms_fixed,
-  #                                      hierarchical_splines_sigmas_fixed,
-  #                                      hierarchical_splines_terms_fixed,
-  #                                      hierarchical_level_sigmas_fixed,
-  #                                      hierarchical_level_terms_fixed))
-  #   fixed_hierarchy_levels <- fixed_hierarchy_levels[fixed_hierarchy_levels != "intercept"]
-  #
-  #   fixed_geo_unit_index_local <- geo_unit_index[fixed_hierarchy_levels] |>
-  #     dplyr::distinct()
-  #   fixed_geo_unit_index_global <- global_fit$geo_unit_index[fixed_hierarchy_levels] |>
-  #     dplyr::distinct()
-  #   missing_geos <- fixed_geo_unit_index_local |>
-  #     dplyr::anti_join(fixed_geo_unit_index_global,
-  #                      by = fixed_hierarchy_levels)
-  #   if (nrow(missing_geos) > 0) {
-  #     stop("All geographic units that appear in the data for the current fit at hierarchical levels for which any parameter is fixed must have also been included in the data used for the `global_fit`.")
-  #   }
-  # }
+  #In "local" fits, ensure that for all hierarchy levels where any quantity is
+  #fixed, all geographic units in data used for the local fit also were present
+  # in the global fit
+  if (!is.null(global_fit)) {
+    fixed_hierarchy_levels <- unique(c(hierarchical_level_sigmas_fixed,
+                                       hierarchical_level_terms_fixed))
+    fixed_hierarchy_levels <- fixed_hierarchy_levels[fixed_hierarchy_levels != "intercept"]
+    fixed_geo_unit_index_local <- geo_unit_index[fixed_hierarchy_levels] |>
+      dplyr::distinct()
+    fixed_geo_unit_index_global <- global_fit$geo_unit_index[fixed_hierarchy_levels] |>
+      dplyr::distinct()
+    missing_geos <- fixed_geo_unit_index_local |>
+      dplyr::anti_join(fixed_geo_unit_index_global,
+                       by = fixed_hierarchy_levels)
+    if (nrow(missing_geos) > 0) {
+      stop("All geographic units that appear in the data for the current fit at hierarchical levels for which any parameter is fixed must have also been included in the data used for the `global_fit`.")
+    }
+  }
 
   # put together stan data
   stan_data <- list(
     C = nrow(geo_unit_index),
-    N = nrow(data),
+    N = nrow(survey_df),
+    # for later: code relevant to use of aggregates
     # for geo_unit:
-    # in case of NA values in data$c, replace with the dummy value 0
+    # in case of NA values in survey_df$c, replace with the dummy value 0
     # this is only used in multiscale fitting with mixed national and subnational data
-    geo_unit = array(ifelse(is.na(data$c), 0L, data$c)),
-    y = array(data[[y]])
+    geo_unit = survey_df$c, # array(ifelse(is.na(survey_df$c), 0L, survey_df$c)),
+    y = array(survey_df[[y]])
   )
-  # area = data[[area]]
+  # area = survey_df[[area]]
   if (mu2param){
     # for 2 parameter model
     stan_data[["k"]] <- 2
@@ -331,24 +275,14 @@ fit_model_simplified <- function(
   ##### Set up hierarchical structures ######
   hier_data <- hier_stan_data  <- list()
   hier_data[["mu_data"]] <- hierarchical_data(geo_unit_index_data = geo_unit_index, hierarchical_level = hierarchical_level)
-  #hier_data[["a_data"]] <- hierarchical_data(geo_unit_index, hierarchical_splines)
-  # hier_stan_data[["a"]] <- hierarchical_param_stan_data(
-  #   global_fit = global_fit,
-  #   param_name = "a",
-  #   param_data = hier_data[["a_data"]],
-  #   hierarchical_terms_fixed = hierarchical_splines_terms_fixed,
-  #   hierarchical_sigmas_fixed = hierarchical_splines_sigmas_fixed)
   hier_stan_data[["mu"]] <- hierarchical_param_stan_data(
     global_fit = global_fit,
     param_name ="mu",
     param_data = hier_data[["mu_data"]],
     hierarchical_terms_fixed = hierarchical_level_terms_fixed,
     hierarchical_sigmas_fixed = hierarchical_level_sigmas_fixed)
-  # to check if this is needed for simplified stuff
-  # when working with >1 parameter
+  # this is needed when working with >1 parameter
   hier_stan_data <- purrr::list_flatten(hier_stan_data, name_spec = "{inner}")
-
-
 
   ##### Set up handing of data model hyperparameters ######
   nonse_data <- list(
@@ -366,8 +300,6 @@ fit_model_simplified <- function(
 
 
   ##### Create list with combined inputs/outputs ####
-
-
   # to pass to stan
   stan_data <- c(
                  stan_data,

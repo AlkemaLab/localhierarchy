@@ -8,10 +8,11 @@ fit_model_simplified(
   survey_df,
   y = "logit_indicator",
   area = "iso",
-  iso_select = NULL,
+  area_select = NULL,
   runstep,
   global_fit = NULL,
   hierarchical_level = c("intercept", "subcluster", "iso"),
+  add_subnational_hierarchy = "subnat",
   chains = 4,
   iter_sampling = 200,
   iter_warmup = 150,
@@ -30,13 +31,13 @@ fit_model_simplified(
 
 \item{y}{column name of outcome.}
 
-\item{area}{column name of the area of each observation}
+\item{area}{column name of the area of each observation (geounit, iso or subnational region)}
 
-\item{iso_select}{ISO code to use for local national run}
+\item{area_select}{area name to use for local run (eg iso code or subnat region name)}
 
-\item{runstep}{type of run, currently one of "step1a", "step1b", "local_national" (see Details).}
+\item{runstep}{type of run, currently one of XXX (see Details).}
 
-\item{global_fit}{optional object of class `"fpemplus"`, used to obtain fixed
+\item{global_fit}{optional object of class XX, used to obtain fixed
 values to use for some parameters in the current fit (see Details).}
 
 \item{hierarchical_level}{vector specifying hierarchical structure used for mu

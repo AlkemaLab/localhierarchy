@@ -33,11 +33,12 @@ dat_subnat <- read_csv(here::here(data_folder, "coverage_data_subnat.csv"))
 
 ### use case 1: global then local national, all countries (in quarto too)
 hierarchical_level <- c("intercept",  "subcluster", "iso")
+devtools::load_all(here::here())
 fit1a <- fit_model_simplified(runstep = "step1a",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)
-fit1a$post_summ <- get_posterior_summaries_simplified(fit1a) %>%
+fit1a$post_summ <- get_posterior_summaries(fit1a) %>%
   dplyr::rename(median = mean)
 fit1a$post_summ
 fit_local <- fit_model_simplified(runstep = "local_national",
@@ -87,10 +88,18 @@ bind_rows(res_local$iso %>% mutate(model = "local"),
 
 ### use case 2: global then local national, 1 country
 iso_select <- "BFA"
+fit1a$samples <- NULL
+devtools::load_all(here::here())
 fit_local2 <- fit_model_simplified(runstep = "local_national",
                                   global_fit = fit1a,
                                   survey_df = dat %>% filter(iso == iso_select),
                                   chains = 4)
+# equivalent is using in area_select
+fit_local2 <- fit_model_simplified(runstep = "local_national",
+                                   global_fit = fit1a,
+                                   area_select = c(iso_select,"NER", "PER"),
+                                   survey_df = dat,
+                                   chains = 4)
 
 fit <- fit_local2
 mu <- list()
@@ -104,7 +113,7 @@ for(subhierarchy in fit$hierarchical_level) {
 }
 res_local <- map(mu, function(tibble_samples)
   tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
-
+res_local$iso
 # plot
 bind_rows(res_local$subcluster %>% mutate(model = "local"),
           res_global$subcluster %>% mutate(model = "global") %>% filter(name %in% res_local$subcluster$name)) %>%
@@ -131,7 +140,7 @@ fit_globalsubnat <- fit_model_simplified(runstep = "global_subnational",
                               survey_df = dat_subnat,
                               global_fit = fit1a,
                               chains = 4)
-fit_globalsubnat$post_summ <- get_posterior_summaries_simplified(fit_globalsubnat) %>%
+fit_globalsubnat$post_summ <- get_posterior_summaries(fit_globalsubnat) %>%
   dplyr::rename(median = mean)
 fit_globalsubnat$post_summ %>%
   filter(variable_no_index == "mu_sigma")
@@ -227,7 +236,7 @@ fit1a_mult <- fit_model_simplified(runstep = "step1a",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)
-fit1a_mult$post_summ <- get_posterior_summaries_simplified(fit1a_mult) %>%
+fit1a_mult$post_summ <- get_posterior_summaries(fit1a_mult) %>%
   dplyr::rename(median = mean)
 fit1a_mult$post_summ %>% filter(variable %in% c("mu_raw[1,1]", "mu_raw[1,2]", "mu_raw[2,1]", "mu_raw[2,2]"))
 
@@ -258,7 +267,7 @@ fit_subnational_mult <- fit_model_simplified(runstep = "global_subnational",
                                    area = "subnat",
                                    global_fit = fit1a_mult,
                                    chains = 4)
-fit_subnational_mult$post_summ <- get_posterior_summaries_simplified(fit_subnational_mult) %>%
+fit_subnational_mult$post_summ <- get_posterior_summaries(fit_subnational_mult) %>%
   dplyr::rename(median = mean)
 
 fit <- fit_subnational_mult

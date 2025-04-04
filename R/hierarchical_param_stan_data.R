@@ -104,8 +104,6 @@ hierarchical_param_stan_data <- function(param_name, param_data,
 
     # now plug in the values
     is_matrix <- is_there_a_comma(globalfit_param_post_summ_raw$variable[1])
-    #if (is_matrix)
-    #  stop("not yet implemented")
 
     if (!is_matrix){
       results_sigma <- rep(NA, n_sigma_fixed)
