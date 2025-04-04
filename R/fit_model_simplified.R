@@ -118,8 +118,9 @@
 fit_model_simplified <- function(
   survey_df,
   y = "logit_indicator",
-  area = "iso",
+  area = "iso", # add default or set in function?
   iso_select  = NULL, # used for local national run
+  # rename as area_select
 
   # type of run is defined by runstep:
   runstep, # type of run, step or localnat or localsubnat
@@ -128,6 +129,7 @@ fit_model_simplified <- function(
   global_fit = NULL, # eventually, read in from data_raw if needed but NULL
 
   hierarchical_level     = c("intercept", "subcluster", "iso"),
+  add_subnational_hierarchy = "subnat", # this is what's added to the hierarchy for subnational
 
   # settings for sampling
   chains = 4, # probably need more for final model
@@ -143,7 +145,7 @@ fit_model_simplified <- function(
 ) {
 
   data <- survey_df # for now, just to keep the same name as in fpem
-  if (!runstep %in% c("step1a", "local_national")){
+  if (!runstep %in% c("step1a", "local_national", "global_subnational", "local_subnational")){
     stop("runstep not yet implemented!")
   }
   if (runstep %in% c("step1a")){
@@ -181,6 +183,23 @@ fit_model_simplified <- function(
       hierarchical_level_sigmas_fixed = hierarchical_level[1:(length(hierarchical_level))]
       print("We fix data model parameters.")
       fix_nonse <- TRUE
+    }
+    if (runstep %in% c("global_subnational", "local_subnational")){
+      print("We fix data model parameters.")
+      fix_nonse <- TRUE
+      if (runstep %in% c("global_subnational")){
+        print("For subnational global run, we add a level for subnational hierarchical settings ")
+        hierarchical_level <- c(global_fit$hierarchical_level, add_subnational_hierarchy)
+        print("For hierarchical terms, we fix things up to the 2nd-lowest or 3rd level (here 2nd is used).")
+        hierarchical_level_terms_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
+        print("For sigma terms, we fix up to 2nd-lowest level.")
+        hierarchical_level_sigmas_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
+      } else {
+        print("For hierarchical terms, we fix things up to the 2nd-lowest or 3rd level (here 2nd is used).")
+        hierarchical_level_terms_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
+        print("For sigma terms, we fix up to lowest level.")
+        hierarchical_level_sigmas_fixed = hierarchical_level[1:(length(hierarchical_level))]
+      }
     }
   }
 
