@@ -12,7 +12,7 @@ get_posterior_summaries(fit, params = c("mu_raw", "mu_sigma", "nonse"))
 \item{params}{vector of parnames to summarize (w/o index)}
 }
 \value{
-tibble with variable (parname with index used in model) and posterior mean
+tibble with variable (parname with index used in model) and postmean (posterior mean)
 }
 \description{
 get_posterior_summaries

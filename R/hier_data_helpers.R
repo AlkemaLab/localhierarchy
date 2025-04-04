@@ -35,8 +35,8 @@ create_a_matrix <- function(post_summ){
     ) %>%
     select(-variable) %>%
     # make integers
-    tidyr::pivot_wider(names_from = col, values_from = median) %>%
-    tidyr::pivot_longer(cols = -row, names_to = "col", values_to = "median") %>%
+    tidyr::pivot_wider(names_from = col, values_from = postmean) %>%
+    tidyr::pivot_longer(cols = -row, names_to = "col", values_to = "postmean") %>%
     mutate(row = as.integer(row),
            col = as.integer(col))
   m <- matrix(NA, max(res$row), max(res$col))
@@ -44,7 +44,7 @@ create_a_matrix <- function(post_summ){
     for (coli in unique(res$col)){
       m[rowi, coli] <- res %>%
         filter(row == rowi, col == coli) %>%
-        pull(median)
+        pull(postmean)
     }
   }
   m

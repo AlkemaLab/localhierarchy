@@ -1,4 +1,40 @@
 
+
+#' posterior_summary_hierparam
+#'
+#' @param fit needs to include parname_star
+#' @param parname selected parameter name (example: "mu")
+#' @param morethan1param does paramname refer to more than 1 parameter (a vector)
+#'
+#' @returns list with summaries of mu for each hierchical level (units with each level)
+#'  these mus are obtained by summing up all relevant etas
+#' for morethan1param, k refers to the index
+#' @export
+#'
+#' @examples
+posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE){
+  mu <- list()
+  for(subhierarchy in fit$hierarchical_level) {
+    mu[[subhierarchy]] <-
+      extract_parameter_subhierarchical(
+        hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
+        subhierarchy = subhierarchy,
+        parname = parname,
+        fit_samples = fit$samples,
+        morethan1param = morethan1param
+        )
+  }
+  if (!morethan1param){
+    res <- map(mu, function(tibble_samples)
+      tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
+  } else {
+    res <- map(mu, function(tibble_samples)
+      tibble_samples %>% select(name, value, k)  %>% reframe(quantile_df(value), .by = c(name, k)))
+  }
+  return(res)
+}
+
+
 #' extract_parameter_subhierarchical
 #'
 #' @param hierarchical_data hierarchical_data, obtained from hierarchical_data(fit$geo_unit, fit$hierarchical_level)
@@ -81,3 +117,10 @@ extract_parameter_subhierarchical <- function(
   return(star)
 }
 
+
+quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
+  tibble(
+    val = quantile(x, probs, na.rm = TRUE),
+    quant = probs
+  )
+}

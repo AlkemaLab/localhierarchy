@@ -123,6 +123,7 @@ hierarchical_param_stan_data <- function(param_name, param_data,
       result[[paste0(param_name, "_sigma_fixed")]] <- results_sigma # globalfit_param_post_summ_sigma$postmean[seq_len(n_sigma_fixed)]
     } else {
       # using old set up here
+      print("In hierarchical_param_stan_data, consider further testing/rewriting of set up for multiple parameters")
       # alternatively: just loop over the 2nd index of the parameter!
       # extract relevant data
       globalfit_param_data = global_fit[[paste0(param_name, "_data")]]

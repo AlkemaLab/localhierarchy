@@ -17,7 +17,7 @@ note that this does NOT get into hierarchical info (and is same for hier and non
 it is just the stacking}
 }
 \value{
-tibble with variable (name with index) and posterior mean
+tibble with variable (parname with index used in model) and postmean (posterior mean)
 }
 \description{
 get_posterior_summary_one_param

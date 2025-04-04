@@ -10,12 +10,7 @@ library(bayesplot) # diagnostic plots
 devtools::load_all(here::here())
 data_folder <- "data_raw"
 
-quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
-  tibble(
-    val = quantile(x, probs, na.rm = TRUE),
-    quant = probs
-  )
-}
+
 # for offsetting plots
 dodge <- position_dodge(width=0.5)
 
@@ -44,30 +39,10 @@ fit_local <- fit_model_simplified(runstep = "local_national",
                                   global_fit = fit1a,
                                   survey_df = dat,
                                   chains = 4)
-fit <- fit1a
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical (
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples)
-}
-res_global <- map(mu, function(tibble_samples)
-  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
-fit <- fit_local
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical (
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples)
-}
-res_local <- map(mu, function(tibble_samples)
-  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
+
+res_global <- posterior_summary_hierparam(fit = fit1a, parname = "mu")
+res_local <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
+
 # plot
 bind_rows(res_local$subcluster %>% mutate(model = "local"),
           res_global$subcluster %>% mutate(model = "global")) %>%
@@ -100,30 +75,20 @@ fit_local2 <- fit_model_simplified(runstep = "local_national",
                                    survey_df = dat,
                                    chains = 4)
 
-fit <- fit_local2
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical (
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples)
-}
-res_local <- map(mu, function(tibble_samples)
-  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
-res_local$iso
+
+res_local2 <- posterior_summary_hierparam(fit = fit_local2, parname = "mu")
+res_local2$iso
 # plot
-bind_rows(res_local$subcluster %>% mutate(model = "local"),
-          res_global$subcluster %>% mutate(model = "global") %>% filter(name %in% res_local$subcluster$name)) %>%
+bind_rows(res_local2$subcluster %>% mutate(model = "local"),
+          res_global$subcluster %>% mutate(model = "global") %>% filter(name %in% res_local2$subcluster$name)) %>%
   group_by(name, model) %>%
   reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
   ggplot(aes(y = y, x = name, color = model)) +
   geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
   geom_point()
 
-bind_rows(res_local$iso %>% mutate(model = "local"),
-          res_global$iso %>% mutate(model = "global")%>% filter(name %in% res_local$iso$name)) %>%
+bind_rows(res_local2$iso %>% mutate(model = "local"),
+          res_global$iso %>% mutate(model = "global")%>% filter(name %in% res_local2$iso$name)) %>%
   group_by(name, model) %>%
   reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
   ggplot(aes(y = y, x = name, color = model)) +
@@ -150,33 +115,10 @@ fit_local <- fit_model_simplified(runstep = "local_subnational",
                                   survey_df = dat_subnat,
                                   chains = 4)
 
-# results global subnat
-fit <- fit_globalsubnat
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical (
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples)
-}
-res_globalsubnat <- map(mu, function(tibble_samples)
-  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
 
-# results local subnat
-fit <- fit_localsubnat
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical (
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples)
-}
-res_localsubnat <- map(mu, function(tibble_samples)
-  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
+# results global subnat
+res_globalsubnat <- posterior_summary_hierparam(fit = fit_globalsubnat, parname = "mu")
+res_localsubnat <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
 
 # plots: compare global subnat to local subnat
 # compare global subnat to global national up to level that was fixed
@@ -237,23 +179,8 @@ fit1a_mult <- fit_model_simplified(runstep = "step1a",
 fit1a_mult$post_summ <- get_posterior_summaries(fit1a_mult)
 fit1a_mult$post_summ %>% filter(variable %in% c("mu_raw[1,1]", "mu_raw[1,2]", "mu_raw[2,1]", "mu_raw[2,2]"))
 
-fit <- fit1a_mult
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical(
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples,
-      morethan1param = TRUE)
-}
-res_global_mult <- map(mu, function(tibble_samples)
-  #  # for one param
-  #  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
-  # for k param
-  tibble_samples %>% select(name, value, k)  %>% reframe(quantile_df(value), .by = c(name, k)))
-res_global_mult
+res_mult <-  posterior_summary_hierparam(fit = fit1a_mult, parname = "mu", morethan1param = TRUE)
+
 
 # global subnat mult param
 fit_subnational_mult <- fit_model_simplified(runstep = "global_subnational",
@@ -265,24 +192,7 @@ fit_subnational_mult <- fit_model_simplified(runstep = "global_subnational",
                                    global_fit = fit1a_mult,
                                    chains = 4)
 fit_subnational_mult$post_summ <- get_posterior_summaries(fit_subnational_mult)
-
-fit <- fit_subnational_mult
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical(
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples,
-      morethan1param = TRUE)
-}
-res_subnational_mult <- map(mu, function(tibble_samples)
-  #  # for one param
-  #  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
-  # for k param
-  tibble_samples %>% select(name, value, k)  %>% reframe(quantile_df(value), .by = c(name, k)))
-res_subnational_mult
+res_subnational_mult <- posterior_summary_hierparam(fit = fit_subnational_mult, parname = "mu", morethan1param = TRUE)
 
 # local subnat mult param
 # all region and 1-region
@@ -294,29 +204,15 @@ fit_local_subnat_mult <- fit_model_simplified(runstep = "local_subnational",
                                    area = "subnat",
                                    global_fit = fit_subnational_mult,
                                    chains = 4)
-fit <- fit_local_subnat_mult
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical(
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples,
-      morethan1param = TRUE)
-}
-res_local_subnat_mult <- map(mu, function(tibble_samples)
-  #  # for one param
-  #  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
-  # for k param
-  tibble_samples %>% select(name, value, k)  %>% reframe(quantile_df(value), .by = c(name, k)))
+
+res_local_subnat_mult <- posterior_summary_hierparam(fit = fit_subnational_mult, parname = "mu", morethan1param = TRUE)
 
 # plots
-#res_global_mult
+#res_mult
 #res_subnational_mult
 #res_local_subnat_mult
 bind_rows(res_subnational_mult$subcluster %>% mutate(model = "local"),
-          res_global_mult$subcluster %>% mutate(model = "global") %>% filter(name %in% res_subnational_mult$subcluster$name)) %>%
+          res_mult$subcluster %>% mutate(model = "global") %>% filter(name %in% res_subnational_mult$subcluster$name)) %>%
   group_by(name, model, k) %>%
   reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
   ggplot(aes(y = y, x = name, color = model)) +
