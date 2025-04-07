@@ -30,7 +30,7 @@
 #' @returns List that contains samples, stan_data, and other information relevant to model fit (arguments)
 #'
 #' @details
-#' The `fit_model` function fits the toy example for hierarchical models/seq fitting.
+#' The `fit_model_localhierarchy` function fits the toy example for hierarchical models/seq fitting.
 #' The argument \code{runstep} determines the type of run to perform. The
 #' following run steps are supported:
 #' - "step1a": Fit the global model
@@ -72,11 +72,10 @@
 #'
 #'
 #'
-#' @export
 #'
 #'
 #'
-fit_model <- function(
+fit_model_localhierarchy <- function(
   survey_df,
   y = "logit_indicator",
   area = "iso", # add default or set in function?

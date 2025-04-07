@@ -6,3 +6,4 @@ check_nas <- function(data, column) {
     stop(glue::glue("There are NAs in column {column}."))
   }
 }
+

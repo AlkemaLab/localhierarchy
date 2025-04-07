@@ -30,7 +30,7 @@ data <- tibble(subcluster = c("A", "A", "B", "B"), iso = c("iso1", "iso2", "iso3
 data
 ```
 
-We need to define the hierarchical levels to use, and the level of interest. Here we set level of interest to be equal to lowest level (iso), this is currently required (and the default setting in all runs in fit_model).
+We need to define the hierarchical levels to use, and the level of interest. Here we set level of interest to be equal to lowest level (iso), this is currently required (and the default setting in all runs in fit_model_localhierarchy).
 
 (This does not need to be a requirement going forward but testing so far is based on it).
 

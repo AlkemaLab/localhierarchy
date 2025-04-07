@@ -120,6 +120,15 @@ extract_parameter_subhierarchical <- function(
 }
 
 
+#' Title
+#'
+#' @param x
+#' @param probs
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
   tibble(
     val = quantile(x, probs, na.rm = TRUE),

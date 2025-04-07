@@ -14,7 +14,7 @@ posterior_summary_hierparam(fit, parname, morethan1param = FALSE)
 \item{morethan1param}{does paramname refer to more than 1 parameter (a vector)}
 }
 \value{
-list with summaries of mu for each hierchical level (units with each level)
+list with summaries of mu for each hierarchical level (units with each level)
  these mus are obtained by summing up all relevant etas
 for morethan1param, k refers to the index
 }

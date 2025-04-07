@@ -111,7 +111,7 @@ The set up and notation in stan/R, in terms of parameters, using parameter mu as
 global model fit
 
 ```{r}
-fit1a <- fit_model(runstep = "step1a",
+fit1a <- fit_model_localhierarchy(runstep = "step1a",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)
@@ -129,7 +129,7 @@ fit1a$post_summ
 do local fit... here we fix things but do get results for all countries
 
 ```{r}
-fit_local <- fit_model(runstep = "local_national",
+fit_local <- fit_model_localhierarchy(runstep = "local_national",
                                   global_fit = fit1a,
                                   survey_df = dat,
                                   chains = 4)

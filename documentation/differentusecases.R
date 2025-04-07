@@ -30,13 +30,13 @@ hierarchical_level <- c("intercept",  "subcluster", "iso")
 ### use case 1: global then local national, all countries (in quarto too)
 
 devtools::load_all(here::here())
-fit1a <- fit_model(runstep = "step1a",
+fit1a <- fit_model_localhierarchy(runstep = "step1a",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)
 fit1a$post_summ <- get_posterior_summaries(fit1a)
 fit1a$post_summ
-fit_local <- fit_model(runstep = "local_national",
+fit_local <- fit_model_localhierarchy(runstep = "local_national",
                                   global_fit = fit1a,
                                   survey_df = dat,
                                   chains = 4)
@@ -65,12 +65,12 @@ bind_rows(res_local$iso %>% mutate(model = "local"),
 iso_select <- "BFA"
 fit1a$samples <- NULL
 devtools::load_all(here::here())
-fit_local2 <- fit_model(runstep = "local_national",
+fit_local2 <- fit_model_localhierarchy(runstep = "local_national",
                                   global_fit = fit1a,
                                   survey_df = dat %>% filter(iso == iso_select),
                                   chains = 4)
 # equivalent is using in area_select
-fit_local2 <- fit_model(runstep = "local_national",
+fit_local2 <- fit_model_localhierarchy(runstep = "local_national",
                                    global_fit = fit1a,
                                    area_select = c(iso_select,"NER", "PER"),
                                    survey_df = dat,
@@ -100,7 +100,7 @@ bind_rows(res_local2$iso %>% mutate(model = "local"),
 ### use case 3: global then subnational global then local subnational
 #dat_subnat
 devtools::load_all(here::here())
-fit_globalsubnat <- fit_model(runstep = "global_subnational",
+fit_globalsubnat <- fit_model_localhierarchy(runstep = "global_subnational",
                                          area = "subnat",
                               survey_df = dat_subnat,
                               global_fit = fit1a,
@@ -110,7 +110,7 @@ fit_globalsubnat$post_summ %>%
   filter(variable_no_index == "mu_sigma")
 fit1a$post_summ %>%
   filter(variable_no_index == "mu_sigma")
-fit_local <- fit_model(runstep = "local_subnational",
+fit_local <- fit_model_localhierarchy(runstep = "local_subnational",
                                   area = "subnat",
                                   global_fit = fit_globalsubnat,
                                   survey_df = dat_subnat,
@@ -165,7 +165,7 @@ bind_rows(res_globalsubnat$subcluster %>% mutate(model = "global subnat"),
   geom_point()
 
 ### use case 4 needed? invariance to re-ordering of input data
-fit_local2 <- fit_model(runstep = "local_subnational",
+fit_local2 <- fit_model_localhierarchy(runstep = "local_subnational",
                                   area = "subnat",
                                   global_fit = fit_globalsubnat,
                                   survey_df = dat_subnat[seq(dim(dat_subnat)[1],1),],
@@ -194,7 +194,7 @@ bind_rows(res_localsubnat$iso %>% mutate(model = "local"),
 # for model fitting, call other stan model and add argument
 # for summaries, need to use morethan1param = TRUE
 devtools::load_all(here::here())
-fit1a_mult <- fit_model(runstep = "step1a",
+fit1a_mult <- fit_model_localhierarchy(runstep = "step1a",
                               mu_isvector = TRUE,
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
@@ -206,7 +206,7 @@ res_mult <-  posterior_summary_hierparam(fit = fit1a_mult, parname = "mu", moret
 
 
 # global subnat mult param
-fit_subnational_mult <- fit_model(runstep = "global_subnational",
+fit_subnational_mult <- fit_model_localhierarchy(runstep = "global_subnational",
                                              mu_isvector = TRUE,
                                    hierarchical_level     =  hierarchical_level,
                                    survey_df = dat_subnat,
@@ -219,7 +219,7 @@ res_subnational_mult <- posterior_summary_hierparam(fit = fit_subnational_mult, 
 # local subnat mult param
 # all region and 1-region
 iso_select <- "BFA"
-fit_local_subnat_mult <- fit_model(runstep = "local_subnational",
+fit_local_subnat_mult <- fit_model_localhierarchy(runstep = "local_subnational",
                                               mu_isvector = TRUE,
                                    hierarchical_level     =  hierarchical_level,
                                    survey_df = dat_subnat %>% filter(iso == iso_select),
