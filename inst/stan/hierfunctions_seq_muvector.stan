@@ -14,30 +14,30 @@ data {
   // 0: estimate nonse. 1: fix nonse at estimates from previous fit.
   int<lower=0, upper=1> fix_nonse;
   // if fix_nonse == 1, one nonse standard deviation estimate
-  array[fix_nonse ? 1 : 0] real<lower=0> nonse_fixed;
+  array[fix_nonse ? 1 : 0] real<lower=verysmallnumber> nonse_fixed;
 
   // parameter mu
   // for mu hierarchical set up (indep of whether mu is vector or not)
   int<lower=0> mu_raw_n_terms;
   int<lower=0> mu_raw_n_terms_fixed;
   int<lower=0> mu_raw_n_terms_estimate;
-  int<lower=0> mu_n_sigma; // update 2025/4/2 to NOT count prior SD
+  int<lower=0> mu_n_sigma;
   int<lower=0> mu_n_sigma_fixed;
   int<lower=0> mu_n_sigma_estimate;
   array[mu_n_sigma + 1] int<lower=1, upper=mu_raw_n_terms> mu_re_start;
   array[mu_n_sigma + 1] int<lower=1, upper=mu_raw_n_terms> mu_re_end;
   matrix[n_geounit, mu_raw_n_terms] mu_model_matrix;
-  real<lower = 0> mu_scalarprior_sd;
+  real<lower = verysmallnumber> mu_scalarprior_sd;
 
   // CHOOSE ONE
   // // if mu is a scalar:
   // vector[mu_raw_n_terms_fixed] mu_raw_fixed;
-  // vector<lower=0>[mu_n_sigma_fixed] mu_sigma_fixed;
+  // vector<lower=verysmallnumber>[mu_n_sigma_fixed] mu_sigma_fixed;
 
   // if mu is a vector:
   int mu_k_terms; // number of parameters in vector mu
   matrix[mu_raw_n_terms_fixed, mu_k_terms] mu_raw_fixed;
-  matrix<lower=0>[mu_n_sigma_fixed, mu_k_terms] mu_sigma_fixed;
+  matrix<lower=verysmallnumber>[mu_n_sigma_fixed, mu_k_terms] mu_sigma_fixed;
   // END CHOOSE ONE
 
 }

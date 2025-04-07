@@ -1,5 +1,7 @@
 
-# without inits, warnings can occur
+# with or without inits, warnings can occur like pasted below
+# due to mean being sum of many mu_stars?
+# perhaps less warnings when using inits to keep mu_raws and mu_sigmas more constrained...
 # Chain XXX Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
 # Chain XXX Exception: normal_lpdf: Location parameter is inf, but must be finite!
 
@@ -10,24 +12,24 @@ init_fun <- function(chain_id, stan_data){
   if (stan_data$mu_raw_n_terms_estimate > 0){
     if (!stan_data[["mu_isvector"]]){
         inits <- c(inits,
-                 list(mu_raw_estimate = rtruncnorm(stan_data$mu_raw_n_terms_estimate, mean = 1, sd = 1, a = -2, b = 2))
+                 list(mu_raw_estimate = rtruncnorm(stan_data$mu_raw_n_terms_estimate, mean = 0, sd = 1, a = -2, b = 2))
                  )
         if (stan_data$mu_n_sigma_estimate > 0){
           inits <- c(inits,
-                     list(mu_sigma_estimate = rtruncnorm(stan_data$mu_n_sigma_estimate, mean = 1, sd = 1, a = stan_data$verysmallnumber, b = 1))
+                     list(mu_sigma_estimate = rtruncnorm(stan_data$mu_n_sigma_estimate, mean = 0, sd = 0.5, a = stan_data$verysmallnumber, b = 1))
                      )
         }
     } else {
       inits <- c(inits,
                  list(mu_raw_estimate = matrix(
-                   rtruncnorm(stan_data$mu_raw_n_terms_estimate*stan_data$mu_k_terms,  mean = 1, sd = 1, a = -2, b = 2),
+                   rtruncnorm(stan_data$mu_raw_n_terms_estimate*stan_data$mu_k_terms,  mean = 0, sd = 1, a = -2, b = 2),
                     nrow = stan_data$mu_raw_n_terms_estimate)
                     )
                  )
       if (stan_data$mu_n_sigma_estimate > 0){
         inits <- c(inits,
                    list(mu_sigma_estimate = matrix(
-                     rtruncnorm(stan_data$mu_n_sigma_estimate*stan_data$mu_k_terms, mean = 1, sd = 1, a = stan_data$verysmallnumber, b = 1),
+                     rtruncnorm(stan_data$mu_n_sigma_estimate*stan_data$mu_k_terms, mean = 0, sd = 0.5, a = stan_data$verysmallnumber, b = 1),
                      nrow = stan_data$mu_n_sigma_estimate)
                   ))
       }
