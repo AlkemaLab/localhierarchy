@@ -140,8 +140,7 @@ fit_model_simplified <- function(
   refresh = 200,
   adapt_delta = 0.9,
   max_treedepth = 14,
-  stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq.stan")),
-  mu2param = FALSE
+  mu_isvector = FALSE
 ) {
 
   if(length(hierarchical_level) == 0) {
@@ -208,13 +207,7 @@ fit_model_simplified <- function(
 
 
 
-  ##### Load model #####
-  if (compile_model){
-    stan_model <- cmdstanr::cmdstan_model(
-      stan_file = stan_file_path,
-      force_recompile = force_recompile
-    )
-  }
+
 
   ##### Data processing  and Setup data for Stan #####
   # select data based on area_select
@@ -257,32 +250,41 @@ fit_model_simplified <- function(
 
   # put together stan data
   stan_data <- list(
-    C = nrow(geo_unit_index),
+    n_geounit = nrow(geo_unit_index),
     N = nrow(survey_df),
     # for later: code relevant to use of aggregates
     # for geo_unit:
     # in case of NA values in survey_df$c, replace with the dummy value 0
     # this is only used in multiscale fitting with mixed national and subnational data
     geo_unit = survey_df$c, # array(ifelse(is.na(survey_df$c), 0L, survey_df$c)),
-    y = array(survey_df[[y]])
+    y = array(survey_df[[y]]),
+    verysmallnumber = 0.00001 # lower bound for sds
   )
   # area = survey_df[[area]]
-  if (mu2param){
-    # for 2 parameter model
-    stan_data[["k"]] <- 2
-  }
+
 
   ##### Set up hierarchical structures ######
+  stan_data[["mu_isvector"]] <- mu_isvector
+  parname <- "mu"
+  if (!mu_isvector){
+    stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_muscalar.stan"))
+  } else {
+    stan_data[["mu_k_terms"]] <- 3 # 2 or higher
+    stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_muvector.stan"))
+  }
+  stan_data[[paste0(parname, "_scalarprior_sd")]] <- 1
   hier_data <- hier_stan_data  <- list()
-  hier_data[["mu_data"]] <- hierarchical_data(geo_unit_index_data = geo_unit_index, hierarchical_level = hierarchical_level)
-  hier_stan_data[["mu"]] <- hierarchical_param_stan_data(
+  hier_data[[paste0(parname, "_data")]] <- hierarchical_data(geo_unit_index_data = geo_unit_index, hierarchical_level = hierarchical_level)
+  hier_stan_data[[parname]] <- hierarchical_param_stan_data(
     global_fit = global_fit,
-    param_name ="mu",
-    param_data = hier_data[["mu_data"]],
+    param_name = parname,
+    param_data = hier_data[[paste0(parname, "_data")]],
     hierarchical_terms_fixed = hierarchical_level_terms_fixed,
     hierarchical_sigmas_fixed = hierarchical_level_sigmas_fixed)
   # this is needed when working with >1 parameter
   hier_stan_data <- purrr::list_flatten(hier_stan_data, name_spec = "{inner}")
+
+
 
   ##### Set up handing of data model hyperparameters ######
   nonse_data <- list(
@@ -297,7 +299,13 @@ fit_model_simplified <- function(
     }
   }# end fixing dm pars
 
-
+  ##### Load model #####
+  if (compile_model){
+    stan_model <- cmdstanr::cmdstan_model(
+      stan_file = stan_file_path,
+      force_recompile = force_recompile
+    )
+  }
 
   ##### Create list with combined inputs/outputs ####
   # to pass to stan
@@ -326,7 +334,14 @@ fit_model_simplified <- function(
 
 
 
-    init_ll <- NULL
+   add_inits <- TRUE
+    if (add_inits){
+      init_ll <- lapply(1:chains, function(id) init_fun(chain_id = id, stan_data))
+    } else {
+      init_ll <- NULL
+    }
+
+
     fit <- stan_model$sample(
       stan_data,
       # save_latent_dynamics = TRUE,

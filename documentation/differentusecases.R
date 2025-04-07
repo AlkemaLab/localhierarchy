@@ -6,6 +6,7 @@ library(ggplot2)
 library(haven)
 library(stringr)
 library(cmdstanr)
+library(truncnorm) # for inits
 library(bayesplot) # diagnostic plots
 devtools::load_all(here::here())
 data_folder <- "data_raw"
@@ -17,7 +18,7 @@ dodge <- position_dodge(width=0.5)
 # national data
 dat <- read_csv(here::here(data_folder, "coverage_data.csv"))
 dat_subnat <- read_csv(here::here(data_folder, "coverage_data_subnat.csv"))
-
+hierarchical_level <- c("intercept",  "subcluster", "iso")
 
 ### overview
 # use case 1: global then local national, all countries (in quarto too)
@@ -27,7 +28,7 @@ dat_subnat <- read_csv(here::here(data_folder, "coverage_data_subnat.csv"))
 # use case 5: use case 3 for multiparam
 
 ### use case 1: global then local national, all countries (in quarto too)
-hierarchical_level <- c("intercept",  "subcluster", "iso")
+
 devtools::load_all(here::here())
 fit1a <- fit_model_simplified(runstep = "step1a",
                               hierarchical_level     =  hierarchical_level,
@@ -163,16 +164,38 @@ bind_rows(res_globalsubnat$subcluster %>% mutate(model = "global subnat"),
   geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
   geom_point()
 
-### use case 4 needed? invariance to re-ordering of input data in use case 3
-
+### use case 4 needed? invariance to re-ordering of input data
+fit_local2 <- fit_model_simplified(runstep = "local_subnational",
+                                  area = "subnat",
+                                  global_fit = fit_globalsubnat,
+                                  survey_df = dat_subnat[seq(dim(dat_subnat)[1],1),],
+                                  chains = 4)
+res_local2 <- posterior_summary_hierparam(fit = fit_local2, parname = "mu")
+bind_rows(res_localsubnat$subnat %>% mutate(model = "local"),
+          res_local2$subnat %>% mutate(model = "local2")) %>%
+  arrange(name) %>%
+  slice(1:(3*2*30)) %>%
+  group_by(name, model) %>%
+  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
+  ggplot(aes(y = y, x = name, color = model)) +
+  geom_errorbar(aes(ymin = ymin, ymax = ymax), position=dodge) +
+  geom_point(position=dodge)
+bind_rows(res_localsubnat$iso %>% mutate(model = "local"),
+          res_local2$iso %>% mutate(model = "local2")) %>%
+  arrange(name) %>%
+  slice(1:(3*2*30)) %>%
+  group_by(name, model) %>%
+  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
+  ggplot(aes(y = y, x = name, color = model)) +
+  geom_errorbar(aes(ymin = ymin, ymax = ymax), position=dodge) +
+  geom_point(position=dodge)
 
 ### use case 5: use case 3 for multiparam
 # for model fitting, call other stan model and add argument
 # for summaries, need to use morethan1param = TRUE
-
+devtools::load_all(here::here())
 fit1a_mult <- fit_model_simplified(runstep = "step1a",
-                              stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_2param.stan")),
-                              mu2param = TRUE,
+                              mu_isvector = TRUE,
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)
@@ -184,8 +207,7 @@ res_mult <-  posterior_summary_hierparam(fit = fit1a_mult, parname = "mu", moret
 
 # global subnat mult param
 fit_subnational_mult <- fit_model_simplified(runstep = "global_subnational",
-                                   stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_2param.stan")),
-                                   mu2param = TRUE,
+                                             mu_isvector = TRUE,
                                    hierarchical_level     =  hierarchical_level,
                                    survey_df = dat_subnat,
                                    area = "subnat",
@@ -196,9 +218,9 @@ res_subnational_mult <- posterior_summary_hierparam(fit = fit_subnational_mult, 
 
 # local subnat mult param
 # all region and 1-region
+iso_select <- "BFA"
 fit_local_subnat_mult <- fit_model_simplified(runstep = "local_subnational",
-                                   stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_2param.stan")),
-                                   mu2param = TRUE,
+                                              mu_isvector = TRUE,
                                    hierarchical_level     =  hierarchical_level,
                                    survey_df = dat_subnat %>% filter(iso == iso_select),
                                    area = "subnat",

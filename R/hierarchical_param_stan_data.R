@@ -21,7 +21,7 @@ hierarchical_param_stan_data <- function(param_name, param_data,
                                          hierarchical_sigmas_fixed,
                                          global_fit) {
   result <- list()
-  result[[paste0(param_name, "_n_terms")]] <- param_data$n_terms
+  result[[paste0(param_name, "_raw_n_terms")]] <- param_data$n_terms
   result[[paste0(param_name, "_re_start")]] <- array(param_data$re_start)
   result[[paste0(param_name, "_re_end")]] <- array(param_data$re_end)
   result[[paste0(param_name, "_model_matrix")]] <- param_data$model_matrix$mat
@@ -32,8 +32,8 @@ hierarchical_param_stan_data <- function(param_name, param_data,
 
   # get nfixed etc, no estimates yet
   if (is.null(global_fit)) {
-    result[[paste0(param_name, "_n_terms_fixed")]] <- 0
-    result[[paste0(param_name, "_n_terms_estimate")]] <- param_data$n_terms
+    result[[paste0(param_name, "_raw_n_terms_fixed")]] <- 0
+    result[[paste0(param_name, "_raw_n_terms_estimate")]] <- param_data$n_terms
     result[[paste0(param_name, "_raw_fixed")]] <- numeric(0)
 
     result[[paste0(param_name, "_n_sigma_fixed")]] <- 0
@@ -74,9 +74,9 @@ hierarchical_param_stan_data <- function(param_name, param_data,
         }
       }) |>
       sum()
-    result[[paste0(param_name, "_n_terms_fixed")]] <- n_terms_fixed
+    result[[paste0(param_name, "_raw_n_terms_fixed")]] <- n_terms_fixed
     # number of terms to estimate: total number of terms minus number fixed
-    result[[paste0(param_name, "_n_terms_estimate")]] <-
+    result[[paste0(param_name, "_raw_n_terms_estimate")]] <-
       param_data$n_terms - n_terms_fixed
 
 
