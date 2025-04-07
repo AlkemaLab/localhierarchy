@@ -6,7 +6,7 @@
 #' @param parname selected parameter name (example: "mu")
 #' @param morethan1param does paramname refer to more than 1 parameter (a vector)
 #'
-#' @returns list with summaries of mu for each hierchical level (units with each level)
+#' @returns list with summaries of mu for each hierarchical level (units with each level)
 #'  these mus are obtained by summing up all relevant etas
 #' for morethan1param, k refers to the index
 #' @export

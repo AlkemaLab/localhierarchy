@@ -1,5 +1,5 @@
 ---
-title: "Hierarchical models and seq model fits"
+title: "Hierarchical models and sequential model fits"
 author: "Leontine"
 format: html
 editor: visual
@@ -9,29 +9,24 @@ editor: visual
 
 In this document we explain
 
-1.  how we set up a hierarchical model for a parameter;
+1.  how we set up a hierarchical model for a parameter; this code set up was introduced in <https://github.com/AlkemaLab/BayesTransitionModels>.
 
 2.  how we fix higher level parameters for that set up when doing sequential runs.
 
-The current goal is to document the set up and include a simplified example of use, to help with code checks and to make it easier to do code updates. Longer term, we can see if we can pull out this related set of functions into a separate R package, to make it easier to use in other modeling exercises.
-
-The code set up was introduced in <https://github.com/AlkemaLab/BayesTransitionModels>
-
 # Set up
-
-Goal: create a simplified example that uses our data set and helper functions from the package (functions in R for processing, functions and code blocks in stan to set up the stan model).
 
 Load relevant packages, including our own
 
 ```{r}
 #| include: false
-library(here) 
-library(tidyverse) 
-library(ggplot2) 
-library(haven) 
+library(here)
+library(tidyverse)
+library(ggplot2)
+library(haven)
 library(stringr)
-library(cmdstanr) 
-library(bayesplot) # diagnostic plots 
+library(cmdstanr)
+library(truncnorm) # for inits
+library(bayesplot) # diagnostic plots
 devtools::load_all(here::here())
 ```
 
@@ -39,13 +34,16 @@ Read in data and preprocess as usual
 
 ```{r}
 #| include: false
-data_folder <- "data_raw" 
+data_folder <- "data_raw"
 dat <- read_csv(here::here(data_folder, "coverage_data.csv"))
+dat_subnat <- read_csv(here::here(data_folder, "coverage_data_subnat.csv"))
+
 ```
 
 Let's use columns `cluster` and `subcluster` and `iso`:
 
 ```{r}
+hierarchical_level <- c("intercept",  "subcluster", "iso")
 dat %>% select(iso, cluster, subcluster)
 ```
 
@@ -94,7 +92,7 @@ $$\mu^{(global)} \sim N(0, s_{\mu, global}^2),$$then we can write $\mu^{(global)
 
 -   $\mu_c =  s_{global}\cdot \gamma_{global} + \sigma_{\mu, region}\cdot \gamma_{r[s[c]]]}^{(region)} + \sigma_{\mu, subregion}\cdot\gamma_{s[c]}^{(subregion)} + \sigma_{\mu, country}\cdot\gamma_{\mu, c}$ with
 
--   $\gamma \sim N(0,1)$ for each gamma (one global, $R$ region, $S$ subregions, $C$ countries.
+-   $\gamma \sim N(0,1)$ for each gamma (one global, $R$ region, $S$ subregions, $C$ countries).
 
 The set up and notation in stan/R, in terms of parameters, using parameter mu as an example, is currently as follows:
 
@@ -113,186 +111,73 @@ The set up and notation in stan/R, in terms of parameters, using parameter mu as
 global model fit
 
 ```{r}
- hierarchical_level     = c("intercept",  "subcluster", "iso")
-fit1a <- fit_model_simplified(runstep = "step1a",
-        hierarchical_level     =  hierarchical_level,
-
-                  survey_df = dat,
-                  chains = 4)
+fit1a <- fit_model(runstep = "step1a",
+                              hierarchical_level     =  hierarchical_level,
+                              survey_df = dat,
+                              chains = 4)
 
 ```
 
 create summary object
 
 ```{r}
-fit1a$post_summ <- get_posterior_summaries_simplified(fit1a) %>%
-  dplyr::rename(median = mean)
-fit1a$post_summ 
+fit1a$post_summ <- get_posterior_summaries(fit1a)
+fit1a$post_summ
 
 ```
 
 do local fit... here we fix things but do get results for all countries
 
 ```{r}
-#fit1a$samples <- NULL
-fit_local <- fit_model_simplified(runstep = "local_national",
-                  global_fit = fit1a,
-                  survey_df = dat,
-                  chains = 4)
-```
-
-```{r}
-#fit1a$samples$summary()$variable
+fit_local <- fit_model(runstep = "local_national",
+                                  global_fit = fit1a,
+                                  survey_df = dat,
+                                  chains = 4)
 ```
 
 #### Produce and check outputs
 
-Re pulling out information at non-country levels (ie estimates for regions and subregions): The orginal code set up in <https://github.com/AlkemaLab/BayesTransitionModels> includes helper functions to pull out various outputs, for example, $\mu$s at the regional or subnational level. We moved some over and use them in the package here. However, they are not yet very user friendly given limited documentation, hardcoding of prior SDs for global means, and reliance on overall fit object. It is work in progress to clean this up further. What I did here for the simplified example (and will move over to the general package later):
-
--   To deal with the set up where things are fixed vs estimated, we let the stan model spit out the mu_stars, that's what the original helper functions use as inputs.
-
--   We clean up helper functions, so that they take in the mu_stars, and specific other stan_data, and are better documented. See function extract_parameter_subhierarchical in fit_model_simplified R script, and its usage below.
+get summaries, takes a little while. this creates, per fit, a list with each entry being one level, and the results (mu estimates) for that level
 
 ```{r}
-quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
-  tibble(
-    val = quantile(x, probs, na.rm = TRUE),
-    quant = probs
-  )
-}
-```
-
-```{r}
-fit <- fit1a
-# some notes, to understand updates between this code base and original one
-# and where to find info 
-#fit1a$country_index is now fit$geo_unit
-# see fit1a$hierarchical_level for info
-# hierarchical_data(fit$geo_unit, fit$hierarchical_level)
-# note that subhierarchies are called column in hierarchical data
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical (
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples)
-}
-# mu[[]] has posterior samples for the subhierarchy level
-# to get the summaries
-
-res_global <- map(mu, function(tibble_samples) 
-  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
-res_global
+res_global <- posterior_summary_hierparam(fit = fit1a, parname = "mu")
+res_local <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
 
 ```
 
-```{r}
-fit <- fit_local
-mu <- list()
-for(subhierarchy in fit$hierarchical_level) {
-  mu[[subhierarchy]] <-
-    extract_parameter_subhierarchical (
-      hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
-      subhierarchy = subhierarchy,
-      parname = "mu",
-      fit_samples = fit$samples)
-}
-res_local <- map(mu, function(tibble_samples) 
-  tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
-res_local
-```
-
-checks that results from local model approximate those from global model
-
-at subcluster level
+Plots that show how values have been fixed in the local runs
 
 ```{r}
 bind_rows(res_local$subcluster %>% mutate(model = "local"),
           res_global$subcluster %>% mutate(model = "global")) %>%
-  group_by(name, model) %>% 
+  group_by(name, model) %>%
   reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
   ggplot(aes(y = y, x = name, color = model)) +
   geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()     
+  geom_point()
+
 
 ```
 
-at country level
+And a plot to show the difference in estimates between global and local runs
 
 ```{r}
 bind_rows(res_local$iso %>% mutate(model = "local"),
           res_global$iso %>% mutate(model = "global")) %>%
-  group_by(name, model) %>% 
+  group_by(name, model) %>%
   reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
   ggplot(aes(y = y, x = name, color = model)) +
   geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()   
+  geom_point()
 ```
 
-# summary object
+# Summary object
 
-going through what's happening to create the summary object
-
-```{r}
-#get_posterior_summaries_simplified(fit1a) 
-fit <- fit1a
-process_indicator_prefixes = c("")
-dm_indicator_prefixes = c("")
-process_params = c("mu_raw", "mu_sigma")
-dm_params = c("nonse")
-
-
-
-
-```
-
-```{r}
-## part to get the names of parameters to fix
-params_to_collect <- dplyr::bind_rows(
-  expand.grid(
-    prefix = process_indicator_prefixes,
-    param = process_params),
-  expand.grid(
-    prefix = dm_indicator_prefixes,
-    param = dm_params)
-) |>
-  dplyr::mutate(prefixed_param_name = paste0(prefix, param))
-
-# split parameters into those that are "fixable" in local fits and those that
-# are "unfixable"
-#  unfixable_param_names <- c("local_shrinkage_dm")
-# unfixable_param_names <- c("BLA")
-fixable_params_to_collect <- params_to_collect |>
-  #   dplyr::filter(!param %in% unfixable_param_names) |>
-  dplyr::pull(prefixed_param_name)
-fixable_params_to_collect 
-```
-
-get results for 1 parameter name
-
-```{r}
-
-get_posterior_summary_one_fixable_param(prefixed_param_name = fixable_params_to_collect[1], fit = fit)
-```
-
-when using a fit where things are fixed, fixed values and estimates are combined
-
-(this will be in test case for subnational, we could also add something like 1a and 1b)
-
-```{r}
-#prefixed_param_name
-```
-
-how this summary is used... global fit is used when creaiting the stan data
-
-hier data does not depend on fixed values
+Going through what's happening to create the summary object
 
 Set up hierarchical structures, folow the hierdata.qmd
 
 ```{r}
-#hierarchical_level <- c("intercept",  "subcluster", "iso")
 area <- "iso"
 ```
 
@@ -306,17 +191,14 @@ geo_unit_index
 ```
 
 ```{r}
-# use in fit_model:
-#hier_data <-  list()
-#hier_data[["mu_data"]] <- 
-# here we just work with one object:
 hier_data <- hierarchical_data(geo_unit_index, hierarchical_level)
-#names(hier_data[["mu_data"]])
 names(hier_data)
 hier_data
 
 
 ```
+
+This is where global fit is used to fix values
 
 ```{r}
 hier_stan_data <- hierarchical_param_stan_data(
@@ -329,47 +211,18 @@ hier_stan_data <- hierarchical_param_stan_data(
 names(hier_stan_data)
 ```
 
-use for non-hierarchical parameters, sigma_y here (vector for the full fpet model)
-
-```{r, eval = FALSE}
- ##### Set up handing of data model hyperparameters ######
-  nonse_data <- list(
-    "fix_nonse" = as.integer(fix_nonse),
-    "nonse_fixed" = numeric(0))
-  if (fix_nonse) {
-    if (is.null(global_fit)) {
-      stop("fix_nonse was set to TRUE, but a global_fit was not provided.")
-    }
-    for (parname in "nonse"){
-      nonse_data[[paste0(parname, "_fixed")]] <- global_fit$post_summ %>% filter(variable == paste0(parname, "[1]")) %>% pull(median)
-    }
-  }# end fixing dm pars
-
+```{r}
+samples <- extract_parameter_subhierarchical(
+        hierarchical_data = hier_data,
+        subhierarchy = "iso",
+        parname = "mu",
+        fit_samples = fit1a$samples,
+        morethan1param = FALSE
+        )
+samples
 ```
 
-# Related notes and to dos to come back to
-
--   To do next: clean code to fix parameters
-
--   How to get the mus in full model set up: in the simpler model used here, various mus are defined in the transformed parameters block so we can check those directly. Note that this not (yet) true for the full transition model because the creation of parameters takes place within the process model function. Options to obtain the mus in the full model are to
-
-    1.  add them to generated quantities: pull out mus with an `if {add_output_mus}` type statement, re-using functions/statements introduced in the simpler file here.
-
-    2.  rewrite transformed parameter block and pull mus out of the process model function (not sure if that slows things down when not used).
-
-    3.  create them in R (would need more work to get functions going, could consider exposing stan functions)
-
-    Options 1-2 seem easiest to LA.
-
--   This example does not yet get into estimation of parameter vectors and associated code for that (as we have for spline coefficients). Simplest way to set that up is to estimate the same parameter $\mu$ twice.
-
--   More general, on how to organize stan functions: Stan functions lived in a separate `include` folder in the original code base. In the fpet2 package we ended up including stan functions in the stan model directly. That inclusion was needed to ship a precompiled model with the package for use in the webtool (using the `instantiate` package). We can move functions back to an `include` subfolder in this documentation/package.
-
--   Note on approach used to get this example together (can be followed when extending further): Start subfolder for simplified model and code, added current stan_model and fit_model function and simplify to produce just the toy example.
-
-# trace plots etc
-
-in the simpler model used, various mus are defined in the transformed parameters block so we can check those directly. (Note that this not (yet) true for the transition model because the creation of parameters takes place within the transition function, see notes in last section on this).
+# Trace plots etc
 
 here just checking the sigmas and first mu:
 
@@ -391,4 +244,3 @@ fit <- fit1a
     }
 #    dev.off()
 ```
-
