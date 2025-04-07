@@ -1,9 +1,11 @@
 
-# with or without inits, warnings can occur like pasted below
-# due to mean being sum of many mu_stars?
-# perhaps less warnings when using inits to keep mu_raws and mu_sigmas more constrained...
+# warnings can occur like pasted below
 # Chain XXX Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
 # Chain XXX Exception: normal_lpdf: Location parameter is inf, but must be finite!
+# ie mu is not finite..
+# meaning inf values are drawn for sum of mustars, so product (mu_raw* mu_sigma)
+# by setting inits, we avoid this for the initial values
+# HOWEVER they can still occur early on in the chain (not sure if adding a cap is good thing to do)
 
 
 init_fun <- function(chain_id, stan_data){

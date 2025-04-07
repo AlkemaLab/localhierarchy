@@ -1,17 +1,13 @@
 Package: LocalHierarchy
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Flexible set up for hierarchical modeling and local fitting
 Version: 0.1.0
-Authors@R: c(
-    person(
-      "Jane", "Doe",
-      email = "jane@example.com",
-      role = c("aut", "cre")
-    )
-  )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+Authors@R: c(person("Herbert", "Susmann", email = "herbps10@gmail.com", role = c("aut")),
+              person("Evan", "Ray", role = c("aut")),
+             person("Leontine", "Alkema", email = "lalkema@umass.edu", role = c("aut", "cre")))
+Description: The LocalHierarchy package implements a flexible set up to estimate parameters hierarchically 
+    and to carry out local model fits, whereby higher-level parameters are fixed. The hierarchical set up is taken from BayesTransitionModels. 
+License: BSD 3-Clause "New" or "Revised" License
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2

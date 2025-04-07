@@ -10,7 +10,6 @@
 #' @returns tibble with variable (parname with index used in model) and postmean (posterior mean)
 #' @export
 #'
-#' @examples
 get_posterior_summaries <- function(
     fit,
     params = c("mu_raw", "mu_sigma", "nonse")
