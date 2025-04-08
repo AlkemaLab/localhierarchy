@@ -14,6 +14,8 @@
 #' @examples
 posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
                                         hierarchical_levels = fit$hierarchical_level){
+  print("Calculating posterior summary for hierarchical parameters")
+  print("This can take a little while")
   mu <- list()
   for(subhierarchy in hierarchical_levels ) {
     mu[[subhierarchy]] <-
@@ -25,8 +27,6 @@ posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
         morethan1param = morethan1param
         )
   }
-  print("Calculating posterior summary for hierarchical parameters")
-  print("This can take a little while")
   if (!morethan1param){
     res <- map(mu, function(tibble_samples)
       tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))

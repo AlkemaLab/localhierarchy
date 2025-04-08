@@ -1,6 +1,7 @@
 
 plot_posterior_summaries <- function(res, hierarchy_select = NULL, areas_select = NULL,
                                      res2 = NULL, modelname1 = "model 1", modelname2 = "model 2",
+                                     k_select = NULL,
                                      dodge = position_dodge(width=0.5)  # for offsetting plots
 ) {
   if (!is.null(areas_select) & is.null(hierarchy_select)) {
@@ -44,6 +45,10 @@ plot_posterior_summaries <- function(res, hierarchy_select = NULL, areas_select 
         geom_point(position = dodge) +
         coord_flip()
     } else {
+      if (!is.null(k_select)) {
+        res_all <- res_all %>%
+          filter(k %in% k_select)
+      }
       p[[hierarchy]] <-
         res_all %>%
         group_by(name, k, model) %>%

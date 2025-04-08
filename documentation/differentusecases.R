@@ -190,3 +190,8 @@ plot_posterior_summaries(res = res_local_subnat_mult, res2 = res_subnational_mul
 p <- plot_posterior_summaries(res = res_subnational_mult, res2 = res_mult)
 p
 
+plot_posterior_summaries(res = res_local_subnat_mult, res2 = res_subnational_mult,
+                         hierarchy_select = "subnat",
+                         areas_select = res_subnational_mult$subnat$name[1:100],
+                         k_select = 1)
+
