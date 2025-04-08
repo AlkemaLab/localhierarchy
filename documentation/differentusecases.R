@@ -12,8 +12,6 @@ devtools::load_all(here::here())
 data_folder <- "data_raw"
 
 
-# for offsetting plots
-dodge <- position_dodge(width=0.5)
 
 # national data
 dat <- read_csv(here::here(data_folder, "coverage_data.csv"))
@@ -45,21 +43,12 @@ res_global <- posterior_summary_hierparam(fit = fit1a, parname = "mu")
 res_local <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
 
 # plot
-bind_rows(res_local$subcluster %>% mutate(model = "local"),
-          res_global$subcluster %>% mutate(model = "global")) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
+#names(res_global)
+devtools::load_all(here::here())
+p <- plot_posterior_summaries(res = res_global)
+p
+plot_posterior_summaries(res = res_global, hierarchy_select = "iso", areas_select = res_global$iso$name[1:100])
 
-bind_rows(res_local$iso %>% mutate(model = "local"),
-          res_global$iso %>% mutate(model = "global")) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
 
 ### use case 2: global then local national, 1 country
 iso_select <- "BFA"
@@ -80,22 +69,9 @@ fit_local2 <- fit_model_localhierarchy(runstep = "local_national",
 res_local2 <- posterior_summary_hierparam(fit = fit_local2, parname = "mu")
 res_local2$iso
 # plot
-bind_rows(res_local2$subcluster %>% mutate(model = "local"),
-          res_global$subcluster %>% mutate(model = "global") %>% filter(name %in% res_local2$subcluster$name)) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
-
-bind_rows(res_local2$iso %>% mutate(model = "local"),
-          res_global$iso %>% mutate(model = "global")%>% filter(name %in% res_local2$iso$name)) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
-
+p <- plot_posterior_summaries(res = res_local2, res2 = res_global,
+                              modelname2 = "global", modelname1 = "local")#, hierarchy_select = "iso")
+p
 
 ### use case 3: global then subnational global then local subnational
 #dat_subnat
@@ -123,46 +99,21 @@ res_localsubnat <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
 
 # plots: compare global subnat to local subnat
 # compare global subnat to global national up to level that was fixed
-
-#compare global subnat to local subnat
-bind_rows(res_localsubnat$subcluster %>% mutate(model = "local"),
-          res_globalsubnat$subcluster %>% mutate(model = "global") ) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model, shape = model)) +
-# confusing when both the same
-#  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
-
-bind_rows(res_localsubnat$iso %>% mutate(model = "local"),
-          res_globalsubnat$iso %>% mutate(model = "global")) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
-
-
-bind_rows(res_localsubnat$subnat %>% mutate(model = "local"),
-          res_globalsubnat$subnat %>% mutate(model = "global")) %>%
-  arrange(name) %>%
-  slice(1:(3*2*30)) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax), position=dodge) +
-  geom_point(position=dodge)
+plot_posterior_summaries(res = res_localsubnat, res2 = res_globalsubnat,
+                              modelname2 = "global", modelname1 = "local", hierarchy_select = "subcluster")
+plot_posterior_summaries(res = res_localsubnat, res2 = res_globalsubnat,
+                         modelname2 = "global", modelname1 = "local", hierarchy_select = "iso")
+plot_posterior_summaries(res = res_localsubnat, res2 = res_globalsubnat,
+                         modelname2 = "global", modelname1 = "local", hierarchy_select = "subnat",
+                         areas_select = res_localsubnat$subnat$name[1:100])
 
 
 
 # compare global subnat to global national up to level that was fixed
-bind_rows(res_globalsubnat$subcluster %>% mutate(model = "global subnat"),
-          res_global$subcluster %>% mutate(model = "global national") %>% filter(name %in% res_globalsubnat$subcluster$name)) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
+plot_posterior_summaries(res = res_globalsubnat, res2 = res_global,
+                         modelname1 = "global", modelname2 = "local", hierarchy_select = "subcluster")
+plot_posterior_summaries(res = res_globalsubnat, res2 = res_global,
+                         modelname1 = "global", modelname2 = "local", hierarchy_select = "iso")
 
 ### use case 4 needed? invariance to re-ordering of input data
 fit_local2 <- fit_model_localhierarchy(runstep = "local_subnational",
@@ -171,24 +122,14 @@ fit_local2 <- fit_model_localhierarchy(runstep = "local_subnational",
                                   survey_df = dat_subnat[seq(dim(dat_subnat)[1],1),],
                                   chains = 4)
 res_local2 <- posterior_summary_hierparam(fit = fit_local2, parname = "mu")
-bind_rows(res_localsubnat$subnat %>% mutate(model = "local"),
-          res_local2$subnat %>% mutate(model = "local2")) %>%
-  arrange(name) %>%
-  slice(1:(3*2*30)) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax), position=dodge) +
-  geom_point(position=dodge)
-bind_rows(res_localsubnat$iso %>% mutate(model = "local"),
-          res_local2$iso %>% mutate(model = "local2")) %>%
-  arrange(name) %>%
-  slice(1:(3*2*30)) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax), position=dodge) +
-  geom_point(position=dodge)
+plot_posterior_summaries(res = res_localsubnat, res2 = res_local2,
+                         modelname2 = "global", modelname1 = "local", hierarchy_select = "subnat",
+                         areas_select = res_localsubnat$subnat$name[1:100])
+
+plot_posterior_summaries(res = res_localsubnat, res2 = res_local2,
+                         modelname2 = "global", modelname1 = "local", hierarchy_select = "iso")
+
+
 
 ### use case 5: use case 3 for multiparam
 # for model fitting, call other stan model and add argument
@@ -233,36 +174,19 @@ res_local_subnat_mult <- posterior_summary_hierparam(fit = fit_subnational_mult,
 #res_mult
 #res_subnational_mult
 #res_local_subnat_mult
-bind_rows(res_subnational_mult$subcluster %>% mutate(model = "local"),
-          res_mult$subcluster %>% mutate(model = "global") %>% filter(name %in% res_subnational_mult$subcluster$name)) %>%
-  group_by(name, model, k) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
+names(res_subnational_mult)
+res_subnational_mult[["subnat"]]
+devtools::load_all(here::here())
+names(res_subnational_mult[[1]])
 
-bind_rows(res_local_subnat_mult$subcluster %>% mutate(model = "local"),
-          res_subnational_mult$subcluster %>% mutate(model = "global") %>% filter(name %in% res_local_subnat_mult$subcluster$name)) %>%
-  group_by(name, model, k) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-#  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
+p <- plot_posterior_summaries(res = res_subnational_mult, res2 = res_mult,
+                         modelname2 = "global", modelname1 = "local")
 
-bind_rows(res_local_subnat_mult$iso %>% mutate(model = "local"),
-          res_subnational_mult$iso %>% mutate(model = "global") %>% filter(name %in% res_local_subnat_mult$iso$name)) %>%
-  group_by(name, model, k) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
+p
+plot_posterior_summaries(res = res_local_subnat_mult, res2 = res_subnational_mult,
+                        hierarchy_select = "subnat",
+                         areas_select = res_subnational_mult$subnat$name[1:100])
 
-
-bind_rows(res_local_subnat_mult$subnat %>% mutate(model = "local"),
-          res_subnational_mult$subnat %>% mutate(model = "global") %>% filter(name %in% res_local_subnat_mult$subnat$name)) %>%
-  group_by(name, model, k) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
+p <- plot_posterior_summaries(res = res_subnational_mult, res2 = res_mult)
+p
 
