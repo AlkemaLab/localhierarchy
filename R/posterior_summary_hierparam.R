@@ -12,12 +12,13 @@
 #' @export
 #'
 #' @examples
-posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE){
+posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
+                                        hierarchical_levels = fit$hierarchical_level){
   mu <- list()
-  for(subhierarchy in fit$hierarchical_level) {
+  for(subhierarchy in hierarchical_levels ) {
     mu[[subhierarchy]] <-
       extract_parameter_subhierarchical(
-        hierarchical_data = hierarchical_data(fit$geo_unit, fit$hierarchical_level),
+        hierarchical_data = hierarchical_data(fit$geo_unit, hierarchical_levels),
         subhierarchy = subhierarchy,
         parname = parname,
         fit_samples = fit$samples,
