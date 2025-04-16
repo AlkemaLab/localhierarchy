@@ -51,9 +51,9 @@ plot_mu_raw <- function(fit, parname, morethan1param = FALSE,
   # getting results
   muraw <- get_mu_raw_labeled(fit = fit, parname = parname, morethan1param = morethan1param)
   samples_tibble_all <- muraw %>%
-    mutate(parname = paste0("mu_", hierarchical_level, hierarchical_unit)) %>%
+    mutate(parname = paste0(parname, hierarchical_level, hierarchical_unit)) %>%
     select(-c(i, hierarchical_level, hierarchical_unit)) %>%
-    pivot_wider(values_from = mu_raw_estimate,
+    pivot_wider(values_from = paste0(parname, "_raw_estimate"),
                 names_from = parname)
   # has samples, including a column with k for multiparameter
   # so need to account for k in plotting
