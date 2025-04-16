@@ -227,7 +227,8 @@ fit_model_localhierarchy <- function(
     stan_data[["mu_k_terms"]] <- 3 # 2 or higher
     stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_muvector.stan"))
   }
-  stan_data[[paste0(parname, "_scalarprior_sd")]] <- 1
+  stan_data[[paste0(parname, "_scalarprior_sd")]] <- 2
+  stan_data[[paste0(parname, "_prior_sd_sigma_estimate")]] <- 2
   hier_data <- hier_stan_data  <- list()
   hier_data[[paste0(parname, "_data")]] <- hierarchical_data(geo_unit_index_data = geo_unit_index, hierarchical_level = hierarchical_level)
   hier_stan_data[[parname]] <- hierarchical_param_stan_data(

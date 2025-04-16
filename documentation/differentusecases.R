@@ -8,10 +8,9 @@ library(stringr)
 library(cmdstanr)
 library(truncnorm) # for inits
 library(bayesplot) # diagnostic plots
+library(posterior)
 devtools::load_all(here::here())
 data_folder <- "data_raw"
-
-
 
 # national data
 dat <- read_csv(here::here(data_folder, "coverage_data.csv"))
@@ -27,7 +26,6 @@ hierarchical_level <- c("intercept",  "subcluster", "iso")
 
 ### use case 1: global then local national, all countries (in quarto too)
 
-devtools::load_all(here::here())
 fit1a <- fit_model_localhierarchy(runstep = "step1a",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
@@ -39,15 +37,33 @@ fit_local <- fit_model_localhierarchy(runstep = "local_national",
                                   survey_df = dat,
                                   chains = 4)
 
+# check the mu_raws
+#devtools::load_all(here::here())
+plots <- plot_mu_raw(fit = fit1a, parname = "mu")
+# a list with plots
+# summary plots gives summaries, 30 at a time
+plots[["summary_plots"]][[1]]
+# specific plots for one parameter are in plots[["plots_allmuraw"]]
+plots[["plots_allmuraw"]][[1]]
+plots[["plots_allmuraw"]][grepl("intercept", names(plots[["plots_allmuraw"]]))]
+plots[["plots_allmuraw"]][grepl("subcluster", names(plots[["plots_allmuraw"]]))][[1]]
+
+# plot the sigmas
+plot_prior_post_sigmas(fit = fit1a, parname = "mu")
+
+
+# the total mus
 res_global <- posterior_summary_hierparam(fit = fit1a, parname = "mu")
 res_local <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
-
-# plot
-#names(res_global)
-devtools::load_all(here::here())
 p <- plot_posterior_summaries(res = res_global)
 p
 plot_posterior_summaries(res = res_global, hierarchy_select = "iso", areas_select = res_global$iso$name[1:100])
+
+p <- plot_posterior_summaries(res = res_local, res2 = res_global, hierarchy_select = "iso")
+p
+
+p <- plot_posterior_summaries(res = res_local, res2 = res_global, hierarchy_select = "subcluster")
+p
 
 
 ### use case 2: global then local national, 1 country
@@ -81,6 +97,21 @@ fit_globalsubnat <- fit_model_localhierarchy(runstep = "global_subnational",
                               survey_df = dat_subnat,
                               global_fit = fit1a,
                               chains = 4)
+
+# check the mu_raws
+plots <- plot_mu_raw(fit = fit_globalsubnat, parname = "mu")
+# a list with plots
+# summary plots gives summaries, 30 at a time
+plots[["summary_plots"]][[1]]
+# specific plots for one parameter are in plots[["plots_allmuraw"]]
+plots[["plots_allmuraw"]][[1]]
+
+# plot the sigmas
+plot_prior_post_sigmas(fit = fit_globalsubnat, parname = "mu")
+
+
+
+# continue
 fit_globalsubnat$post_summ <- get_posterior_summaries(fit_globalsubnat)
 fit_globalsubnat$post_summ %>%
   filter(variable_no_index == "mu_sigma")
@@ -140,6 +171,23 @@ fit1a_mult <- fit_model_localhierarchy(runstep = "step1a",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)
+
+# check the mu_raws
+plots <- plot_mu_raw(fit = fit1a_mult, parname = "mu", morethan1param = TRUE)
+# a list with plots
+# summary plots is a list of dimension k, for each k, it gives summaries, 30 at a time
+plots[["summary_plots"]][[1]][[1]]
+# specific plots for one parameter are in plots[["plots_allmuraw"]][[k_select]]
+names(plots[["plots_allmuraw"]][[1]])
+plots[["plots_allmuraw"]][[1]][[1]]
+plots[["plots_allmuraw"]][grepl("intercept", names(plots[["plots_allmuraw"]]))]
+plots[["plots_allmuraw"]][grepl("subcluster", names(plots[["plots_allmuraw"]]))][[1]]
+
+# plot the sigmas
+plot_prior_post_sigmas(fit = fit1a_mult, parname = "mu")
+
+
+
 fit1a_mult$post_summ <- get_posterior_summaries(fit1a_mult)
 fit1a_mult$post_summ %>% filter(variable %in% c("mu_raw[1,1]", "mu_raw[1,2]", "mu_raw[2,1]", "mu_raw[2,2]"))
 
@@ -194,4 +242,8 @@ plot_posterior_summaries(res = res_local_subnat_mult, res2 = res_subnational_mul
                          hierarchy_select = "subnat",
                          areas_select = res_subnational_mult$subnat$name[1:100],
                          k_select = 1)
+
+
+
+
 

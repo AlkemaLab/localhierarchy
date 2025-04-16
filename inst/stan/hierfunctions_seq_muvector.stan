@@ -28,6 +28,7 @@ data {
   array[mu_n_sigma + 1] int<lower=1, upper=mu_raw_n_terms> mu_re_end;
   matrix[n_geounit, mu_raw_n_terms] mu_model_matrix;
   real<lower = verysmallnumber> mu_scalarprior_sd;
+  real<lower = verysmallnumber> mu_prior_sd_sigma_estimate;
 
   // CHOOSE ONE
   // // if mu is a scalar:
@@ -114,7 +115,7 @@ transformed parameters {
 model {
   // hierarchical parameters
   to_vector(mu_raw_estimate) ~ std_normal();
-  to_vector(mu_sigma_estimate) ~ normal(0, 1);
+  to_vector(mu_sigma_estimate) ~ normal(0, mu_prior_sd_sigma_estimate);
   // data model parameters
   nonse_estimate ~ normal(0, 1);
 

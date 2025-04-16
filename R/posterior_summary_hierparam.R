@@ -16,14 +16,38 @@ posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
                                         hierarchical_levels = fit$hierarchical_level){
   print("Calculating posterior summary for hierarchical parameters")
   print("This can take a little while")
+
+  # initially we had a loop over levels here
+  # but for each level, we were getting all the stars out
+  # so here updated to first get once:
+  # posterior samples of vectors of param_stars (etas)
+  pars <- c(glue::glue("{parname}_star"))
+  if (!morethan1param){
+    star <- fit$samples$draws(pars) %>%
+      tidybayes::spread_draws((!!sym(pars[1]))[i]) %>%
+      dplyr::group_by(.chain, .iteration, .draw)
+  } else {
+    star <- fit$samples$draws(pars) %>%
+      tidybayes::spread_draws((!!sym(pars[1]))[i,k]) %>%
+      dplyr::group_by(.data$k, .data$.chain, .data$.iteration, .data$.draw)
+  }
+  star <-
+    star %>%
+    tidyr::nest() %>%
+    dplyr::mutate(star = map(data, `[[`, glue::glue("{parname}_star"))) %>%
+    dplyr::select(-data)
+  star
+  # star has posterior samples of vectors of param_stars (etas)
+
+  # get total mus, obtained by summing up relevant mu_stars
   mu <- list()
-  for(subhierarchy in hierarchical_levels ) {
+  for(subhierarchy in hierarchical_levels) {
     mu[[subhierarchy]] <-
       extract_parameter_subhierarchical(
         hierarchical_data = hierarchical_data(fit$geo_unit, hierarchical_levels),
         subhierarchy = subhierarchy,
         parname = parname,
-        fit_samples = fit$samples,
+        star_samples = star,
         morethan1param = morethan1param
         )
   }
@@ -43,7 +67,7 @@ posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
 #' @param hierarchical_data hierarchical_data, obtained from hierarchical_data(fit$geo_unit, fit$hierarchical_level)
 #' @param subhierarchy selected hierarchical_level (example: "intercept" or "region")
 #' @param parname selected parameter name (example: "mu")
-#' @param fit_samples fit$samples including parname_star
+#' @param star_samples samples from fit$samples for parname_star
 #' @param morethan1param does parname refer to more than 1 parameter (a vector)
 #'
 #' @returns a tibble with posterior samples of the selected parameter mu at the subhierarchy level.
@@ -57,9 +81,9 @@ extract_parameter_subhierarchical <- function(
     hierarchical_data,
     subhierarchy,
     parname,
-    fit_samples,
-    morethan1param = FALSE
-
+    star_samples,
+    morethan1param = FALSE,
+    add_standardizedmu = FALSE
 ) {
 
   # not currently used
@@ -74,25 +98,8 @@ extract_parameter_subhierarchical <- function(
     dplyr::pull(i) %>%
     max()
 
-  # get the param_stars
-  pars <- c(glue::glue("{parname}_star"))
-  if (!morethan1param){
-    star <- fit_samples$draws(pars) %>%
-      tidybayes::spread_draws((!!sym(pars[1]))[i]) %>%
-      dplyr::group_by(.chain, .iteration, .draw)
-  } else {
-    star <- fit_samples$draws(pars) %>%
-      tidybayes::spread_draws((!!sym(pars[1]))[i,k]) %>%
-      dplyr::group_by(.data$k, .data$.chain, .data$.iteration, .data$.draw)
-  }
-  star <-
-    star %>%
-    tidyr::nest() %>%
-    dplyr::mutate(star = map(data, `[[`, glue::glue("{parname}_star"))) %>%
-    dplyr::select(-data)
-  # star has posterior samples of vectors of param_stars (etas)
-
   # to get the summed up mu_stars, use unique model matrix rows
+  mu_total <- star_samples
   uniq <- unique(hierarchical_data$model_matrix$mat[, 1:end, drop = FALSE])
   titles <- c()
   for(i in 1:nrow(uniq)) {
@@ -107,17 +114,17 @@ extract_parameter_subhierarchical <- function(
       dplyr::pull(level)
     titles <- c(titles, title)
 
-    star[[title]] = map_dbl(star[["star"]], function(star) {
+    mu_total[[title]] = map_dbl(mu_total[["star"]], function(star) {
       mult_vector %*% star
     })
   }
 
-  star <- star %>%
+  mu_total <- mu_total %>%
     tidyr::pivot_longer(cols = all_of(titles)) %>%
     dplyr::ungroup() %>%
     dplyr::select(-star)
 
-  return(star)
+  return(mu_total)
 }
 
 

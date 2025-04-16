@@ -8,8 +8,9 @@ extract_parameter_subhierarchical(
   hierarchical_data,
   subhierarchy,
   parname,
-  fit_samples,
-  morethan1param = FALSE
+  star_samples,
+  morethan1param = FALSE,
+  add_standardizedmu = FALSE
 )
 }
 \arguments{
@@ -19,7 +20,7 @@ extract_parameter_subhierarchical(
 
 \item{parname}{selected parameter name (example: "mu")}
 
-\item{fit_samples}{fit$samples including parname_star}
+\item{star_samples}{samples from fit$samples for parname_star}
 
 \item{morethan1param}{does parname refer to more than 1 parameter (a vector)}
 }

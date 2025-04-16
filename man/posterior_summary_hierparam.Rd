@@ -4,7 +4,12 @@
 \alias{posterior_summary_hierparam}
 \title{posterior_summary_hierparam}
 \usage{
-posterior_summary_hierparam(fit, parname, morethan1param = FALSE)
+posterior_summary_hierparam(
+  fit,
+  parname,
+  morethan1param = FALSE,
+  hierarchical_levels = fit$hierarchical_level
+)
 }
 \arguments{
 \item{fit}{needs to include parname_star}
