@@ -187,6 +187,7 @@ plots[["plots_allmuraw"]][grepl("intercept", names(plots[["plots_allmuraw"]]))]
 plots[["plots_allmuraw"]][grepl("subcluster", names(plots[["plots_allmuraw"]]))][[1]]
 
 # plot the sigmas
+# these are still fine even when ordered because they are defined in transformed params block
 plot_prior_post_sigmas(fit = fit1a_mult, parname = "mu")
 
 
@@ -194,6 +195,42 @@ fit1a_mult$post_summ <- get_posterior_summaries(fit1a_mult)
 fit1a_mult$post_summ %>% filter(variable %in% c("mu_raw[1,1]", "mu_raw[1,2]", "mu_raw[2,1]", "mu_raw[2,2]"))
 
 res_mult <-  posterior_summary_hierparam(fit = fit1a_mult, parname = "mu", morethan1param = TRUE)
+
+# local multiparam
+fit1a_mult$stan_model$variables()
+
+fit1a_mult$stan_model$variables()[["parameters"]][["mu_raw_estimate"]]
+fit1a_mult$stan_model$variables()[["parameters"]][["mu_sigma_estimate"]]
+
+#fit1a_mult$post_summ <-
+  get_posterior_summaries(fit1a_mult)
+  # mu_sigma not done??
+
+is.element("mu_sigma_estimate[1,1]" , posterior::variables(fit1a_mult$samples$draws()))
+is.element("mu_sigma_estimate[1,1]" , posterior::variables(fit_subnational_mult$samples$draws()))
+estimate_param_name <- "mu_sigma_estimate"
+param_inf <- unlist(map(
+  map(fit1a_mult$stan_model$variables(), function(parfromablock) parfromablock[[estimate_param_name]]),
+  function(infoinblock){
+    #res <- NA
+    if (!is.null(infoinblock)){
+      #res <-
+        infoinblock$dimensions
+    }
+    #return(res)
+  }))
+param_inf ==2
+    param_inf <- fit$stan_model$variables()[["parameters"]][[estimate_param_name]]
+
+fit_local_multi <- fit_model_localhierarchy(runstep = "local_national",
+                                            mu_isvector = TRUE,
+                                      global_fit = fit1a_mult,
+                                      survey_df = dat,
+                                      chains = 4)
+res_local_mult <-  posterior_summary_hierparam(fit = fit_local_multi, parname = "mu", morethan1param = TRUE)
+
+# shouldn't work
+# plot_prior_post_sigmas(fit = fit_local_multi, parname = "mu")
 
 
 # global subnat mult param
@@ -205,6 +242,9 @@ fit_subnational_mult <- fit_model_localhierarchy(runstep = "global_subnational",
                                    global_fit = fit1a_mult,
                                    chains = 4)
 fit_subnational_mult$post_summ <- get_posterior_summaries(fit_subnational_mult)
+fit_subnational_mult$stan_model$variables()[["parameters"]][["mu_raw_estimate"]]
+fit_subnational_mult$stan_model$variables()[["parameters"]][["mu_sigma_estimate"]]
+
 res_subnational_mult <- posterior_summary_hierparam(fit = fit_subnational_mult, parname = "mu", morethan1param = TRUE)
 
 # local subnat mult param
@@ -245,6 +285,10 @@ plot_posterior_summaries(res = res_local_subnat_mult, res2 = res_subnational_mul
                          areas_select = res_subnational_mult$subnat$name[1:100],
                          k_select = 1)
 
+plot_posterior_summaries(res = res_local_mult, res2 = res_mult,
+                         hierarchy_select = "iso",
+                         areas_select = res_subnational_mult$iso$name[1:100],
+                         k_select = 1)
 
 
 

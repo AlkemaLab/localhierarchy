@@ -60,8 +60,18 @@ parameters {
 
   // if mu is a vector:
   matrix[mu_raw_n_terms_estimate, mu_k_terms] mu_raw_estimate;
-  matrix<lower=verysmallnumber>[mu_n_sigma_estimate, mu_k_terms] mu_sigma_estimate;
+  // choose one here too
+  // no ordering
+  // matrix<lower=verysmallnumber>[mu_n_sigma_estimate, mu_k_terms] mu_sigma_estimate;
+  // if we want ordering, ie variance to decrease with the hierarchical level
+  // then currently needs hardcoding of number of parameters
+  // and sampling needs truncation at verysmallnumber
+  positive_ordered [mu_n_sigma_estimate] mu_sigma_estimate_reverse_1;
+  positive_ordered [mu_n_sigma_estimate] mu_sigma_estimate_reverse_2;
+  positive_ordered [mu_n_sigma_estimate] mu_sigma_estimate_reverse_3;
   // END CHOOSE ONE
+
+
 
   // Data model
   array[fix_nonse ? 0 : 1] real<lower = verysmallnumber> nonse_estimate;
@@ -86,6 +96,13 @@ transformed parameters {
  //    mu_model_matrix_w, mu_model_matrix_v, mu_model_matrix_u)
 
   // if mu is a vector:
+  // if sigmas are ordered
+  matrix[mu_n_sigma_estimate, mu_k_terms] mu_sigma_estimate;
+  if (mu_n_sigma_estimate > 0) {
+    mu_sigma_estimate[1:mu_n_sigma_estimate, 1] = reverse(mu_sigma_estimate_reverse_1);
+    mu_sigma_estimate[1:mu_n_sigma_estimate, 2] = reverse(mu_sigma_estimate_reverse_2);
+    mu_sigma_estimate[1:mu_n_sigma_estimate, 3] = reverse(mu_sigma_estimate_reverse_3);
+  }
   matrix[mu_raw_n_terms,mu_k_terms] mu_star = get_mudimhk_star(mu_k_terms,
        mu_n_sigma, mu_n_sigma_fixed, mu_n_sigma_estimate,
        mu_sigma_fixed, mu_sigma_estimate,
@@ -115,7 +132,12 @@ transformed parameters {
 model {
   // hierarchical parameters
   to_vector(mu_raw_estimate) ~ std_normal();
-  to_vector(mu_sigma_estimate) ~ normal(0, mu_prior_sd_sigma_estimate);
+  // not ordered
+  //to_vector(mu_sigma_estimate) ~ normal(0, mu_prior_sd_sigma_estimate);
+  // ordered
+   to_vector(mu_sigma_estimate_reverse_1) ~ normal(0, mu_prior_sd_sigma_estimate)T[verysmallnumber, positive_infinity()];
+   to_vector(mu_sigma_estimate_reverse_2) ~ normal(0, mu_prior_sd_sigma_estimate)T[verysmallnumber, positive_infinity()];
+   to_vector(mu_sigma_estimate_reverse_3) ~ normal(0, mu_prior_sd_sigma_estimate)T[verysmallnumber, positive_infinity()];
   // data model parameters
   nonse_estimate ~ normal(0, 1);
 

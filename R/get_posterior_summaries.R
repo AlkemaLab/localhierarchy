@@ -82,14 +82,19 @@ get_posterior_summary_one_param <- function(
   }
 
   # what is the dimension of the array we're expecting?
-  param_inf <- fit$stan_model$variables()[["parameters"]][[estimate_param_name]]
-  num_inds <- param_inf[["dimensions"]]
-  # check later: does `fit$stan_model$variables()` sometimes not exist?
-  # if so, it's used here just to get the dimension, 1 or 2
-  # so could hardcode as well
-  # print("Warning: in obtaining posterior summary in get_posterior_summary_one_param, we have hardcoded num_inds based on names of parameters.")
-  # num_inds = ifelse(param_name %in% c("a_raw", "a_sigma", "d_a_raw", "d_a_sigma",
-  #                                              "z_a_raw", "z_a_sigma"), 2, 1)
+  # to make this work for reversesigma, we can't use just "parameters"
+  # param_inf <- fit$stan_model$variables()[["parameters"]][[estimate_param_name]]
+  # num_inds <- param_inf[["dimensions"]]
+  num_inds <- unlist(map(
+    map(fit1a_mult$stan_model$variables(), function(parfromablock) parfromablock[[estimate_param_name]]),
+    function(infoinblock){
+      #res <- NA
+      if (!is.null(infoinblock)){
+        #res <-
+        infoinblock$dimensions
+      }
+      #return(res)
+    }))
 
   # process variable names in param_estimate_summary, splitting
   # into columns var_name, i, and possibly j, where i and j
