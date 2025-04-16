@@ -88,7 +88,12 @@ plot_mu_raw <- function(fit, parname, morethan1param = FALSE,
 #' @examples
 plot_prior_post_sigmas <- function(fit, parname){
   # sigmas, fine to look at all k's combined
-  p <- mcmc_dens_overlay(fit$samples$draws(paste0(parname, "_sigma_estimate")) ) +
+  samp <- fit$samples$draws(paste0(parname, "_sigma_estimate"))
+  parnames <- dimnames(samp)[[3]]
+  # yes that's a convoluted way to get either the number of parameters for multiparam setting, or number of sigmas otherwise
+  max_korlevel <- max(unlist(map(strsplit(parnames, split = ","), function(x) as.numeric(readr::parse_number(rev(x)[1])))))
+  p <- mcmc_dens_overlay(samp,
+                         facet_args = list(nrow = max_korlevel)) +
     stat_function(fun = dtruncnorm, color = "red",
                   args = list(a = 0, mean = 0,
                               sd = fit$stan_data[[paste0(parname, "_prior_sd_sigma_estimate")]]

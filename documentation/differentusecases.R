@@ -38,7 +38,7 @@ fit_local <- fit_model_localhierarchy(runstep = "local_national",
                                   chains = 4)
 
 # check the mu_raws
-#devtools::load_all(here::here())
+devtools::load_all(here::here())
 plots <- plot_mu_raw(fit = fit1a, parname = "mu")
 # a list with plots
 # summary plots gives summaries, 30 at a time
@@ -51,6 +51,9 @@ plots[["plots_allmuraw"]][grepl("subcluster", names(plots[["plots_allmuraw"]]))]
 # plot the sigmas
 plot_prior_post_sigmas(fit = fit1a, parname = "mu")
 
+plots <- plot_mu_raw(fit = fit_local, parname = "mu")
+plots[[1]][[1]]
+plots[[2]][[1]]
 
 # the total mus
 res_global <- posterior_summary_hierparam(fit = fit1a, parname = "mu")
@@ -185,7 +188,6 @@ plots[["plots_allmuraw"]][grepl("subcluster", names(plots[["plots_allmuraw"]]))]
 
 # plot the sigmas
 plot_prior_post_sigmas(fit = fit1a_mult, parname = "mu")
-
 
 
 fit1a_mult$post_summ <- get_posterior_summaries(fit1a_mult)
