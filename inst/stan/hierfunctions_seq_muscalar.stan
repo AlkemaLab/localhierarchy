@@ -30,15 +30,10 @@ data {
   real<lower = verysmallnumber> mu_scalarprior_sd;
   real<lower = verysmallnumber> mu_prior_sd_sigma_estimate;
 
-  // CHOOSE ONE
   // if mu is a scalar:
   vector[mu_raw_n_terms_fixed] mu_raw_fixed;
   vector<lower=verysmallnumber>[mu_n_sigma_fixed] mu_sigma_fixed;
 
-  // // if mu is a vector:
-  // int mu_k_terms; // number of parameters in vector mu
-  // matrix[mu_raw_n_terms_fixed, mu_k_terms] mu_raw_fixed;
-  // matrix<lower=verysmallnumber>[mu_n_sigma_fixed, mu_k_terms] mu_sigma_fixed;
   // END CHOOSE ONE
 
 }
@@ -56,7 +51,11 @@ parameters {
   // CHOOSE ONE
   // if mu is a scalar:
   vector[mu_raw_n_terms_estimate] mu_raw_estimate;
-  vector<lower=verysmallnumber>[mu_n_sigma_estimate] mu_sigma_estimate;
+  // non-ordered:
+  //vector<lower=verysmallnumber>[mu_n_sigma_estimate] mu_sigma_estimate;
+  // ordered:
+  positive_ordered [mu_n_sigma_estimate] mu_sigma_estimate_reverse;
+
 
   // // if mu is a vector:
   // matrix[mu_raw_n_terms_estimate, mu_k_terms] mu_raw_estimate;
@@ -69,6 +68,9 @@ parameters {
 
 /////////////////////////////////////////////////////
 transformed parameters {
+
+  // if ordered
+  vector[mu_n_sigma_estimate] mu_sigma_estimate = reverse(mu_sigma_estimate_reverse);
 
  // CHOOSE ONE
  // if mu is a scalar:
@@ -115,7 +117,11 @@ transformed parameters {
 model {
   // hierarchical parameters
   to_vector(mu_raw_estimate) ~ std_normal();
-  to_vector(mu_sigma_estimate) ~ normal(0, mu_prior_sd_sigma_estimate);
+  // non-ordered
+  // to_vector(mu_sigma_estimate) ~ normal(0, mu_prior_sd_sigma_estimate);
+  //ordered
+  mu_sigma_estimate_reverse ~ normal(0, mu_prior_sd_sigma_estimate)T[verysmallnumber, positive_infinity()];
+
   // data model parameters
   nonse_estimate ~ normal(0, 1);
 
