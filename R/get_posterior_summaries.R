@@ -86,7 +86,7 @@ get_posterior_summary_one_param <- function(
   # param_inf <- fit$stan_model$variables()[["parameters"]][[estimate_param_name]]
   # num_inds <- param_inf[["dimensions"]]
   num_inds <- unlist(map(
-    map(fit1a_mult$stan_model$variables(), function(parfromablock) parfromablock[[estimate_param_name]]),
+    map(fit$stan_model$variables(), function(parfromablock) parfromablock[[estimate_param_name]]),
     function(infoinblock){
       #res <- NA
       if (!is.null(infoinblock)){
