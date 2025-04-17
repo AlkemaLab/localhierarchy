@@ -1,3 +1,5 @@
+
+# used in bayescoverage
 check_nas <- function(data, column) {
   if(!(column %in% names(data))) {
     stop(glue::glue("Could not find column {column}."))

@@ -292,8 +292,8 @@ fit_model_localhierarchy <- function(
 
    add_inits <- TRUE
     if (add_inits){
-      print("We set initial values using init_fun")
-      init_ll <- lapply(1:chains, function(id) init_fun(chain_id = id, stan_data))
+      print("We set initial values using init_fun_localhierarchy")
+      init_ll <- lapply(1:chains, function(id) init_fun_localhierarchy(chain_id = id, stan_data))
     } else {
       init_ll <- NULL
     }

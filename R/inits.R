@@ -8,7 +8,7 @@
 # HOWEVER they can still occur early on in the chain (not sure if adding a cap is good thing to do)
 
 
-init_fun <- function(chain_id, stan_data){
+init_fun_localhierarchy <- function(chain_id, stan_data){
   set.seed(chain_id)
   inits <- list()
   if (stan_data$mu_raw_n_terms_estimate > 0){
