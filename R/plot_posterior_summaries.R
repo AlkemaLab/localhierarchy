@@ -43,7 +43,8 @@ plot_posterior_summaries <- function(res, hierarchy_select = NULL, areas_select 
         ggplot(aes(y = y, x = name, color = model)) +
         geom_linerange(aes(ymin = ymin, ymax = ymax), position=dodge) +
         geom_point(position = dodge) +
-        coord_flip()
+        coord_flip() +
+        ylab("Parameter estimates")
     } else {
       if (!is.null(k_select)) {
         res_all <- res_all %>%
@@ -57,7 +58,8 @@ plot_posterior_summaries <- function(res, hierarchy_select = NULL, areas_select 
         geom_linerange(aes(ymin = ymin, ymax = ymax), position=dodge) +
         geom_point(position = dodge) +
         coord_flip() +
-        facet_wrap(~k, ncol = 1)
+        facet_wrap(~k, ncol = 1) +
+        ylab("Parameter estimates")
     }
   }
   return(p)
