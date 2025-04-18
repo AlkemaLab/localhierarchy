@@ -5,6 +5,7 @@
 #' @param fit needs to include parname_star
 #' @param parname selected parameter name (example: "mu")
 #' @param morethan1param does paramname refer to more than 1 parameter (a vector)
+#' @param hierarchical_levels specifies the names of the hierarchical levels (defaults to fit$hierarchical_level)
 #'
 #' @returns list with summaries of mu for each hierarchical level (units with each level)
 #'  these mus are obtained by summing up all relevant etas
@@ -128,7 +129,7 @@ extract_parameter_subhierarchical <- function(
 }
 
 
-#' Title
+#' Compute quantiles
 #'
 #' @param x
 #' @param probs
