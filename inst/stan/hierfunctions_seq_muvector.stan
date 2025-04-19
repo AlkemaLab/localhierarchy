@@ -28,6 +28,7 @@ data {
   array[mu_n_sigma + 1] int<lower=1, upper=mu_raw_n_terms> mu_re_end;
   matrix[n_geounit, mu_raw_n_terms] mu_model_matrix;
   real<lower = verysmallnumber> mu_scalarprior_sd;
+  real mu_scalarprior_mean;
   real<lower = verysmallnumber> mu_prior_sd_sigma_estimate;
 
   // CHOOSE ONE
@@ -106,7 +107,7 @@ transformed parameters {
   matrix[mu_raw_n_terms,mu_k_terms] mu_star = get_mudimhk_star(mu_k_terms,
        mu_n_sigma, mu_n_sigma_fixed, mu_n_sigma_estimate,
        mu_sigma_fixed, mu_sigma_estimate,
-       mu_scalarprior_sd,
+       mu_scalarprior_mean, mu_scalarprior_sd,
        mu_raw_n_terms, mu_raw_n_terms_fixed, mu_raw_n_terms_estimate,
        mu_raw_fixed, mu_raw_estimate,
        mu_re_start, mu_re_end);
