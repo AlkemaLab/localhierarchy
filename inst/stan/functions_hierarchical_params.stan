@@ -28,6 +28,7 @@ vector get_mu_star(//vector mu_sigma,
  int mu_n_sigma,
  int mu_n_sigma_fixed, int mu_n_sigma_estimate,
  vector mu_sigma_fixed, vector mu_sigma_estimate,
+ real mu_prior_mean,
  real mu_prior_sd,
  // mu_raw part
  int mu_raw_n_terms,
@@ -52,6 +53,7 @@ vector get_mu_star(//vector mu_sigma,
   if (mu_raw_n_terms_estimate > 0) {
     mu_raw[(1+mu_raw_n_terms_fixed):mu_raw_n_terms] = mu_raw_estimate;
   }
+  mu_raw[1] = mu_raw[1] + mu_prior_mean;
   vector[mu_raw_n_terms] mu_star = scale_blocks(mu_raw, mu_raw_n_terms, mu_sigmawpriorsd, mu_n_sigma + 1, mu_re_start, mu_re_end);
   return(mu_star);
 }
@@ -130,6 +132,7 @@ matrix get_mudimhk_star(
  int mu_n_sigma,
  int mu_n_sigma_fixed, int mu_n_sigma_estimate,
  matrix mudimhk_sigma_fixed, matrix mudimhk_sigma_estimate,
+ real mudimhk_scalarprior_mean,
  real mudimhk_scalarprior_sd,
  // mu_raw part
  int mu_raw_n_terms,
@@ -154,6 +157,7 @@ matrix get_mudimhk_star(
   if (mu_raw_n_terms_estimate > 0) {
     mudimhk_raw[(1+mu_raw_n_terms_fixed):mu_raw_n_terms,] = mudimhk_raw_estimate;
   }
+  mudimhk_raw[1,] = mudimhk_raw[1,] + mudimhk_scalarprior_mean;
   matrix[mu_raw_n_terms, k] mudimhk_star;
   for(i in 1:k) {
     mudimhk_star[, i] = scale_blocks(mudimhk_raw[, i], mu_raw_n_terms, mudimhk_sigmawpriorsd[, i], mu_n_sigma + 1, mu_re_start, mu_re_end);
