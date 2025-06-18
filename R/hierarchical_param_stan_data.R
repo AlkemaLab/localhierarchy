@@ -82,9 +82,9 @@ hierarchical_param_stan_data <- function(param_name, param_data,
 
 
     # get indices in global for local vector of fixed parameter values
-    # we assume that in the local model, the fixed etas are before the to-be-estimated ones
-    # when sticking to an ordering of levels from higher order to lower order
-    # and defining fixed hierarchical levels only for higher order levels, this is correct
+    # in the local model, the fixed etas are before the to-be-estimated ones
+    # this is correct when sticking to an ordering of levels from higher order to lower order
+    # and defining fixed hierarchical levels only for higher order levels
     index_local <- param_data$model_matrix$index[1:n_terms_fixed,]
     index_global <- globalfit_param_data$model_matrix$index
     indices_for_local <- rep(NA, length(index_local$column))

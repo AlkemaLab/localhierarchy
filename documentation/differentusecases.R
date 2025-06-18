@@ -21,6 +21,8 @@ hierarchical_level <- c("intercept",  "subcluster", "iso")
 # use case 1: global then local national, all countries (in quarto too)
 # use case 2: global then local national, 1 country
 # use case 3: global then subnational global then local subnational
+### extended to also be able to produce subnational estimates for countries that were
+# included in global national run but not in global subnational run
 # use case 4 needed? invariance to re-ordering of input data in use case 3
 # use case 5: use case 3 for multiparam
 
@@ -291,5 +293,129 @@ plot_posterior_summaries(res = res_local_mult, res2 = res_mult,
                          k_select = 1)
 
 
+##### extending use case 3
+# after getting
+#fit_globalsubnat$post_summ
+#fit1a$post_summ
+
+# global subnat just adds mu_sigma for another level
+fit_globalsubnat$post_summ %>%
+  filter(variable_no_index == "mu_sigma")
+fit1a$post_summ %>%
+  filter(variable_no_index == "mu_sigma")
+# goal = keep national estimates from 1a, also for countries w/o subnat data
+
+# approach
+# use global fit nat
+# add in sigmas by selecting params not in global fit nat, "sigma_"
+# and save as globalsubnat_fromnat_fit
+# for local subnational, update hierarchical levels (do add one, just like in global subnat)
+
+# parameters to add:
+param_add <- anti_join(fit_globalsubnat$post_summ %>%
+    # select rows where variable_no_index has sigma in it
+    filter(grepl("sigma", variable_no_index)),
+    fit1a$post_summ %>%
+        filter(grepl("sigma", variable_no_index)))
+
+fit_globalsubnat_fromnat <- fit1a
+# check that ordering does not cause issues for multiparam set ups
+fit_globalsubnat_fromnat$post_summ <- bind_rows(fit_globalsubnat_fromnat$post_summ, param_add)
+devtools::load_all(here::here())
+fit_local <- fit_model_localhierarchy(runstep = "local_subnational",
+                                      use_globalsubnat_fromnat = TRUE,
+                                      area = "subnat",
+                                      global_fit = fit_globalsubnat_fromnat,
+                                      survey_df = dat_subnat,
+                                      chains = 4)
 
 
+# results global subnat
+res_globalsubnat <- posterior_summary_hierparam(fit = fit_globalsubnat, parname = "mu")
+res_localsubnat <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
+
+# plots: compare global subnat to local subnat
+plot_posterior_summaries(res = res_localsubnat, res2 = res_globalsubnat,
+                         modelname2 = "global", modelname1 = "local", hierarchy_select = "subcluster")
+plot_posterior_summaries(res = res_localsubnat, res2 = res_globalsubnat,
+                         modelname2 = "global", modelname1 = "local", hierarchy_select = "iso")
+plot_posterior_summaries(res = res_localsubnat, res2 = res_globalsubnat,
+                         modelname2 = "global", modelname1 = "local", hierarchy_select = "subnat",
+                         areas_select = res_localsubnat$subnat$name[1:100])
+
+
+# to test
+# use a fit1a instead
+# should give an error for sigmas
+# confirmed
+fit_local <- fit_model_localhierarchy(runstep = "local_subnational",
+                                      use_globalsubnat_fromnat = TRUE,
+                                      area = "subnat",
+                                      global_fit = fit1a,
+                                      survey_df = dat_subnat,
+                                      chains = 4)
+
+# do for multiple params
+# then test with 1a as well
+
+fit1a_mult <- fit_model_localhierarchy(runstep = "step1a",
+                                       mu_isvector = TRUE,
+                                       hierarchical_level     =  hierarchical_level,
+                                       survey_df = dat,
+                                       chains = 4)
+
+fit1a_mult$post_summ <- get_posterior_summaries(fit1a_mult)
+res_mult <-  posterior_summary_hierparam(fit = fit1a_mult, parname = "mu", morethan1param = TRUE)
+fit_subnational_mult <- fit_model_localhierarchy(runstep = "global_subnational",
+                                                 mu_isvector = TRUE,
+                                                 hierarchical_level     =  hierarchical_level,
+                                                 survey_df = dat_subnat,
+                                                 area = "subnat",
+                                                 global_fit = fit1a_mult,
+                                                 chains = 4)
+fit_subnational_mult$post_summ <- get_posterior_summaries(fit_subnational_mult)
+fit_subnat_mult_fromnat <- fit1a_mult
+param_add <- anti_join(fit_subnational_mult$post_summ %>%
+                         # select rows where variable_no_index has sigma in it
+                         filter(grepl("sigma", variable_no_index)),
+                       fit1a_mult$post_summ %>%
+                         filter(grepl("sigma", variable_no_index)))
+param_add
+# check that ordering does not cause issues for multiparam set ups
+fit_subnat_mult_fromnat$post_summ <- bind_rows(fit_subnat_mult_fromnat$post_summ, param_add)
+
+fit_local1 <- fit_model_localhierarchy(runstep = "local_subnational",
+                                      mu_isvector = TRUE,
+                                      use_globalsubnat_fromnat = FALSE,
+                                      area = "subnat",
+                                      global_fit = fit_subnational_mult,
+                                      survey_df = dat_subnat,
+                                      chains = 4)
+
+fit_local2 <- fit_model_localhierarchy(runstep = "local_subnational",
+                                      mu_isvector = TRUE,
+                                      use_globalsubnat_fromnat = TRUE,
+                                      area = "subnat",
+                                      global_fit = fit_subnat_mult_fromnat,
+                                      survey_df = dat_subnat,
+                                      chains = 4)
+
+res_globalsubnat2 <-  posterior_summary_hierparam(fit = fit_subnational_mult, parname = "mu",
+                                                  morethan1param = TRUE)
+res_localsubnat2 <- posterior_summary_hierparam(fit = fit_local2, parname = "mu",
+                                                morethan1param = TRUE)
+res_localsubnat1 <- posterior_summary_hierparam(fit = fit_local1, parname = "mu",
+                                                morethan1param = TRUE)
+
+# plots: compare global subnat to local subnat
+plot_posterior_summaries(res = res_localsubnat1, res2 = res_globalsubnat2,
+                         modelname2 = "global", modelname1 = "local",
+                         hierarchy_select = "subcluster")
+plot_posterior_summaries(res = res_localsubnat1, res2 = res_globalsubnat2,
+                         modelname2 = "global", modelname1 = "local", hierarchy_select = "iso")
+plot_posterior_summaries(res = res_localsubnat1, res2 = res_globalsubnat2,
+                         modelname2 = "global", modelname1 = "local", hierarchy_select = "subnat",
+                         areas_select = res_localsubnat$subnat$name[1:100])
+plot_posterior_summaries(res = res_localsubnat1, res2 = res_localsubnat2,
+                         modelname2 = "local2", modelname1 = "local", hierarchy_select = "subnat",
+                         areas_select = res_localsubnat$subnat$name[1:100])
