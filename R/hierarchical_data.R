@@ -1,13 +1,14 @@
 
 #' Hierarchical_data
 #'
+#' This is my description!
+#'
 #' @param geo_unit_index_data tibble with unique hierarchical levels (one column for each level)
 #' @param hierarchical_level vector with hierarchical spec
 #'
 #' @returns list with model matrix and info on start and end indices associated with different levels
 #' @export
 #'
-#' @examples
 hierarchical_data <- function(geo_unit_index_data, hierarchical_level) {
   model_matrix <- hierarchical_model_matrix(geo_unit_index_data = geo_unit_index_data,
                                             hierarchical_level = hierarchical_level)

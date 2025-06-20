@@ -50,6 +50,10 @@ transformed data {
   vector[rows(csr_extract_w(mu_model_matrix))] mu_model_matrix_w     = csr_extract_w(mu_model_matrix);
   array[size(csr_extract_v(mu_model_matrix))] int mu_model_matrix_v  = csr_extract_v(mu_model_matrix);
   array[size(csr_extract_u(mu_model_matrix))] int mu_model_matrix_u  = csr_extract_u(mu_model_matrix);
+  matrix[N,mu_k_terms] y_matrix;
+  for (k in 1:mu_k_terms){
+    y_matrix[,k] = y + (k-1)/2.0;
+  }
 }
 
 /////////////////////////////////////////////////////
@@ -143,18 +147,14 @@ model {
   nonse_estimate ~ normal(0, 1);
 
   //fit to the data
-
-  // CHOOSE ONE
-  // // if mu is a scalar
-  // for(i in 1:N) {
-  //   y[i] ~ normal(mu[geo_unit[i]], nonse);
-  // }
-
   // // if mu is a vector
-  for(i in 1:N) {
+  for (k in 1:mu_k_terms){
+    y_matrix[1:N,k] ~ normal(mu[geo_unit[1:N],k], nonse);
+  }
+  for (i in 1:N){
     for (k in 1:mu_k_terms){
-      y[i] ~ normal(mu[geo_unit[i],k], nonse);
-    }
+      y_matrix[i,k] ~ normal(mu[geo_unit[i],k], nonse);
+  }
   }
   // END CHOOSE ONE
 

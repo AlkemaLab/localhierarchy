@@ -85,7 +85,7 @@ fit_model_localhierarchy <- function(
   hierarchical_level     = c("intercept", "subcluster", "iso"),
   add_subnational_hierarchy = "subnat", # this is what's added to the hierarchy for subnational
   mu_isvector = FALSE, # TRUE if mu is a vector
-
+  use_globalsubnat_fromnat = FALSE,
   # settings for sampling
   chains = 4,
   iter_sampling = 200,
@@ -152,10 +152,16 @@ fit_model_localhierarchy <- function(
         print("For sigma terms, we fix up to 2nd-lowest level.")
         hierarchical_level_sigmas_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
       } else {
+        if (use_globalsubnat_fromnat){
+          # same as global subnational, to add a level
+          print("For subnational local run using nat global fit, we add a level for subnational hierarchical settings ")
+          hierarchical_level <- c(global_fit$hierarchical_level, add_subnational_hierarchy)
+        }
         print("For hierarchical terms, we fix things up to the 2nd-lowest or 3rd level (here 2nd is used).")
         hierarchical_level_terms_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
         print("For sigma terms, we fix up to lowest level.")
         hierarchical_level_sigmas_fixed = hierarchical_level[1:(length(hierarchical_level))]
+
       }
     }
   }
@@ -188,7 +194,12 @@ fit_model_localhierarchy <- function(
   #fixed, all geographic units in data used for the local fit also were present
   # in the global fit
   if (!is.null(global_fit)) {
-    fixed_hierarchy_levels <- unique(c(hierarchical_level_sigmas_fixed,
+    fixed_hierarchy_levels <- unique(c(
+      # commenting out sigmas for use_globalsubnat_fromnat = TRUE,
+      # could make this depend on that argument too
+      # note: now we do NOT check whether sigma was estimated
+      # confirmed that this results in when no sigmas at lower level included
+      # hierarchical_level_sigmas_fixed,
                                        hierarchical_level_terms_fixed))
     fixed_hierarchy_levels <- fixed_hierarchy_levels[fixed_hierarchy_levels != "intercept"]
     fixed_geo_unit_index_local <- geo_unit_index[fixed_hierarchy_levels] |>

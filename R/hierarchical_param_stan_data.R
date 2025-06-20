@@ -83,8 +83,8 @@ hierarchical_param_stan_data <- function(param_name, param_data,
 
     # get indices in global for local vector of fixed parameter values
     # in the local model, the fixed etas are before the to-be-estimated ones
-    # this is correct when sticking to an ordering of levels from higher order to lower order
-    # and defining fixed hierarchical levels only for higher order levels
+    # (this is correct when sticking to an ordering of levels from higher order to lower order
+    # and defining fixed hierarchical levels only for higher order levels)
     index_local <- param_data$model_matrix$index[1:n_terms_fixed,]
     index_global <- globalfit_param_data$model_matrix$index
     indices_for_local <- rep(NA, length(index_local$column))
@@ -122,17 +122,16 @@ hierarchical_param_stan_data <- function(param_name, param_data,
       result[[paste0(param_name, "_raw_fixed")]] <- results_eta # globalfit_param_post_summ_raw$postmean[indices_for_local]
       result[[paste0(param_name, "_sigma_fixed")]] <- results_sigma # globalfit_param_post_summ_sigma$postmean[seq_len(n_sigma_fixed)]
     } else {
-      # using old set up here
-      print("In hierarchical_param_stan_data, consider further testing/rewriting of set up for multiple parameters")
-      # alternatively: just loop over the 2nd index of the parameter!
       # extract relevant data
       globalfit_param_data = global_fit[[paste0(param_name, "_data")]]
       globalfit_param_post_summ_raw = global_fit$post_summ %>%
         filter(variable_no_index == paste0(param_name, "_raw"))
       globalfit_param_post_summ_sigma = global_fit$post_summ %>%
         filter(variable_no_index == paste0(param_name, "_sigma"))
-      result[[paste0(param_name, "_raw_fixed")]] <- create_a_matrix(globalfit_param_post_summ_raw[, c("variable", "postmean")])[indices_for_local, , drop = FALSE]
-      result[[paste0(param_name, "_sigma_fixed")]] <- create_a_matrix(globalfit_param_post_summ_sigma[, c("variable", "postmean")])[seq_len(n_sigma_fixed), , drop=FALSE]
+      result[[paste0(param_name, "_raw_fixed")]] <-
+        create_a_matrix(globalfit_param_post_summ_raw[, c("variable", "postmean")])[indices_for_local, , drop = FALSE]
+      result[[paste0(param_name, "_sigma_fixed")]] <-
+        create_a_matrix(globalfit_param_post_summ_sigma[, c("variable", "postmean")])[seq_len(n_sigma_fixed), , drop=FALSE]
     }
     print("We are fixing the following parameters:")
     print(result[[paste0(param_name, "_raw_fixed")]])

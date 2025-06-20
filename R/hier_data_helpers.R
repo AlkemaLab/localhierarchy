@@ -26,7 +26,17 @@ is_there_a_comma <- function(variable){
 # #get_dimension(c("a[1,1]", "a[1,2]"))
 
 
-# more complicated than need to be...
+#' Create a matrix
+#'
+#' This function takes a postsumm object and returns a matrix with the
+#' relevant information
+#'
+#' @param post_summ tibble with columns `variable` and `postmean`,
+#' variable examples are 'a[1,1]', 'a[2,1]', etc.
+#'
+#' @returns matrix with rows and columns corresponding to the indices in the variable
+#' @export
+#'
 create_a_matrix <- function(post_summ){
   res <- post_summ %>%
     mutate(
@@ -49,11 +59,11 @@ create_a_matrix <- function(post_summ){
   }
   m
 }
-#create_a_matrix( tibble(variable = c("a[1,1]", "a[2,1]", "a[1,2]", "a[2,2]"), median = seq(1,4)) )
-#create_a_matrix( tibble(variable = c("a[1,1]", "a[2,1]"), median = seq(1,2)) )
+#create_a_matrix( tibble(variable = c("a[1,1]", "a[2,1]"), postmean = seq(1,2)) )
 #robust to ordering of the variables
-#create_a_matrix( tibble(variable = c("a[2,1]", "a[1,1]"), median = seq(1,2)) )
-#create_a_matrix( tibble(variable = c("a[1,1]",  "a[1,2]", "a[2,1]","a[2,2]"), median = seq(1,4)) )
+#create_a_matrix( tibble(variable = c("a[2,1]", "a[1,1]"), postmean = seq(1,2)) )
+#create_a_matrix( tibble(variable = c("a[1,1]", "a[2,1]", "a[1,2]", "a[2,2]"), postmean = seq(1,4)) )
+#create_a_matrix( tibble(variable = c("a[1,1]",  "a[1,2]", "a[2,1]","a[2,2]"), postmean = seq(1,4)) )
 
 #' Determine whether or not a variable exists in draws from a fit
 #' This is similar to the function posterior:::check_existing_variables,

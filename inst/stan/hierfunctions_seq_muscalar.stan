@@ -128,20 +128,7 @@ model {
   nonse_estimate ~ normal(0, 1);
 
   //fit to the data
-
-  // CHOOSE ONE
-  // if mu is a scalar
-  for(i in 1:N) {
-    y[i] ~ normal(mu[geo_unit[i]], nonse);
-  }
-
-  // // if mu is a vector
-  // for(i in 1:N) {
-  //   for (k in 1:mu_k_terms){
-  //     y[i] ~ normal(mu[geo_unit[i],k], nonse);
-  //   }
-  // }
-  // END CHOOSE ONE
+  y[1:N] ~ normal(mu[geo_unit[1:N]], nonse);
 
 }
 
