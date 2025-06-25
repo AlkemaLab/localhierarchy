@@ -27,7 +27,7 @@ hierarchical_level <- c("intercept",  "subcluster", "iso")
 
 ### use case 1: global then local national, all countries (in quarto too)
 
-fit1a <- fit_model_localhierarchy(runstep = "step1a",
+fit1a <- fit_model_localhierarchy(runstep = "global_national",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)

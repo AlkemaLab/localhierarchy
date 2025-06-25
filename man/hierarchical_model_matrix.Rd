@@ -16,7 +16,7 @@ hierarchical_model_matrix(geo_unit_index_data, hierarchical_level)
 list (modelmatrix, assign, index) associated with the geo_unit_data and hierarchical_levels
 in modelmatrix each column refers to one eta (and nrows is the number of lowest level units).
 assign is length of etas, with 0 for intercept, then an hierarchical level index (starting at 2) for each eta level
-index is a tibble with n_eta rows, with info for each eta in and columns i [index of eta], column [hierarchical level], and level [name of hierarchical level]
+index is a tibble with n_eta rows, with info for each eta in and columns i \link{index of eta}, column \link{hierarchical level}, and level \link{name of hierarchical level}
 }
 \description{
 hierarchical_model_matrix

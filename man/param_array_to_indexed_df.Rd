@@ -3,13 +3,13 @@
 \name{param_array_to_indexed_df}
 \alias{param_array_to_indexed_df}
 \title{Starting from an array of parameter values (of dimension 1 or 2),
-create a data frame with columns `variable` with the combined parameter name
-and indices, and `median` with the parameter values}
+create a data frame with columns \code{variable} with the combined parameter name
+and indices, and \code{median} with the parameter values}
 \usage{
 param_array_to_indexed_df(param_values, num_inds, n, m, param_name)
 }
 \description{
 Starting from an array of parameter values (of dimension 1 or 2),
-create a data frame with columns `variable` with the combined parameter name
-and indices, and `median` with the parameter values
+create a data frame with columns \code{variable} with the combined parameter name
+and indices, and \code{median} with the parameter values
 }

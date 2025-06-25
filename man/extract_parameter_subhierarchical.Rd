@@ -27,8 +27,7 @@ extract_parameter_subhierarchical(
 \value{
 a tibble with posterior samples of the selected parameter mu at the subhierarchy level.
 these mus are obtained by summing up all relevant etas
-variables are `name`, `value`, `.draw/iteration/chain'
-and `k` referring to parameter index if morethan1param = TRUE
+variables are \code{name}, \code{value}, \verb{.draw/iteration/chain' and }k` referring to parameter index if morethan1param = TRUE
 }
 \description{
 extract_parameter_subhierarchical

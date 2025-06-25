@@ -22,7 +22,7 @@ posterior_summary_hierparam(
 }
 \value{
 list with summaries of mu for each hierarchical level (units with each level)
- these mus are obtained by summing up all relevant etas
+these mus are obtained by summing up all relevant etas
 for morethan1param, each level has a list where k refers to the index
 }
 \description{

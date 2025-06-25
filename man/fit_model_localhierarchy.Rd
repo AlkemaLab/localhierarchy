@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_model.R
 \name{fit_model_localhierarchy}
 \alias{fit_model_localhierarchy}
-\title{Fit model}
+\title{Fit model for localhierarchy model}
 \usage{
 fit_model_localhierarchy(
   survey_df,
@@ -31,20 +31,20 @@ fit_model_localhierarchy(
 
 \item{y}{column name of outcome.}
 
-\item{area}{column name of the area of each observation (geounit; iso or subnational region)}
+\item{area}{column name of the area of each observation (used as geounit; iso or subnational region)}
 
 \item{area_select}{area name to use for local run (eg iso code or subnat region name)}
 
 \item{runstep}{type of run, currently one of XXX (see Details).}
 
-\item{global_fit}{optional object of class XX, used to obtain fixed
+\item{global_fit}{optional global fit object, used to obtain fixed
 values to use for some parameters in the current fit (see Details).}
 
 \item{hierarchical_level}{vector specifying hierarchical structure used for mu}
 
 \item{add_subnational_hierarchy}{level that's added to the hierarchy for subnational, defaults to 'subnat'}
 
-\item{mu_isvector}{Boolean, TRUE if mu is a vector, defaults to FALSE
+\item{mu_isvector}{Logical, TRUE if mu is a vector, defaults to FALSE
 
 Settings for sampling}
 
@@ -70,17 +70,19 @@ Settings for sampling}
 List that contains samples, stan_data, and other information relevant to model fit (arguments)
 }
 \description{
-Fit model
+This function fits the localhierarchy model
 }
 \details{
-The `fit_model_localhierarchy` function fits the toy example for hierarchical models/seq fitting.
+The \code{fit_model_localhierarchy} function fits the toy example for hierarchical models/seq fitting.
 The argument \code{runstep} determines the type of run to perform. The
 following run steps are supported:
-- "step1a": Fit the global model
-- "local_national": Fit the model to data from a single country, using a 1a fit.
-- "global_subnational": Fit the model to global database with subnational data, using a 1a fit.
-- "local_subnational": Fit the model to subnational data from a single country or region, using a global_subnational fit.
+\itemize{
+\item "global_national": Fit the global model.
+\item "local_national": Fit the model to data from a single country, using a global_national fit.
+\item "global_subnational": Fit the model to global database with subnational data, using a global_national fit.
+\item "local_subnational": Fit the model to subnational data from a single country or region, using a global_subnational fit.
 This is also explained in the documentation folder.
+}
 
 Details on hierarchical set ups used
 The package allows the structure of the hierarchical prior to be configured by the user

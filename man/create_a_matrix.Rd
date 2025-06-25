@@ -7,8 +7,8 @@
 create_a_matrix(post_summ)
 }
 \arguments{
-\item{post_summ}{tibble with columns `variable` and `postmean`,
-variable examples are 'a[1,1]', 'a[2,1]', etc.}
+\item{post_summ}{tibble with columns \code{variable} and \code{postmean},
+variable examples are 'a\link{1,1}', 'a\link{2,1}', etc.}
 }
 \value{
 matrix with rows and columns corresponding to the indices in the variable

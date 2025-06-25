@@ -111,7 +111,7 @@ The set up and notation in stan/R, in terms of parameters, using parameter mu as
 global model fit
 
 ```{r}
-fit1a <- fit_model_localhierarchy(runstep = "step1a",
+fit_global <- fit_model_localhierarchy(runstep = "global_national",
                               hierarchical_level     =  hierarchical_level,
                               survey_df = dat,
                               chains = 4)
@@ -121,8 +121,8 @@ fit1a <- fit_model_localhierarchy(runstep = "step1a",
 create summary object
 
 ```{r}
-fit1a$post_summ <- get_posterior_summaries(fit1a)
-fit1a$post_summ
+fit_global$post_summ <- get_posterior_summaries(fit_global)
+fit_global$post_summ
 
 ```
 
@@ -130,7 +130,7 @@ do local fit... here we fix things but do get results for all countries
 
 ```{r}
 fit_local <- fit_model_localhierarchy(runstep = "local_national",
-                                  global_fit = fit1a,
+                                  global_fit = fit_global,
                                   survey_df = dat,
                                   chains = 4)
 ```
@@ -140,35 +140,47 @@ fit_local <- fit_model_localhierarchy(runstep = "local_national",
 get summaries, takes a little while. this creates, per fit, a list with each entry being one level, and the results (mu estimates) for that level
 
 ```{r}
-res_global <- posterior_summary_hierparam(fit = fit1a, parname = "mu")
+res_global <- posterior_summary_hierparam(fit = fit_global, parname = "mu")
 res_local <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
 
 ```
 
-Plots that show how values have been fixed in the local runs
+Plots that show outputs
 
 ```{r}
-bind_rows(res_local$subcluster %>% mutate(model = "local"),
-          res_global$subcluster %>% mutate(model = "global")) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
+plot_posterior_summaries(res = res_global, modelname1 = "global")
+```
+
+how values have been fixed in the local runs
+
+```{r}
+plot_posterior_summaries(res = res_local, 
+                         res2 = res_global,
+                         modelname2 = "global", modelname1 = "local") 
+
+```
+
+selecting specific levels
+
+```{r}
+plot_posterior_summaries(res = res_local, 
+                         res2 = res_global,
+                         modelname2 = "global", modelname1 = "local",
+                        hierarchy_select = "subcluster")
+
 
 
 ```
 
-And a plot to show the difference in estimates between global and local runs
+Level and selected areas
 
 ```{r}
-bind_rows(res_local$iso %>% mutate(model = "local"),
-          res_global$iso %>% mutate(model = "global")) %>%
-  group_by(name, model) %>%
-  reframe(y = val[quant == 0.5], ymin = val[quant == 0.025], ymax = val[quant == 0.975]) %>%
-  ggplot(aes(y = y, x = name, color = model)) +
-  geom_errorbar(aes(ymin = ymin, ymax = ymax)) +
-  geom_point()
+plot_posterior_summaries(res = res_local, 
+                         res2 = res_global,
+                         modelname2 = "global", modelname1 = "local",
+                        hierarchy_select = "iso",
+                        areas_select = res_local$iso$name[1:100])
+
 ```
 
 # Summary object
@@ -202,8 +214,8 @@ This is where global fit is used to fix values
 
 ```{r}
 hier_stan_data <- hierarchical_param_stan_data(
-  global_fit = fit1a,
-  param_name ="mu",
+  global_fit = fit_global,
+  param_name = "mu",
   param_data = hier_data,
   hierarchical_terms_fixed = hierarchical_level[1:2], 
   hierarchical_sigmas_fixed = hierarchical_level[1:3]
@@ -211,24 +223,40 @@ hier_stan_data <- hierarchical_param_stan_data(
 names(hier_stan_data)
 ```
 
+# Prior-posts 
+
+sigmas
+
 ```{r}
-samples <- extract_parameter_subhierarchical(
-        hierarchical_data = hier_data,
-        subhierarchy = "iso",
-        parname = "mu",
-        fit_samples = fit1a$samples,
-        morethan1param = FALSE
-        )
-samples
+plot_prior_post_sigmas(fit = fit_globalsubnat, parname = "mu")
+
 ```
 
-# Trace plots etc
+create plots for mu_raws
 
-here just checking the sigmas and first mu:
+```{r}
+plots <- plot_mu_raw(fit = fit_global, parname = "mu")
+# a list with plots
+```
+
+summary plots gives summaries, 30 at a time
+
+```{r}
+plots[["summary_plots"]][[1]]
+
+```
+
+specific prior-post plots for one parameter are in plots\[\["plots_allmuraw"\]\]
+
+```{r}
+plots[["plots_allmuraw"]][[1]]
+```
+
+Simple trace plots etc
 
 ```{r}
 
-fit <- fit1a
+fit <- fit_global
  parname_list <- list( c("mu_raw_estimate[1]",
                           "mu_sigma_estimate"))
 #    plot_dirandname <- file.path(fit$output_dir, paste0(runname, "diagnostics.pdf"))

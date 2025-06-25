@@ -26,7 +26,7 @@ hierarchical_level <- c("intercept",  "subcluster", "iso")
 # use case 4 needed? invariance to re-ordering of input data in use case 3
 
 
-fit1a_mult <- fit_model_localhierarchy(runstep = "step1a",
+fit1a_mult <- fit_model_localhierarchy(runstep = "global_national",
                                        mu_isvector = TRUE,
                                        hierarchical_level     =  hierarchical_level,
                                        survey_df = dat,

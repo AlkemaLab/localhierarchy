@@ -10,12 +10,12 @@ just the variable name and the indices.}
 split_var_name_and_index(estimate_df, num_inds)
 }
 \arguments{
-\item{estimate_df}{data frame with a column called `variable` that contains parname[i] or parname[i,j] entries}
+\item{estimate_df}{data frame with a column called \code{variable} that contains parname\link{i} or parname\link{i,j} entries}
 
 \item{num_inds}{number of indices in the variable name (used for 1 or 2)}
 }
 \value{
-data frame with the same columns as `estimate_df` plus columns containing
+data frame with the same columns as \code{estimate_df} plus columns containing
 just the variable name and the indices.
 }
 \description{

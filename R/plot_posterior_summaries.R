@@ -5,8 +5,8 @@
 #'
 #' @param res output from posterior_summary_hierparam
 #' @param hierarchy_select optional, what hierarchical level to show? if NULL, all levels are shown
-#' @param areas_select optional: areas to filter by, allowed only if one hierarchical level is selected
-#' @param res2 optional, output from posterior_summary_hierparam
+#' @param areas_select optional: specific areas in a level to filter by, allowed only if one hierarchical level is selected
+#' @param res2 optional, output from posterior_summary_hierparam for comparison
 #' @param modelname1 label for res
 #' @param modelname2 label for res2
 #' @param k_select optional, if res contains k, which k values to show? if NULL, all k values are shown

@@ -7,7 +7,7 @@ editor: visual
 
 # 
 
-# Demonstration of hierarchical data with toy data set. 
+# Demonstration of hierarchical data with toy data set.
 
 Load relevant packages
 
@@ -73,7 +73,7 @@ names(hier_stan_data)
 ```
 
 ```{r}
-hier_stan_data$mu_n_terms # number of etas + global mu
+hier_stan_data$mu_raw_n_terms # number of etas + global mu
 length(unique(geo_unit_index$subcluster))
 length(unique(geo_unit_index$iso))
   
@@ -143,7 +143,7 @@ mu
 hier_data$model_matrix
 ```
 
-# Unsuccessful investigation into exposing stan build-in functions
+# Notes on unsuccessful investigation into exposing stan build-in functions
 
 If we want to use all stan functions, we need to expose (compile) the stan math functions as well, eg for for sparse matrices. see here for info
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/hierarchical_param_stan_data.R
 \name{hierarchical_param_stan_data}
 \alias{hierarchical_param_stan_data}
-\title{Set up data for Stan related to hierarchical parameters}
+\title{Stan data for hierarchical parameters}
 \usage{
 hierarchical_param_stan_data(
   param_name,
@@ -18,18 +18,15 @@ hierarchical_param_stan_data(
 \item{param_data}{Data structures as constructed by hierarchical_data for that parameter}
 
 \item{hierarchical_terms_fixed}{character vector specifying hierarchical
-levels for which the terms should be fixed (subset of `hierarchical_levels`)}
+levels for which the terms should be fixed (subset of \code{hierarchical_levels})}
 
 \item{global_fit}{an optional "global" fit that will be used to extract
 parameter estimates for any specified hierarchical units to fix}
 }
 \value{
 named list with Stan data relevant to the hierarchical set up for
-  this parameter, e.g. if the `param_name` is `"mu"`, these will be
-  `mu_n_terms, mu_n_sigma, mu_re_start, mu_re_end,
-  mu_model_matrix, mu_n_terms_fixed, mu_n_terms_estimate,
-  mu_raw_fixed, mu_n_sigma_fixed, mu_n_sigma_estimate,
-  mu_sigma_fixed`
+this parameter, e.g. if the \code{param_name} is \code{"mu"}, these will be
+\verb{mu_n_terms, mu_n_sigma, mu_re_start, mu_re_end, mu_model_matrix, mu_n_terms_fixed, mu_n_terms_estimate, mu_raw_fixed, mu_n_sigma_fixed, mu_n_sigma_estimate, mu_sigma_fixed}
 }
 \description{
 Set up data for Stan related to hierarchical parameters

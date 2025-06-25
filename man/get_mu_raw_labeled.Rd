@@ -18,5 +18,5 @@ tibble with samples of parname_raw_estimate, including info on hierarchical leve
 }
 \description{
 This function extracts the mu_raw_estimate samples from a fitted model and
- labels them with their hierarchical level.
+labels them with their hierarchical level.
 }

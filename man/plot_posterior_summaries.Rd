@@ -20,9 +20,9 @@ plot_posterior_summaries(
 
 \item{hierarchy_select}{optional, what hierarchical level to show? if NULL, all levels are shown}
 
-\item{areas_select}{optional: areas to filter by, allowed only if one hierarchical level is selected}
+\item{areas_select}{optional: specific areas in a level to filter by, allowed only if one hierarchical level is selected}
 
-\item{res2}{optional, output from posterior_summary_hierparam}
+\item{res2}{optional, output from posterior_summary_hierparam for comparison}
 
 \item{modelname1}{label for res}
 

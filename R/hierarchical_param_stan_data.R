@@ -1,4 +1,6 @@
 
+#' Stan data for hierarchical parameters
+#'
 #' Set up data for Stan related to hierarchical parameters
 #'
 #' @param param_name The name of the parameter we are working with, e.g. "mu"
@@ -79,8 +81,6 @@ hierarchical_param_stan_data <- function(param_name, param_data,
     result[[paste0(param_name, "_raw_n_terms_estimate")]] <-
       param_data$n_terms - n_terms_fixed
 
-
-
     # get indices in global for local vector of fixed parameter values
     # in the local model, the fixed etas are before the to-be-estimated ones
     # (this is correct when sticking to an ordering of levels from higher order to lower order
@@ -133,9 +133,9 @@ hierarchical_param_stan_data <- function(param_name, param_data,
       result[[paste0(param_name, "_sigma_fixed")]] <-
         create_a_matrix(globalfit_param_post_summ_sigma[, c("variable", "postmean")])[seq_len(n_sigma_fixed), , drop=FALSE]
     }
-    print("We are fixing the following parameters:")
-    print(result[[paste0(param_name, "_raw_fixed")]])
-    print(result[[paste0(param_name, "_sigma_fixed")]])
+    #print("We are fixing the following parameters:")
+    #print(result[[paste0(param_name, "_raw_fixed")]])
+    #print(result[[paste0(param_name, "_sigma_fixed")]])
     return(result)
   }
 }

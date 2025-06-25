@@ -2,19 +2,21 @@
 
 
 
-#' Fit model
+#' Fit model for localhierarchy model
+#'
+#' This function fits the localhierarchy model
 #'
 #' @param survey_df tibble with survey data
 #' @param y column name of outcome.
-#' @param area column name of the area of each observation (geounit; iso or subnational region)
+#' @param area column name of the area of each observation (used as geounit; iso or subnational region)
 #' @param area_select area name to use for local run (eg iso code or subnat region name)
 #'
 #' @param runstep type of run, currently one of XXX (see Details).
-#' @param global_fit optional object of class XX, used to obtain fixed
+#' @param global_fit optional global fit object, used to obtain fixed
 #'   values to use for some parameters in the current fit (see Details).
 #' @param hierarchical_level vector specifying hierarchical structure used for mu
 #' @param add_subnational_hierarchy level that's added to the hierarchy for subnational, defaults to 'subnat'
-#' @param mu_isvector Boolean, TRUE if mu is a vector, defaults to FALSE
+#' @param mu_isvector Logical, TRUE if mu is a vector, defaults to FALSE
 #'
 #' Settings for sampling
 #' @param chains number of chains to run
@@ -33,10 +35,10 @@
 #' The `fit_model_localhierarchy` function fits the toy example for hierarchical models/seq fitting.
 #' The argument \code{runstep} determines the type of run to perform. The
 #' following run steps are supported:
-#' - "step1a": Fit the global model
-#' - "local_national": Fit the model to data from a single country, using a 1a fit.
-#' - "global_subnational": Fit the model to global database with subnational data, using a 1a fit.
-#' - "local_subnational": Fit the model to subnational data from a single country or region, using a global_subnational fit.
+#' * "global_national": Fit the global model.
+#' * "local_national": Fit the model to data from a single country, using a global_national fit.
+#' * "global_subnational": Fit the model to global database with subnational data, using a global_national fit.
+#' * "local_subnational": Fit the model to subnational data from a single country or region, using a global_subnational fit.
 #' This is also explained in the documentation folder.
 #'
 #' Details on hierarchical set ups used
@@ -102,11 +104,10 @@ fit_model_localhierarchy <- function(
     stop("No hierarchical structure supplied. See the hierarchical_level argument.")
   }
 
-  if (!runstep %in% c("step1a", "local_national", "global_subnational", "local_subnational")){
+  if (!runstep %in% c("global_national", "local_national", "global_subnational", "local_subnational")){
     stop("runstep not yet implemented!")
   }
-  if (runstep %in% c("step1a")){
-    # global fit
+  if (runstep %in% c("global_national")){
     print("We do a global fit.")
     print("We don't fix anything")
     hierarchical_level_sigmas_fixed = c()
@@ -115,17 +116,6 @@ fit_model_localhierarchy <- function(
   } else {
     if (is.null(global_fit)){
       stop("Need a global fit for this run.")
-      # we can also add internal data
-      # globalstepname <- dplyr::case_when(
-      #   runstep == "step1b" ~ "1a",
-      #   runstep == "local_national" ~ "1b",
-      #   runstep == "step3" ~ "1b",
-      #   TRUE ~ "3"
-      # )
-      # global_fit <- readRDS(file = paste0(
-      #   here::here("data-raw/internal/"), "fit",
-      #   globalstepname,
-      #   ".rds"))
     }
 
     print("We use a global fit, and take selected or all settings from there.")
@@ -167,9 +157,6 @@ fit_model_localhierarchy <- function(
   }
 
 
-
-
-
   ##### Data processing  and Setup data for Stan #####
   # select data based on area_select
   if (!is.null(area_select)){
@@ -179,7 +166,6 @@ fit_model_localhierarchy <- function(
   geo_unit_index <- get_geo_unit_index_data(survey_df,
                                             hierarchical_levels = c(hierarchical_level),
                                             area = area)
-  # need it here after all
   hierarchical_column_names <- unique(hierarchical_level) %>%
     setdiff("intercept")
   survey_df <- survey_df %>%
@@ -198,7 +184,7 @@ fit_model_localhierarchy <- function(
       # commenting out sigmas for use_globalsubnat_fromnat = TRUE,
       # could make this depend on that argument too
       # note: now we do NOT check whether sigma was estimated
-      # confirmed that this results in when no sigmas at lower level included
+      # confirmed that this results in an error when no sigmas at lower level included
       # hierarchical_level_sigmas_fixed,
                                        hierarchical_level_terms_fixed))
     fixed_hierarchy_levels <- fixed_hierarchy_levels[fixed_hierarchy_levels != "intercept"]
@@ -218,11 +204,7 @@ fit_model_localhierarchy <- function(
   stan_data <- list(
     n_geounit = nrow(geo_unit_index),
     N = nrow(survey_df),
-    # for later: code relevant to use of aggregates
-    # for geo_unit:
-    # in case of NA values in survey_df$c, replace with the dummy value 0
-    # this is only used in multiscale fitting with mixed national and subnational data
-    geo_unit = survey_df$c, # array(ifelse(is.na(survey_df$c), 0L, survey_df$c)),
+    geo_unit = survey_df$c,
     y = array(survey_df[[y]]),
     verysmallnumber = 0.00001 # lower bound for sds
   )
