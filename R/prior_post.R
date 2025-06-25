@@ -1,11 +1,13 @@
 
 
-#' Plot estimates of mu raws
+#' Plot prior and posterior densities of mu_raw
 #'
-#' @param fit needs to include parname_raw_estimate and stan_data
-#' @param parname selected parameter name (example: "mu")
-#' @param morethan1param does paramname refer to more than 1 parameter (a vector)
-#' @param nresultsperpage number of results per page in summary plots
+#' This function plots the posterior densities of mu_raw parameters, with prior added.
+#'
+#' @param fit List that includes "parname"_raw_estimate and stan_data
+#' @param parname Selected parameter name (example: mu)
+#' @param morethan1param Logical, does parname refer to more than 1 parameter (a vector)
+#' @param nresultsperpage Number of results per page in summary plots
 #'
 #' @returns lists with list 'summary_plots' and list 'plots_allmuraw'.
 #' summary plots gives summary CIs, nresultsperpage at a time.
@@ -13,7 +15,6 @@
 #' If morethan1param = TRUE, then each list contains a list per parameter k
 #' #' @export
 #'
-#' @examples
 plot_mu_raw <- function(fit, parname, morethan1param = FALSE,
                         nresultsperpage = 30){
   helper_get_plots_allmuraw <- function(samples_tibble){
@@ -77,15 +78,16 @@ plot_mu_raw <- function(fit, parname, morethan1param = FALSE,
               summary_plots = summary_plots))
 }
 
-#' plot_prior_post_sigmas
+#' Plot prior and posteriors of sigmas from hierarchical models
 #'
-#' @param fit needs to include parname_sigma_estimate and stan_data
-#' @param parname selected parameter name (example: "mu")
+#' This function plots the prior and posterior densities of sigma_estimate parameters,
 #'
-#' @returns plot with density of sigma_estimate and prior added
+#' @param fit List, needs to include parname_sigma_estimate and stan_data
+#' @param parname Selected parameter name (example: "mu")
+#'
+#' @returns Plot with density of sigma_estimate and prior added
 #' @export
 #'
-#' @examples
 plot_prior_post_sigmas <- function(fit, parname){
   # sigmas, fine to look at all k's combined
   samp <- fit$samples$draws(paste0(parname, "_sigma_estimate"))

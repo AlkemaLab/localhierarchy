@@ -17,12 +17,14 @@ posterior_summary_hierparam(
 \item{parname}{selected parameter name (example: "mu")}
 
 \item{morethan1param}{does paramname refer to more than 1 parameter (a vector)}
+
+\item{hierarchical_levels}{specifies the names of the hierarchical levels (defaults to fit$hierarchical_level)}
 }
 \value{
 list with summaries of mu for each hierarchical level (units with each level)
  these mus are obtained by summing up all relevant etas
-for morethan1param, k refers to the index
+for morethan1param, each level has a list where k refers to the index
 }
 \description{
-posterior_summary_hierparam
+Calculate posterior summaries for hierarchical parameters
 }

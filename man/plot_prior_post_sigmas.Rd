@@ -2,18 +2,18 @@
 % Please edit documentation in R/prior_post.R
 \name{plot_prior_post_sigmas}
 \alias{plot_prior_post_sigmas}
-\title{plot_prior_post_sigmas}
+\title{Plot prior and posteriors of sigmas from hierarchical models}
 \usage{
 plot_prior_post_sigmas(fit, parname)
 }
 \arguments{
-\item{fit}{needs to include parname_sigma_estimate and stan_data}
+\item{fit}{List, needs to include parname_sigma_estimate and stan_data}
 
-\item{parname}{selected parameter name (example: "mu")}
+\item{parname}{Selected parameter name (example: "mu")}
 }
 \value{
-plot with density of sigma_estimate and prior added
+Plot with density of sigma_estimate and prior added
 }
 \description{
-plot_prior_post_sigmas
+This function plots the prior and posterior densities of sigma_estimate parameters,
 }

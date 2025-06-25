@@ -15,5 +15,5 @@ hierarchical_data(geo_unit_index_data, hierarchical_level)
 list with model matrix and info on start and end indices associated with different levels
 }
 \description{
-Hierarchical_data
+Create hierarchical data structure for a hierarchical model.
 }

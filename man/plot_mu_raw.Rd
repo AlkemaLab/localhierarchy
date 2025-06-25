@@ -2,18 +2,18 @@
 % Please edit documentation in R/prior_post.R
 \name{plot_mu_raw}
 \alias{plot_mu_raw}
-\title{Plot estimates of mu raws}
+\title{Plot prior and posterior densities of mu_raw}
 \usage{
 plot_mu_raw(fit, parname, morethan1param = FALSE, nresultsperpage = 30)
 }
 \arguments{
-\item{fit}{needs to include parname_raw_estimate and stan_data}
+\item{fit}{List that includes "parname"_raw_estimate and stan_data}
 
-\item{parname}{selected parameter name (example: "mu")}
+\item{parname}{Selected parameter name (example: mu)}
 
-\item{morethan1param}{does paramname refer to more than 1 parameter (a vector)}
+\item{morethan1param}{Logical, does parname refer to more than 1 parameter (a vector)}
 
-\item{nresultsperpage}{number of results per page in summary plots}
+\item{nresultsperpage}{Number of results per page in summary plots}
 }
 \value{
 lists with list 'summary_plots' and list 'plots_allmuraw'.
@@ -23,5 +23,5 @@ If morethan1param = TRUE, then each list contains a list per parameter k
 #' @export
 }
 \description{
-Plot estimates of mu raws
+This function plots the posterior densities of mu_raw parameters, with prior added.
 }

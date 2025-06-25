@@ -2,20 +2,21 @@
 % Please edit documentation in R/mu_raw.R
 \name{get_mu_raw_labeled}
 \alias{get_mu_raw_labeled}
-\title{Title}
+\title{Get mu_raw_labeled}
 \usage{
 get_mu_raw_labeled(fit, parname, morethan1param = FALSE)
 }
 \arguments{
-\item{fit}{needs to include parname_raw_estimate}
+\item{fit}{needs to include parname_raw_estimate (example: mu_raw)}
 
-\item{parname}{selected parameter name (example: "mu")}
+\item{parname}{selected parameter name (example: mu)}
 
-\item{morethan1param}{does paramname refer to more than 1 parameter (a vector)}
+\item{morethan1param}{does parname refer to more than 1 parameter (a vector)}
 }
 \value{
 tibble with samples of parname_raw_estimate, including info on hierarchical level
 }
 \description{
-Title
+This function extracts the mu_raw_estimate samples from a fitted model and
+ labels them with their hierarchical level.
 }

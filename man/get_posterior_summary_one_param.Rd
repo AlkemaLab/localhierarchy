@@ -20,5 +20,5 @@ it is just the stacking}
 tibble with variable (parname with index used in model) and postmean (posterior mean)
 }
 \description{
-get_posterior_summary_one_param
+Get posterior summary for one parameter
 }

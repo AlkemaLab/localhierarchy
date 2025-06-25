@@ -14,6 +14,7 @@ fit_model_localhierarchy(
   hierarchical_level = c("intercept", "subcluster", "iso"),
   add_subnational_hierarchy = "subnat",
   mu_isvector = FALSE,
+  use_globalsubnat_fromnat = FALSE,
   chains = 4,
   iter_sampling = 200,
   iter_warmup = 150,

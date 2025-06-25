@@ -4,6 +4,8 @@
 
 #' get_posterior_summaries
 #'
+#' Get posterior summaries for a set of parameters
+#'
 #' @param fit fit object to summarize
 #' @param params vector of parnames to summarize (w/o index)
 #'
@@ -41,6 +43,8 @@ get_posterior_summaries <- function(
 
 #' get_posterior_summary_one_param
 #'
+#' Get posterior summary for one parameter
+#'
 #' @param fit fit object
 #' @param param_name parameter name w/o index
 #'
@@ -52,7 +56,6 @@ get_posterior_summaries <- function(
 #' @returns tibble with variable (parname with index used in model) and postmean (posterior mean)
 #' @export
 #'
-#' @examples
 get_posterior_summary_one_param <- function(
     fit,
     param_name) {

@@ -1,13 +1,14 @@
 
-# warnings can occur like pasted below
-# Chain XXX Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-# Chain XXX Exception: normal_lpdf: Location parameter is inf, but must be finite!
-# ie mu is not finite..
-# meaning inf values are drawn for sum of mustars, so product (mu_raw* mu_sigma)
-# by setting inits, we avoid this for the initial values
-# HOWEVER they can still occur early on in the chain (not sure if adding a cap is good thing to do)
-
-
+#' Set initial values
+#'
+#' This function sets the initial values for the parameters in a simple hierarchical model.
+#'
+#' @param chain_id the chain ID, used for setting the seed
+#' @param stan_data a list containing the Stan data, to obtain length of parameter vectors
+#'
+#' @returns a list of initial values for the model parameters
+#' @export
+#'
 init_fun_localhierarchy <- function(chain_id, stan_data){
   set.seed(chain_id)
   inits <- list()

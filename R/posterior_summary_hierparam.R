@@ -2,6 +2,8 @@
 
 #' posterior_summary_hierparam
 #'
+#' Calculate posterior summaries for hierarchical parameters
+#'
 #' @param fit needs to include parname_star
 #' @param parname selected parameter name (example: "mu")
 #' @param morethan1param does paramname refer to more than 1 parameter (a vector)
@@ -9,10 +11,9 @@
 #'
 #' @returns list with summaries of mu for each hierarchical level (units with each level)
 #'  these mus are obtained by summing up all relevant etas
-#' for morethan1param, k refers to the index
+#' for morethan1param, each level has a list where k refers to the index
 #' @export
 #'
-#' @examples
 posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
                                         hierarchical_levels = fit$hierarchical_level){
   print("Calculating posterior summary for hierarchical parameters")
@@ -77,7 +78,6 @@ posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
 #' and `k` referring to parameter index if morethan1param = TRUE
 #' @export
 #'
-#' @examples
 extract_parameter_subhierarchical <- function(
     hierarchical_data,
     subhierarchy,
@@ -131,13 +131,14 @@ extract_parameter_subhierarchical <- function(
 
 #' Compute quantiles
 #'
-#' @param x
-#' @param probs
+#' This function computes quantiles for a given vector and returns them in a tibble format.
 #'
-#' @returns
+#' @param x vector with values
+#' @param probs vector of quantiles
+#'
+#' @returns tibble with the requested quantiles
 #' @export
 #'
-#' @examples
 quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
   tibble(
     val = quantile(x, probs, na.rm = TRUE),

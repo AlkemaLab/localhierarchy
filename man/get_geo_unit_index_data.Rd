@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_geo_unit_index_data.R
 \name{get_geo_unit_index_data}
 \alias{get_geo_unit_index_data}
-\title{get_geo_unit_index_data}
+\title{Get geo_unit_index_data}
 \usage{
 get_geo_unit_index_data(data, hierarchical_levels, area)
 }
@@ -17,10 +17,11 @@ get_geo_unit_index_data(data, hierarchical_levels, area)
 tibble with unique hierarchical levels (one column for each level) and index "c" assigned based on area
 }
 \description{
-get_geo_unit_index_data
+Get unique hierarchical levels from survey data and assign index "c" based on area.
 }
 \examples{
-survey_dat <- tibble(subcluster = c("A", "A", "B", "B"), iso = c("iso1", "iso2", "iso3", "iso3"))
+survey_dat <- tibble(subcluster = c("A", "A", "B", "B"),
+    iso = c("iso1", "iso2", "iso3", "iso4"))
 get_geo_unit_index_data(survey_dat,
         hierarchical_levels = c("intercept", "subcluster", "iso"),
         area = "iso")

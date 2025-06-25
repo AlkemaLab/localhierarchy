@@ -1,8 +1,9 @@
 
 
 #' hierarchical_model_matrix
+#' Create list with information including a model matrix, associated with the geo_unit_data and hierarchical_levels
 #'
-#' @param geo_unit_index_data tibble with unique hierarchical levels (one column for each level)
+#' @param geo_unit_index_data tibble with unique hierarchical levels (one column for each level, one row per combi)
 #' @param hierarchical_level vector with hierarchical spec from highest to lowest levels
 #'
 #' @returns list (modelmatrix, assign, index) associated with the geo_unit_data and hierarchical_levels
@@ -11,7 +12,6 @@
 #' index is a tibble with n_eta rows, with info for each eta in and columns i [index of eta], column [hierarchical level], and level [name of hierarchical level]
 #' @export
 #'
-#' @examples
 hierarchical_model_matrix <- function(geo_unit_index_data, hierarchical_level) {
   mat <- matrix(NA, nrow = nrow(geo_unit_index_data), ncol = 0)
   assign <- c()

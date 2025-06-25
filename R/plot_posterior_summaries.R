@@ -1,8 +1,28 @@
 
-plot_posterior_summaries <- function(res, hierarchy_select = NULL, areas_select = NULL,
-                                     res2 = NULL, modelname1 = "model 1", modelname2 = "model 2",
-                                     k_select = NULL,
-                                     dodge = position_dodge(width=0.5)  # for offsetting plots
+#' Plot summaries of hierarchical parameters
+#'
+#' Display outputs from posterior_summary_hierparam
+#'
+#' @param res output from posterior_summary_hierparam
+#' @param hierarchy_select optional, what hierarchical level to show? if NULL, all levels are shown
+#' @param areas_select optional: areas to filter by, allowed only if one hierarchical level is selected
+#' @param res2 optional, output from posterior_summary_hierparam
+#' @param modelname1 label for res
+#' @param modelname2 label for res2
+#' @param k_select optional, if res contains k, which k values to show? if NULL, all k values are shown
+#' @param dodge used for offsetting plots, default is 0.5
+#'
+#' @returns ggplot object
+#'
+plot_posterior_summaries <- function(
+    res,
+    hierarchy_select = NULL,
+    areas_select = NULL,
+    res2 = NULL,
+    modelname1 = "model 1",
+    modelname2 = "model 2",
+    k_select = NULL,
+    dodge = position_dodge(width=0.5)  # for offsetting plots
 ) {
   if (!is.null(areas_select) & is.null(hierarchy_select)) {
     stop("You must select a hierarchy to filter the areas. Please provide a hierarchy_select argument.")

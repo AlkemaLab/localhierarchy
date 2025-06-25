@@ -15,5 +15,5 @@ get_posterior_summaries(fit, params = c("mu_raw", "mu_sigma", "nonse"))
 tibble with variable (parname with index used in model) and postmean (posterior mean)
 }
 \description{
-get_posterior_summaries
+Get posterior summaries for a set of parameters
 }

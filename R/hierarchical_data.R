@@ -1,7 +1,7 @@
 
 #' Hierarchical_data
 #'
-#' This is my description!
+#' Create hierarchical data structure for a hierarchical model.
 #'
 #' @param geo_unit_index_data tibble with unique hierarchical levels (one column for each level)
 #' @param hierarchical_level vector with hierarchical spec

@@ -2,13 +2,18 @@
 % Please edit documentation in R/posterior_summary_hierparam.R
 \name{quantile_df}
 \alias{quantile_df}
-\title{Title}
+\title{Compute quantiles}
 \usage{
 quantile_df(x, probs = c(0.025, 0.5, 0.975))
 }
 \arguments{
-\item{probs}{}
+\item{x}{vector with values}
+
+\item{probs}{vector of quantiles}
+}
+\value{
+tibble with the requested quantiles
 }
 \description{
-Title
+This function computes quantiles for a given vector and returns them in a tibble format.
 }

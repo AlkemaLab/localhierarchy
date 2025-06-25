@@ -1,14 +1,16 @@
 
-#' Title
+#' Get mu_raw_labeled
 #'
-#' @param fit needs to include parname_raw_estimate
-#' @param parname selected parameter name (example: "mu")
-#' @param morethan1param does paramname refer to more than 1 parameter (a vector)
+#' This function extracts the mu_raw_estimate samples from a fitted model and
+#'  labels them with their hierarchical level.
+#'
+#' @param fit needs to include parname_raw_estimate (example: mu_raw)
+#' @param parname selected parameter name (example: mu)
+#' @param morethan1param does parname refer to more than 1 parameter (a vector)
 #'
 #' @returns tibble with samples of parname_raw_estimate, including info on hierarchical level
 #' @export
 #'
-#' @examples
 get_mu_raw_labeled <- function(fit, parname, morethan1param = FALSE){
   # mu_raw_estimate is saved directly so getting those is not difficult
   # the only challenge is to figure out what hier level they refer to

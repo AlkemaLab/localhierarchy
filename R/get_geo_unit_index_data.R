@@ -1,6 +1,8 @@
 
 
-#' get_geo_unit_index_data
+#' Get geo_unit_index_data
+#'
+#' Get unique hierarchical levels from survey data and assign index "c" based on area.
 #'
 #' @param data survey data of interest that contains the hierarchical_column_names
 #' @param hierarchical_levels vector that contains one of more specs of hierarchical_level (incl intercept)
@@ -10,7 +12,8 @@
 #' @export
 #'
 #' @examples
-#' survey_dat <- tibble(subcluster = c("A", "A", "B", "B"), iso = c("iso1", "iso2", "iso3", "iso3"))
+#' survey_dat <- tibble(subcluster = c("A", "A", "B", "B"),
+#'     iso = c("iso1", "iso2", "iso3", "iso4"))
 #' get_geo_unit_index_data(survey_dat,
 #'         hierarchical_levels = c("intercept", "subcluster", "iso"),
 #'         area = "iso")

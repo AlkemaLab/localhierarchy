@@ -2,12 +2,13 @@
 % Please edit documentation in R/hierarchical_model_matrix.R
 \name{hierarchical_model_matrix}
 \alias{hierarchical_model_matrix}
-\title{hierarchical_model_matrix}
+\title{hierarchical_model_matrix
+Create list with information including a model matrix, associated with the geo_unit_data and hierarchical_levels}
 \usage{
 hierarchical_model_matrix(geo_unit_index_data, hierarchical_level)
 }
 \arguments{
-\item{geo_unit_index_data}{tibble with unique hierarchical levels (one column for each level)}
+\item{geo_unit_index_data}{tibble with unique hierarchical levels (one column for each level, one row per combi)}
 
 \item{hierarchical_level}{vector with hierarchical spec from highest to lowest levels}
 }
@@ -19,4 +20,5 @@ index is a tibble with n_eta rows, with info for each eta in and columns i [inde
 }
 \description{
 hierarchical_model_matrix
+Create list with information including a model matrix, associated with the geo_unit_data and hierarchical_levels
 }
