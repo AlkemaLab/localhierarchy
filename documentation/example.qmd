@@ -272,3 +272,91 @@ fit <- fit_global
     }
 #    dev.off()
 ```
+# Subnational estimation 
+
+## Equations 
+We extend the model with an additional level of hierarchy, here subnational regions. The simplest set up is as follows: 
+
+-   Parameter to estimate = $\mu_r^{(subnat)}$ = subnational-region-specific coverage 
+
+-   We assume that $\mu_r^{(subnat)} =  \mu_{c[r]} + \eta_{r}^{(subnat)}$,  with $\eta_r^{(subnat)} \sim N(0, \sigma_{\mu, across-subnat}^2)$, where $\sigma_{\mu, across-subnat}^2$ refers to across-subnational-region variance. The subnational $\eta$ can be parametrized as before, i.e. $\eta = \sigma\cdot \gamma$ where $\gamma \sim N(0,1)$. 
+
+- We can consider a data model for data observed at the subnational level as follows: $y_i^{(region)} \sim N(\mu_{r[i]}^{(subnat)}, \sigma_y^{2(subnat)})$. Here $\sigma_y^{2(subnat)}$ is the subnational error variance which is likely to be larger than the national-level variance due to larger sampling errors at the subnational level. (Note that in real examples, sampling error is calculated for an observation and included in the variance term, to capture differences between national and subnational level observations). 
+
+- Data on national level can be used as well, by aggregation subnational estimates. This is left out of this package but can be found in fpet2025 and BayesCoverage. 
+
+## Model fitting
+In model fitting, we can fit a global subnational model using subnational data from different countries and without fixing any parameters. Alternatively, we can fix parameters based on fits to national level data. This second approach is helpful when subnational level data are more limited as compared to national level data. 
+
+We illustrate the sequential approach where subnational estimates are obtained using information from a global national fit. The model that is fitted is as follows:  
+
+- We set $\mu_r^{(subnat)} =  \mu_{c[r]} + \eta_{r}^{(subnat)}$, and set $\mu_{c[r]} = \hat{\mu}_{c[r]}, the posterior mean from a fit to national level data. (The model could also be fitted using fixed values up to one level above the country level, to introduce a hierarchical model for the subnational parameters). 
+
+- In this simplified example, we set $\sigma_y^{2(subnat)} = \sigma_y^2$. 
+
+We fit a global subnational model with these settings 
+```{r}
+fit_globalsubnat <- fit_model_localhierarchy(runstep = "global_subnational",
+                             area = "subnat",
+                      
+                              survey_df = dat_subnat,
+                              global_fit = fit_global,
+                              chains = 4)
+
+
+```
+
+Here only one new sigma is estimated:
+```{r}
+plot_prior_post_sigmas(fit = fit_globalsubnat, parname = "mu")
+
+```
+
+We can obtain the posterior summaries 
+```{r}
+fit_globalsubnat$post_summ <- get_posterior_summaries(fit_globalsubnat)
+
+```
+
+Note that values of sigmas for higher levels are the same in the global national and subnational fit. However, mu_raws may be different if different countries were included or ordered differently. (this is documented inand reproducable with fit_global$geo_unit_index )
+```{r}
+fit_globalsubnat$post_summ %>%
+  filter(variable_no_index == "mu_sigma")
+fit1a$post_summ %>%
+  filter(variable_no_index == "mu_sigma")
+```
+
+fitting a local subnational model 
+(note that if the data are from a new country, and national mu's were fixed, this approach does not work. See xxx for a fix)
+```{r}
+fit_local <- fit_model_localhierarchy(runstep = "local_subnational",
+                                  area = "subnat",
+                                  global_fit = fit_globalsubnat,
+                                  survey_df = dat_subnat,
+                                  chains = 4)
+```
+
+checking summaries 
+```{r}
+res_globalsubnat <- posterior_summary_hierparam(fit = fit_globalsubnat, parname = "mu")
+res_localsubnat <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
+
+```
+
+comparison plots, local subnational and various other fits  
+```{r}
+plot_posterior_summaries(res = res_localsubnat, res2 = res_global,
+                              modelname2 = "global national", modelname1 = "local",
+                         hierarchy_select = "subcluster")
+```
+
+The fixed country estimates that were used: 
+```{r}
+plot_posterior_summaries(res = res_localsubnat, 
+                         res2 = res_global,
+                         modelname2 = "global national", modelname1 = "local",
+                         hierarchy_select = "iso")
+```
+
+
+
