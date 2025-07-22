@@ -27,6 +27,7 @@ library(stringr)
 library(cmdstanr)
 library(truncnorm) # for inits
 library(bayesplot) # diagnostic plots
+library(posterior) # else error for as_draws_list
 devtools::load_all(here::here())
 ```
 
@@ -205,7 +206,7 @@ geo_unit_index
 ```{r}
 hier_data <- hierarchical_data(geo_unit_index, hierarchical_level)
 names(hier_data)
-hier_data
+# hier_data # not printing, model matrix is too large, see toy example instead
 
 
 ```
@@ -228,7 +229,7 @@ names(hier_stan_data)
 sigmas
 
 ```{r}
-plot_prior_post_sigmas(fit = fit_globalsubnat, parname = "mu")
+plot_prior_post_sigmas(fit = fit_global, parname = "mu")
 
 ```
 
@@ -318,11 +319,11 @@ fit_globalsubnat$post_summ <- get_posterior_summaries(fit_globalsubnat)
 
 ```
 
-Note that values of sigmas for higher levels are the same in the global national and subnational fit. However, mu_raws may be different if different countries were included or ordered differently. (this is documented inand reproducable with fit_global$geo_unit_index )
+Note that values of sigmas for higher levels are the same in the global national and subnational fit. However, mu_raws may be different if different countries were included or ordered differently. (this is documented in and reproducable with fit_global$geo_unit_index )
 ```{r}
 fit_globalsubnat$post_summ %>%
   filter(variable_no_index == "mu_sigma")
-fit1a$post_summ %>%
+fit_global$post_summ %>%
   filter(variable_no_index == "mu_sigma")
 ```
 

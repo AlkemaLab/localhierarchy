@@ -55,10 +55,10 @@ posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
   }
   if (!morethan1param){
     res <- map(mu, function(tibble_samples)
-      tibble_samples %>% select(name, value)  %>% reframe(quantile_df(value), .by = name))
+      tibble_samples %>% select(name, value)  %>% reframe(summary_df(value), .by = name))
   } else {
     res <- map(mu, function(tibble_samples)
-      tibble_samples %>% select(name, value, k)  %>% reframe(quantile_df(value), .by = c(name, k)))
+      tibble_samples %>% select(name, value, k)  %>% reframe(summary_df(value), .by = c(name, k)))
   }
   return(res)
 }
@@ -143,5 +143,24 @@ quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
   tibble(
     val = quantile(x, probs, na.rm = TRUE),
     quant = probs
+  )
+}
+
+#' Compute summaries
+#'
+#' This function computes posterior summaries for a given vector and returns them in a tibble format.
+#'
+#' @param x vector with values
+#'
+#' @returns tibble with 2.5th quantile, posterior mean, and 97.5th quantile, and quant = c(0.025, 0.5, 0.975)
+#'
+#' @export
+#'
+summary_df <- function(x) {
+  tibble(
+    val = c(quantile(x, 0.025, na.rm = TRUE),
+            mean(x, na.rm = TRUE),
+            quantile(x, 0.975, na.rm = TRUE)),
+    quant = c(0.025, 0.5, 0.975)
   )
 }
