@@ -13,6 +13,7 @@
  * @param mu_n_sigma_estimate Number of estimated sigmas
  * @param mu_sigma_fixed Fixed sigma values
  * @param mu_sigma_estimate Estimated sigma values
+ * @param mu_prior_mean Prior mean
  * @param mu_prior_sd Prior sd
  * @param mu_raw_n_terms Number of mu_raws
  * @param mu_raw_n_terms_fixed Number of fixed mu_raws
@@ -53,6 +54,9 @@ vector get_mu_star(//vector mu_sigma,
   if (mu_raw_n_terms_estimate > 0) {
     mu_raw[(1+mu_raw_n_terms_fixed):mu_raw_n_terms] = mu_raw_estimate;
   }
+  // note that mu_prior_mean is currently on standardized scale,
+  // ie mu_global = sd*(gamma + mu_prior_mean)
+  // (could update into +mu_prior_mean/mu_prior_sd is easier if mean is on mu_global scale)
   mu_raw[1] = mu_raw[1] + mu_prior_mean;
   vector[mu_raw_n_terms] mu_star = scale_blocks(mu_raw, mu_raw_n_terms, mu_sigmawpriorsd, mu_n_sigma + 1, mu_re_start, mu_re_end);
   return(mu_star);

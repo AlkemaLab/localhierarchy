@@ -86,4 +86,20 @@ plot_posterior_summaries(res = res_local,
 fit_global$post_summ %>%
   filter(variable == "nonse[1]")
 
+# reproduce intercept estimate
+# this is the gamma, standardized value
+fit_global$post_summ %>%
+  filter(variable == "mu_raw[1]")
+# to get mu_global: mu_global = sd*(gamma + mu_prior_mean)
+# such that gamma = mu_global/sd - mu_prior_mean
+# for rescaling, we used
+# from stan function
+#mu_sigmawpriorsd[1] = mu_prior_sd;
+#mu_raw[1] = mu_raw[1] + mu_prior_mean;
+fit_global$stan_data$mu_scalarprior_mean
+fit_global$stan_data$mu_scalarprior_sd
+
+gamma <- fit_global$post_summ %>%
+  filter(variable == "mu_raw[1]") %>%pull(postmean)
+fit_global$stan_data$mu_scalarprior_sd*(gamma + fit_global$stan_data$mu_scalarprior_mean)
 
