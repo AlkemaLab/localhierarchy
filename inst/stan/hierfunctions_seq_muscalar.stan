@@ -53,9 +53,9 @@ parameters {
   // if mu is a scalar:
   vector[mu_raw_n_terms_estimate] mu_raw_estimate;
   // non-ordered:
-  //vector<lower=verysmallnumber>[mu_n_sigma_estimate] mu_sigma_estimate;
+  vector<lower=verysmallnumber>[mu_n_sigma_estimate] mu_sigma_estimate;
   // ordered:
-  positive_ordered [mu_n_sigma_estimate] mu_sigma_estimate_reverse;
+  // positive_ordered [mu_n_sigma_estimate] mu_sigma_estimate_reverse;
 
 
   // // if mu is a vector:
@@ -70,8 +70,8 @@ parameters {
 /////////////////////////////////////////////////////
 transformed parameters {
 
-  // if ordered
-  vector[mu_n_sigma_estimate] mu_sigma_estimate = reverse(mu_sigma_estimate_reverse);
+  // if ordered, comment out
+  // vector[mu_n_sigma_estimate] mu_sigma_estimate = reverse(mu_sigma_estimate_reverse);
 
  // CHOOSE ONE
  // if mu is a scalar:
@@ -120,9 +120,9 @@ model {
   // hierarchical parameters
   to_vector(mu_raw_estimate) ~ std_normal();
   // non-ordered
-  // to_vector(mu_sigma_estimate) ~ normal(0, mu_prior_sd_sigma_estimate);
+  to_vector(mu_sigma_estimate) ~ normal(0, mu_prior_sd_sigma_estimate);
   //ordered
-  mu_sigma_estimate_reverse ~ normal(0, mu_prior_sd_sigma_estimate)T[verysmallnumber, positive_infinity()];
+  // mu_sigma_estimate_reverse ~ normal(0, mu_prior_sd_sigma_estimate)T[verysmallnumber, positive_infinity()];
 
   // data model parameters
   nonse_estimate ~ normal(0, 1);

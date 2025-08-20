@@ -7,7 +7,7 @@
 #' This function fits the localhierarchy model
 #'
 #' @param survey_df tibble with survey data
-#' @param y column name of outcome.
+#' @param y column name of outcome, defaults to `y`.
 #' @param area column name of the area of each observation (used as geounit; iso or subnational region)
 #' @param area_select area name to use for local run (eg iso code or subnat region name)
 #'
@@ -79,15 +79,15 @@
 #'
 fit_model_localhierarchy <- function(
   survey_df,
-  y = "logit_indicator",
+  y = "y", # observation
   area = "iso", # add default or set in function?
-  area_select  = NULL, # used for local national run
+  area_select  = NULL, # used for local run
   runstep, # type of run, see details
   global_fit = NULL,
   hierarchical_level     = c("intercept", "subcluster", "iso"),
   add_subnational_hierarchy = "subnat", # this is what's added to the hierarchy for subnational
+  use_globalsubnat_fromnat = TRUE,
   mu_isvector = FALSE, # TRUE if mu is a vector
-  use_globalsubnat_fromnat = FALSE,
   # settings for sampling
   chains = 4,
   iter_sampling = 200,
@@ -119,9 +119,7 @@ fit_model_localhierarchy <- function(
     }
 
     print("We use a global fit, and take selected or all settings from there.")
-    print("Settings for hierarchical settings")
     hierarchical_level <- global_fit$hierarchical_level
-    print(hierarchical_level)
     # for hier stuff, we fix things according to the run
     if (runstep %in% c("local_national")) {
       print("For hierarchical terms, we fix things up to the 2nd-lowest level.")
@@ -134,27 +132,29 @@ fit_model_localhierarchy <- function(
     if (runstep %in% c("global_subnational", "local_subnational")){
       print("We fix data model parameters.")
       fix_nonse <- TRUE
+      if (runstep %in% c("global_subnational") | use_globalsubnat_fromnat) {
+        print("For subnational global run, or in a local subnat run with a global fit from a national run, we add a level for subnational hierarchical settings ")
+        hierarchical_level <- c(hierarchical_level, add_subnational_hierarchy)
+      }
       if (runstep %in% c("global_subnational")){
-        print("For subnational global run, we add a level for subnational hierarchical settings ")
-        hierarchical_level <- c(global_fit$hierarchical_level, add_subnational_hierarchy)
         print("For hierarchical terms, we fix things up to the 2nd-lowest or 3rd level (here 2nd is used).")
         hierarchical_level_terms_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
         print("For sigma terms, we fix up to 2nd-lowest level.")
         hierarchical_level_sigmas_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
       } else {
-        if (use_globalsubnat_fromnat){
-          # same as global subnational, to add a level
-          print("For subnational local run using nat global fit, we add a level for subnational hierarchical settings ")
-          hierarchical_level <- c(global_fit$hierarchical_level, add_subnational_hierarchy)
-        }
-        print("For hierarchical terms, we fix things up to the 2nd-lowest or 3rd level (here 2nd is used).")
+        print("For hierarchical terms, we fix things up to the 2nd-lowest level.")
         hierarchical_level_terms_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
         print("For sigma terms, we fix up to lowest level.")
         hierarchical_level_sigmas_fixed = hierarchical_level[1:(length(hierarchical_level))]
-
       }
     }
   }
+  print("Hierarchical levels used for this run:")
+  print(hierarchical_level)
+  print("Hierarchical terms fixed:")
+  print(hierarchical_level_terms_fixed)
+  print("Hierarchical sigmas fixed:")
+  print(hierarchical_level_sigmas_fixed)
 
 
   ##### Data processing  and Setup data for Stan #####
@@ -220,9 +220,9 @@ fit_model_localhierarchy <- function(
     stan_data[["mu_k_terms"]] <- 3 # 2 or higher
     stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_muvector.stan"))
   }
-  stan_data[[paste0(parname, "_scalarprior_sd")]] <- 2
-  stan_data[[paste0(parname, "_scalarprior_mean")]] <- 1
-  stan_data[[paste0(parname, "_prior_sd_sigma_estimate")]] <- 2
+  stan_data[[paste0(parname, "_scalarprior_sd")]] <- 1
+  stan_data[[paste0(parname, "_scalarprior_mean")]] <- 0
+  stan_data[[paste0(parname, "_prior_sd_sigma_estimate")]] <- 1
   hier_data <- hier_stan_data  <- list()
   hier_data[[paste0(parname, "_data")]] <- hierarchical_data(geo_unit_index_data = geo_unit_index, hierarchical_level = hierarchical_level)
   hier_stan_data[[parname]] <- hierarchical_param_stan_data(
@@ -284,9 +284,11 @@ fit_model_localhierarchy <- function(
 
 
 
-   add_inits <- TRUE
+   add_inits <- FALSE #TRUE
+   # if TRUE, can consider avoiding warnings
+   options(cmdstanr_warn_inits = FALSE)
     if (add_inits){
-      print("We set initial values using init_fun_localhierarchy")
+      #print("We set initial values using init_fun_localhierarchy")
       init_ll <- lapply(1:chains, function(id) init_fun_localhierarchy(chain_id = id, stan_data))
     } else {
       init_ll <- NULL
@@ -304,7 +306,9 @@ fit_model_localhierarchy <- function(
       seed = seed,
       refresh = refresh,
       adapt_delta = adapt_delta,
-      max_treedepth = max_treedepth
+      max_treedepth = max_treedepth,
+      # if we don't want to get progress reports
+      show_messages = FALSE
     )
 
     result <- c(result,

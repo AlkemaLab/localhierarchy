@@ -6,11 +6,13 @@
 #' @param param_name The name of the parameter we are working with, e.g. "mu"
 #' @param param_data Data structures as constructed by hierarchical_data for that parameter
 #' @param global_fit an optional "global" fit that will be used to extract
-#'   parameter estimates for any specified hierarchical units to fix
+#'   parameter estimates for any specified hierarchical units to fix. Defaults to NULL, no fixing.
 #' @param hierarchical_terms_fixed character vector specifying hierarchical
-#'   levels for which the terms should be fixed (subset of `hierarchical_levels`)
+#'   levels for which the terms should be fixed (subset of `hierarchical_levels`).
+#'   Used only if global fit is provided.
 #' @param hierarchical_terms_fixed character vector specifying hierarchical
-#'   levels for which the terms should be fixed (subset of `hierarchical_levels`)
+#'   levels for which the terms should be fixed (subset of `hierarchical_levels`, intercept is always included)
+#'   Used only if global fit is provided.
 #'
 #' @return named list with Stan data relevant to the hierarchical set up for
 #'   this parameter, e.g. if the `param_name` is `"mu"`, these will be
@@ -18,10 +20,11 @@
 #'   mu_model_matrix, mu_n_terms_fixed, mu_n_terms_estimate,
 #'   mu_raw_fixed, mu_n_sigma_fixed, mu_n_sigma_estimate,
 #'   mu_sigma_fixed`
-hierarchical_param_stan_data <- function(param_name, param_data,
+hierarchical_param_stan_data <- function(param_name,
+                                         param_data,
+                                         global_fit = NULL,
                                          hierarchical_terms_fixed,
-                                         hierarchical_sigmas_fixed,
-                                         global_fit) {
+                                         hierarchical_sigmas_fixed) {
   result <- list()
   result[[paste0(param_name, "_raw_n_terms")]] <- param_data$n_terms
   result[[paste0(param_name, "_re_start")]] <- array(param_data$re_start)
