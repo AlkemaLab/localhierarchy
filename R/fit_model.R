@@ -16,6 +16,9 @@
 #'   values to use for some parameters in the current fit (see Details).
 #' @param hierarchical_level vector specifying hierarchical structure used for mu
 #' @param add_subnational_hierarchy level that's added to the hierarchy for subnational, defaults to 'subnat'
+#' @param use_globalsubnat_fromnat Logical, whether in a local subnational run,
+#' to use the global fit derived from national data
+#' if TRUE and local subnat run, global_fit needs to contain object `fit_globalsubnat_fromnat`
 #' @param mu_isvector Logical, TRUE if mu is a vector, defaults to FALSE
 #'
 #' Settings for sampling
@@ -29,7 +32,10 @@
 #' @param adapt_delta target acceptance rate for the No-U-Turn Sampler
 #' @param max_treedepth maximum tree depth for the No-U-Turn Sampler
 #'
-#' @returns List that contains samples, stan_data, and other information relevant to model fit (arguments)
+#' @returns List that contains samples, stan_data, other information relevant to model fit (arguments),
+#' and for global fits, point estimates of relevant parameters (post_summ).
+#' For subnational global fits, the list includes fit_globalsubnat_fromnat, which is the global fit with
+#' additional subnational sigmas added to the postsum object.
 #'
 #' @details
 #' The `fit_model_localhierarchy` function fits the toy example for hierarchical models/seq fitting.
@@ -119,6 +125,10 @@ fit_model_localhierarchy <- function(
     }
 
     print("We use a global fit, and take selected or all settings from there.")
+    if (use_globalsubnat_fromnat & runstep %in% c("local_subnational")){
+      add_subnational_hierarchy <- global_fit$area
+      global_fit <- global_fit$fit_globalsubnat_fromnat
+    }
     hierarchical_level <- global_fit$hierarchical_level
     # for hier stuff, we fix things according to the run
     if (runstep %in% c("local_national")) {
@@ -311,8 +321,33 @@ fit_model_localhierarchy <- function(
       show_messages = FALSE
     )
 
+
     result <- c(result,
                 samples = fit)
+    if (runstep %in% c("global_national", "global_subnational")){
+      post_summ <- get_posterior_summaries(result)
+      result <- c(result,
+          list(post_summ = post_summ))
+      if (runstep %in% c("global_subnational")){
+        # we also want to produce the object that has the national global fit with
+        # summaries that are extended to include additional subnational sigmas
+        # get this object (w/o samples)
+        fit_globalsubnat_fromnat <- global_fit
+        fit_globalsubnat_fromnat$samples <- NULL
+        param_add <- anti_join(result$post_summ %>%
+                                 # select rows where variable_no_index has sigma in it
+                                 filter(grepl("sigma", variable_no_index)),
+                               fit_globalsubnat_fromnat$post_summ %>%
+                                 filter(grepl("sigma", variable_no_index)))
+        # param_add
+        fit_globalsubnat_fromnat$post_summ <- bind_rows(fit_globalsubnat_fromnat$post_summ,
+                                                        param_add)
+
+
+        result <- c(result,
+                    list(fit_globalsubnat_fromnat = fit_globalsubnat_fromnat))
+      }
+    }
   result
 }
 
