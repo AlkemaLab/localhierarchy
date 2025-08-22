@@ -6,17 +6,17 @@
 \usage{
 fit_model_localhierarchy(
   survey_df,
-  y = "logit_indicator",
+  y = "y",
   area = "iso",
   area_select = NULL,
   runstep,
   global_fit = NULL,
   hierarchical_level = c("intercept", "subcluster", "iso"),
   add_subnational_hierarchy = "subnat",
+  use_globalsubnat_fromnat = TRUE,
   mu_isvector = FALSE,
-  use_globalsubnat_fromnat = FALSE,
   chains = 4,
-  iter_sampling = 200,
+  iter_sampling = 300,
   iter_warmup = 150,
   compile_model = TRUE,
   force_recompile = FALSE,
@@ -29,7 +29,7 @@ fit_model_localhierarchy(
 \arguments{
 \item{survey_df}{tibble with survey data}
 
-\item{y}{column name of outcome.}
+\item{y}{column name of outcome, defaults to \code{y}.}
 
 \item{area}{column name of the area of each observation (used as geounit; iso or subnational region)}
 
@@ -43,6 +43,10 @@ values to use for some parameters in the current fit (see Details).}
 \item{hierarchical_level}{vector specifying hierarchical structure used for mu}
 
 \item{add_subnational_hierarchy}{level that's added to the hierarchy for subnational, defaults to 'subnat'}
+
+\item{use_globalsubnat_fromnat}{Logical, whether in a local subnational run,
+to use the global fit derived from national data
+if TRUE and local subnat run, global_fit needs to contain object \code{fit_globalsubnat_fromnat}}
 
 \item{mu_isvector}{Logical, TRUE if mu is a vector, defaults to FALSE
 
@@ -67,7 +71,10 @@ Settings for sampling}
 \item{max_treedepth}{maximum tree depth for the No-U-Turn Sampler}
 }
 \value{
-List that contains samples, stan_data, and other information relevant to model fit (arguments)
+List that contains samples, stan_data, other information relevant to model fit (arguments),
+and for global fits, point estimates of relevant parameters (post_summ).
+For subnational global fits, the list includes fit_globalsubnat_fromnat, which is the global fit with
+additional subnational sigmas added to the postsum object.
 }
 \description{
 This function fits the localhierarchy model

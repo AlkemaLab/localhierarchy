@@ -7,9 +7,9 @@
 hierarchical_param_stan_data(
   param_name,
   param_data,
+  global_fit = NULL,
   hierarchical_terms_fixed,
-  hierarchical_sigmas_fixed,
-  global_fit
+  hierarchical_sigmas_fixed
 )
 }
 \arguments{
@@ -17,11 +17,12 @@ hierarchical_param_stan_data(
 
 \item{param_data}{Data structures as constructed by hierarchical_data for that parameter}
 
-\item{hierarchical_terms_fixed}{character vector specifying hierarchical
-levels for which the terms should be fixed (subset of \code{hierarchical_levels})}
-
 \item{global_fit}{an optional "global" fit that will be used to extract
-parameter estimates for any specified hierarchical units to fix}
+parameter estimates for any specified hierarchical units to fix. Defaults to NULL, no fixing.}
+
+\item{hierarchical_terms_fixed}{character vector specifying hierarchical
+levels for which the terms should be fixed (subset of \code{hierarchical_levels}, intercept is always included)
+Used only if global fit is provided.}
 }
 \value{
 named list with Stan data relevant to the hierarchical set up for

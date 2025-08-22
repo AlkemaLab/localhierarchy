@@ -73,9 +73,7 @@
 #'
 #' @importFrom cmdstanr cmdstan_model write_stan_file
 #' @importFrom tibble tibble
-#' @importFrom splines bs
 #' @import dplyr
-#' @importFrom readr read_file
 #' @importFrom stringr str_replace_all
 #'
 #'
@@ -96,7 +94,7 @@ fit_model_localhierarchy <- function(
   mu_isvector = FALSE, # TRUE if mu is a vector
   # settings for sampling
   chains = 4,
-  iter_sampling = 200,
+  iter_sampling = 300,
   iter_warmup = 150,
   compile_model  = TRUE, force_recompile = FALSE,
   seed = 1234,
@@ -143,17 +141,17 @@ fit_model_localhierarchy <- function(
       print("We fix data model parameters.")
       fix_nonse <- TRUE
       if (runstep %in% c("global_subnational") | use_globalsubnat_fromnat) {
-        print("For subnational global run, or in a local subnat run with a global fit from a national run, we add a level for subnational hierarchical settings ")
+        print("We add a level for subnational hierarchical settings ")
         hierarchical_level <- c(hierarchical_level, add_subnational_hierarchy)
       }
       if (runstep %in% c("global_subnational")){
-        print("For hierarchical terms, we fix things up to the 2nd-lowest or 3rd level (here 2nd is used).")
-        hierarchical_level_terms_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
+        print("For hierarchical terms, we fix things up to the 2nd-lowest level (here 3rd is used).")
+        hierarchical_level_terms_fixed = hierarchical_level[1:(length(hierarchical_level)-2)]
         print("For sigma terms, we fix up to 2nd-lowest level.")
         hierarchical_level_sigmas_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
       } else {
-        print("For hierarchical terms, we fix things up to the 2nd-lowest level.")
-        hierarchical_level_terms_fixed = hierarchical_level[1:(length(hierarchical_level)-1)]
+        print("For hierarchical terms, we fix things up to the 2nd-lowest level (here 3rd is used).")
+        hierarchical_level_terms_fixed = hierarchical_level[1:(length(hierarchical_level)-2)]
         print("For sigma terms, we fix up to lowest level.")
         hierarchical_level_sigmas_fixed = hierarchical_level[1:(length(hierarchical_level))]
       }
