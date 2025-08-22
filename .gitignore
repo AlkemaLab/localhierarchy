@@ -18,5 +18,6 @@ inst/stan/hierfunctions_seq_muscalar
 inst/stan/hierfunctions_seq_muvector
 documentation/hierarchicalmodels_seqruns_files/
 documentation/hierdata_files/
+paper/paper_cache/
 
 
