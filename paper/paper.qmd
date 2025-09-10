@@ -492,43 +492,8 @@ plot_posterior_summaries(res = res_local_seq, modelname1 = "local",
 
 # Usage in other projects
 
-The `localhierarchy` package is used in different projects, including the Family Planning Estimation Tool (FPET) and national and subnational modeling of coverage indicators for the Countdown initiative. In these projects, the goal is to estimate and create short-term forecasts of a set of indicators at the national and subnational levels. For example, in FPET, the goal is to produce estimates with uncertainty for modern contraceptive use from 1970 until 2030. Bayesian statistical models are used that parametrize how indicators change with time and hierarchical models are incorpored in such temporal models. A workflow of global-local estimation is followed such that countries can produce estimates and forecasts based on data for their respective countries. In these applications, `localhierarchy` functions are either used as is or adapted for the application. Stan models include the specification of the hierarchical models and Stan functions `localhierarchy`.
+see overleaf
 
-TO DO: finish a summary of one application, probably fpet, to present
-
--   summary of modeling approach used and how hier model is incorporated (ie transition model, parameters of longer term trend are estimated hierarchically)
-
-    <!-- Model indicators demand and demand satisfied. -->
-
-    <!-- Hierarchical models are used to capture country differences in the transitions, i.e., the long-term process by which these indicators change. Specific parameters are the rate of change (cpatured by spline regression coefficients), the timing, and asymptote. -->
-
--   perhaps a brief note about data models used
-
--   workflow used: global model fitting, then country workshops for local fitting, sensitivity analyses
-
-    -   to decide whether to add the first step of estimating longer term trends here
-
-        <!-- In the global national model, 2 steps are taken as well: we first estimate long terms trends, subcluster parameters, followed by country parameters. -->
-
--   how additional data can be used in local models: introduce routine data
-
--   subnational modeling:
-
-    -   summary to show that subnat global data base is much more limited than global national one
-
-        <!-- Global national data base has xx obs for married and xxx for unmarried women. Subnational data were processed for xxx countries at the time of model development. -->
-
-    -   summary of process/workflow
-
-        <!-- at subnational global fitting, we fix country parameters, effectovely introducing informative priors centered at natiional-data informed means. -->
-
-    -   bottom-up estimation, how national level data is used in subnational modeling. draft text below
-
--   \[probably not\] fp workflow additions (fitting for married vs unmarried, combination in all-women model)
-
-Draft text on bottom-up estimation: Typically, a national level indicator $\mu_c$ for country $c$ is a weighted mean of the subnational estimates, i.e. $\mu_c = \sum_s 1(c[s] = c) w_s \mu_{s}^{(subnat)}$, where the weights $w_s$ are based on population size or a different demographic indicator in subnational region $s$. For example, if the outcome refers to a coverage proportion, weights are based on the relevant population size in each subnational region. National level estimates that are obtained from subnational estimates are referred to as bottom-up estimates. Bottom-up estimates can be produced as a by-product of subnational estimates in a model fit where estimates for all regions in a country are produced. In settings where bottom-up estimates can be produced, national data can be considered for inclusion in model fitting. Specifically, national level data can inform the bottom-up estimate and hence indirectly, the subnational estimates. This is useful in settings where a national survey may not be available at the subnational level.
-
-<!-- Bottom-up estimates are typically close to but not equal to national estimates $\hat{\mu}_c$, as different data sources and modeling assumptions are used when directly estimating national level indicators using national-level data versus when constructing bottom-up estimates produced from subnational data. -->
 
 # Conclusions
 
