@@ -36,20 +36,8 @@ devtools::load_all(here::here())
 ```
 
 # Introduction
+see overleaf
 
-to finish:
-
--   context: global health estimation exercises, use of bayesian hier models, examples
-
--   need for local models
-
-    -   We want local Bayesian models to allow users to do runs on their own laptops/get results quickly, use data from own country only, not to get updates when other country is updated.
-
-    -   Examples of where local models are used: maternal, fp. where they could be used ....
-
--   challenges with global-local combis: no easy set up to keep code in synch between global and local model, to pass parameters from global model on to local model
-
--   this paper: introduce a package to facilitate development and fitting of combined global-local models. Models fitted in Stan.
 
 # Methods
 
