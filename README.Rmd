@@ -1,0 +1,31 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# localHierarchy
+
+The `localHierarchy` R package provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required. The package provides R functions and Stan model components to support global modeling, in which all parameters in hierarchical models are estimated, and local modeling, where parameters are estimated for only one or a small number of populations, using fixed values from a global model fit.
+
+## Installation
+
+Dependency on `cmdstanr:`
+
+Instructions for installing `cmdstanr` are available in their [Getting started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) guide.
+
+Install `localHierarchy` from Github:
+`remotes::install_github("AlkemaLab/localhierarchy")`
+
+## Examples
+
+to do: add from paper

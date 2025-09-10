@@ -32,7 +32,7 @@ is_there_a_comma <- function(variable){
 #' relevant information
 #'
 #' @param post_summ tibble with columns `variable` and `postmean`,
-#' variable examples are 'a[1,1]', 'a[2,1]', etc.
+#' variable examples are `a[1,1]`, `a[2,1]`, etc.
 #'
 #' @returns matrix with rows and columns corresponding to the indices in the variable
 #' @export
@@ -89,7 +89,7 @@ variable_exists_in_draws <- function(fit, var_name) {
 #' about a variable name and row and/or column indices, add columns containing
 #' just the variable name and the indices.
 #'
-#' @param estimate_df data frame with a column called `variable` that contains parname[i] or parname[i,j] entries
+#' @param estimate_df data frame with a column called `variable` that contains `parname[i]` or `parname[i,j]` entries
 #' @param num_inds number of indices in the variable name (used for 1 or 2)
 #'
 #' @returns data frame with the same columns as `estimate_df` plus columns containing

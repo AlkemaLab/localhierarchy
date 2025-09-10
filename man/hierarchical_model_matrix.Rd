@@ -2,8 +2,7 @@
 % Please edit documentation in R/hierarchical_model_matrix.R
 \name{hierarchical_model_matrix}
 \alias{hierarchical_model_matrix}
-\title{hierarchical_model_matrix
-Create list with information including a model matrix, associated with the geo_unit_data and hierarchical_levels}
+\title{hierarchical_model_matrix}
 \usage{
 hierarchical_model_matrix(geo_unit_index_data, hierarchical_level)
 }
@@ -13,12 +12,20 @@ hierarchical_model_matrix(geo_unit_index_data, hierarchical_level)
 \item{hierarchical_level}{vector with hierarchical spec from highest to lowest levels}
 }
 \value{
-list (modelmatrix, assign, index) associated with the geo_unit_data and hierarchical_levels
-in modelmatrix each column refers to one eta (and nrows is the number of lowest level units).
-assign is length of etas, with 0 for intercept, then an hierarchical level index (starting at 2) for each eta level
-index is a tibble with n_eta rows, with info for each eta in and columns i \link{index of eta}, column \link{hierarchical level}, and level \link{name of hierarchical level}
+A list with components \code{modelmatrix}, \code{assign}, and \code{index}:
+\itemize{
+\item \code{modelmatrix}: A matrix where each column refers to one eta (number of rows equals number of lowest level units).
+\item \code{assign}: Integer vector of length equal to the number of etas; \code{0} for the intercept, then a hierarchical level index (starting at 2) for each eta level.
+\item \code{index}: A tibble with \code{n_eta} rows, and columns:
+\itemize{
+\item \code{i}: Index of eta
+\item \code{column}: Hierarchical level
+\item \code{level}: Name of hierarchical level
+}
+}
+
+All components are associated with the provided \code{geo_unit_data} and \code{hierarchical_levels}.
 }
 \description{
-hierarchical_model_matrix
 Create list with information including a model matrix, associated with the geo_unit_data and hierarchical_levels
 }
