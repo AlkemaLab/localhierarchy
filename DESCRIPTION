@@ -1,4 +1,4 @@
-Package: LocalHierarchy
+Package: localhierarchy
 Type: Package
 Title: Flexible set up for hierarchical modeling and local fitting
 Version: 0.1.0
