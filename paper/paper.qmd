@@ -1,6 +1,6 @@
 ---
 title: "`localhierarchy`: an R package to facilitate fitting of global and local Bayesian hierarchical models"
-author: "Leontine, Herb, Shauna, Evan"
+author: "Leontine, Shauna, Evan, Herb"
 format: 
   pdf:
     latex-engine: pdflatex    # lualatex or xelatex or pdflatex
@@ -15,7 +15,7 @@ abstract: |
   
   We present the `localHierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required. The package provides R functions and Stan model components to support global modeling, in which all parameters in hierarchical models are estimated, and local modeling, in which parameters are estimated for only one or a small number of populations, using fixed values from a global model fit. 
   
-  This article presents a practical introduction to the package for the applied user and illustrates the package’s functionality through several example use cases.
+  This article presents a practical introduction to the package for the applied user and illustrates the package’s functionality through examples for national and subnational estimation.
 date: last-modified
 bibliography: references.bib
 number-sections: true
@@ -33,33 +33,48 @@ library(truncnorm) # for inits
 library(bayesplot) # diagnostic plots
 library(posterior) # else error for as_draws_list
 library(tidybayes)
+library(patchwork)
 devtools::load_all(here::here())
 ```
 
 # Introduction
 
 <!-- % context: global health estimation exercises, use of bayesian hier models, examples -->
-In global health estimation, Bayesian hierarchical models have become a cornerstone methodology, enabling the integration of diverse data sources to produce reliable estimates across multiple populations and regions. For example, they are used to estimate family planning indicators for the FP2030 initiative (ref) and maternal mortality by the United Nations Interagency Group (ref). TO DO. In these efforts, national or subnational estimates are often required for population-periods with limited data availability. Bayesian hierarchical models—whether used directly or for specific components within larger modeling frameworks—are valuable in these contexts because they facilitate the sharing of information across populations. As a result, global modeling exercises typically fit Bayesian hierarchical models to comprehensive global databases, producing national-level estimates for all countries worldwide. 
+
+In global health estimation, Bayesian hierarchical models have become a cornerstone methodology, enabling the integration of diverse data sources to produce reliable estimates across multiple populations and regions. For example, they are used to estimate family planning indicators for the FP2030 initiative (ref), low birth weight (ref), and maternal mortality by the United Nations Interagency Group (ref). In these efforts, national or subnational estimates are often required for population-periods with limited data availability. Bayesian hierarchical models—whether used directly or for specific components within larger modeling frameworks—are valuable in these contexts because they facilitate the sharing of information across populations. As a result, global modeling exercises typically fit Bayesian hierarchical models to comprehensive global databases, producing national-level estimates for all countries worldwide.
 
 <!-- % introduce local models and how they comapre to global model, why they are needed -->
-To facilitate local-level analysis, it is often desirable to use models that are informed by global models but can be fitted to just a subset of the data, such as data from a single country. We refer to these as local models: models derived from global hierarchical models but adapted to be fitted using data from only one population. Beyond allowing model fitting to smaller, specific datasets, local models offer practical advantages such as faster computation, making it feasible for users to perform analyses quickly on their own computers. Additionally, local models enable estimates for different populations to be updated independently, for example, when new data become available.
-This approach has been used successfully in global estimation exercises for family planning and maternal mortality (ref, ref).
+
+To facilitate local-level analysis, it is often desirable to use models that are informed by global models but can be fitted to just a subset of the data, such as data from a single country. We refer to these as local models: models derived from global hierarchical models but adapted to be fitted using data from only one population. Beyond allowing model fitting to smaller, specific datasets, local models offer practical advantages such as faster computation, making it feasible for users to perform analyses quickly on their own computers. Additionally, local models enable estimates for different populations to be updated independently, for example, when new data become available. This approach has been used successfully in global estimation exercises for family planning and maternal mortality (ref, ref).
 
 Since local models are usually derived from global models, a key challenge in using both for global health estimation is synchronizing codebases and data flows between these approaches. This is particularly important for modeling approaches that involve hierarchical estimation of multiple parameters, where the hierarchical structures may differ across parameters.
 
-This paper introduces the \texttt{localhierarchy} R package designed to address these challenges by supporting the development and fitting of Bayesian hierarchical models in settings requiring both global and local estimation. The package provides R functions and Stan functions and model blocks 
-<!-- citep{stan2023}  -->
-to facilitate specification of hierarchical models, to fit full global models, and to subsequently fit local models using fixed parameter values inferred from the global analysis. Through this framework, users can conveniently perform local inference informed by global context, streamlining workflows in global health estimation tasks. 
+This paper introduces the \texttt{localhierarchy} R package designed to address these challenges by supporting the development and fitting of Bayesian hierarchical models in settings requiring both global and local estimation. The package provides R functions and Stan functions and model blocks <!-- citep{stan2023}  --> to facilitate specification of hierarchical models, to fit full global models, and to subsequently fit local models using fixed parameter values inferred from the global analysis. Through this framework, users can conveniently perform local inference informed by global context, streamlining workflows in global health estimation tasks.
 
-This article presents a practical introduction to the \texttt{localhierarchy} package along with illustrative case studies demonstrating its applicability. The article is organized as follows. The next section introduces the modeling approach and workflow used for estimating family planning indicators, motivating the need for the \texttt{localhierarchy} functionality of fitting global and local hierarchical models. The methods section introduces the package' functionality for the estimation of one parameter at the national and subnational level. Finally, we return to the case study of family planning estimation to present illustrative results of the application of the \texttt{localhierarchy} setup in this context. 
+This article presents a practical introduction to the \texttt{localhierarchy} package along with illustrative case studies demonstrating its applicability. The article is organized as follows. The next section introduces the modeling approach and workflow used for estimating family planning indicators, motivating the need for the \texttt{localhierarchy} functionality of fitting global and local hierarchical models. The methods section introduces the package' functionality for the estimation of one parameter at the national and subnational level. Finally, we return to the case study of family planning estimation to present illustrative results of the application of the \texttt{localhierarchy} setup in this context.
 
 # The Family Planning Estimation Tool (FPET)
 
-The Family Planning Estimation Tool (FPET) is widely used to estimate key family planning indicators in countries and regions. Key indicators include modern contraceptive use, demand for family planning, and demand satisfied, referring to as the ratio of modern use to demand. Data on such indicators is available from household surveys and routine data systems. FPET estimates are obtained from fitting a Bayesian model to available data. An illustration of FPET estimates and available data is shown in Figure 1 for countries ccc and xxx. 
+The Family Planning Estimation Tool (FPET) is widely used to estimate key family planning indicators in countries and regions. Key indicators include modern contraceptive use, demand for family planning, and demand satisfied, referring to as the ratio of modern use to demand. Data on such indicators is available from household surveys and routine data systems. FPET estimates are obtained from fitting a Bayesian model to available data. An illustration of FPET estimates and available data is shown in @fig-localfits for three countries in Western Africa.
 
-At its core, the Bayesian FPET model employs transition models to characterize the long-term trajectories of family planning indicators over time within a population. The transition model describes changes in an indicator in terms of three principal parameters: the rate of change, the timing of the transition, and the asymptotic level (the maximum attainable level for an indicator). To allow for population-specific variation in how family planning indicators evolve, the parameters of the transition model are population-specific. Given limited country-specific information on some parameters, Bayesian hierarchical models are used to share information between populations. For example, the asymptotic level of demand is not yet known for the countries in Figure 1. Data from other countries inform this estimate using a hierarchical structure as summarized in Figure 2. Estimates of asymptotes for a selection of countries is shown in Figure 3.
+```{r}
+#| fig-height: 9
+#| fig-width: 7
+#| echo: false
+#| label: fig-localfits
+#| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in Benin (BEN), Gambia (GMB), and Ghana (GHA). Graphs show mCPR, unmet need for modern methods, demand, and demand satisfied with modern methods. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance. FPET estimates are shown in black, with grey shaded areas representing 90% credible intervals."
+plots <- readRDS("outputfpet_localfits.rds")
+plots[[1]] /  plots[[2]]/ plots[[3]] 
+```
 
-<!-- These structures are illustrated in Figure 1, showing how countries are grouped within regions, and regions are grouped in major world regions. -->
+
+At its core, the Bayesian FPET model employs transition models for demand and demand satisfied to characterize the long-term trajectories of family planning indicators over time within a population, illustrated in @fig-transition. The transition model describes changes in an indicator in terms of three principal parameters: the rate of change, the timing of the transition, and the asymptotic level (the maximum attainable level for an indicator). To allow for population-specific variation in how family planning indicators evolve, the parameters of the transition model are population-specific.
+
+![Illustration of transition model used in the modeling of family planning indicators. TO DO (if kept): make specific to this text, ie name asymptote, level](fig/transition.png){#fig-transition}
+
+Given limited country-specific information on some parameters, Bayesian hierarchical models are used to share information between populations, using hierarchical structures such as the one illustrated in Figure \ref{fig-hierstruc}. Specifically for family planning estimation and forecasting, a hierarchical model is used to estimate the asymptote of the transition of demand from low to high values, and the level of demand in a reference year. @fig-level shows estimates of the level in the reference year at the country level for countries in Western Africa, and for the groupings used in the hierarchical model. @fig-asympt shows estimates for the asymptote. These figures show variation in levels among countries in Western Africa, informed by country-specific data. Estimates of asymptotes are similar across countries in Western Africa because countries have not yet reached the end phase of their transition yet; the asymptotes in Western African countries are informed by the estimate of the asymptote in sub-Saharan Africa through the hierarchical model.
+
+<!-- figure hier structure  -->
 
 ```{=latex}
 \begin{figure}[h]
@@ -128,30 +143,46 @@ At its core, the Bayesian FPET model employs transition models to characterize t
 % \draw[arrow] (mu31.south) -- (dots4.north);
 \end{tikzpicture}%}
 \end{adjustbox}
-\caption{Illustration of hierarchical grouping of countries in world regions.}
+\caption{Illustration of hierarchical grouping of countries in world regions.}\label{fig-hierstruc}
 \end{figure}
 ```
 
+```{r, echo = FALSE}
+plots <- readRDS("outputfpet_params.rds")
+```
 
-The workflow used in FPET to produce country-level estimates is as follows. Firstly, the full Bayesian model is fitted to a global data base of survey data. Data base compilation is carried out by the United Nations Population Division (ref) and the Track20 project (ref). The global model fit provides information on model parameters, including hierarchical parameters, e.g., estimates of asymptotes. Subsequently, a local model can be used to produce FP estimates based on the data from one country, using information from the global model fit (explained further below). As part of the Track20 project, local model fitting is performed by country monitoring and evaluation officers using an online tool (ref). At this step, in addition to fitting models to country survey data, as done in the global modeling, users can incorporate additional data sources such as routine information system records (e.g., the number of contraceptive commodities supplied, add REF).
+```{r}
+#| fig-height: 9
+#| fig-width: 7
+#| echo: false
+#| label: fig-level
+#| fig-cap: "Estimates of the level of demand for countries in Western Africa and for higher levels used in the hierarchical model (smaller world regions and major world regions). Point estimates and 95% credible intervals are shown. TO DO: fix formatting, show country names"
+plots$plot_iso_omega /  plots$plot_reg_omega[[3]]/ plots$plot_reg_omega[[2]]
+```
+
+```{r}
+#| fig-height: 9
+#| fig-width: 7
+#| echo: false
+#| label: fig-asympt
+#| fig-cap: "Estimates of the asymptote for demand for countries in Western Africa and for higher levels used in the hierarchical model (major world regions). Point estimates and 95% credible intervals are shown. TO DO: fix formatting, show country names"
+plots$plot_iso_ptilde /  plots$plot_reg_ptilde[[2]] 
+```
+
+The workflow used in FPET to produce country-level estimates is as follows. Firstly, the full Bayesian model is fitted to a global data base of survey data. Data base compilation is carried out by the United Nations Population Division (ref) and the Track20 project (ref). The global model fit provides information on model parameters, including hierarchical parameters, e.g., estimates of asymptotes. Subsequently, a local model can be used to produce FP estimates based on the data from one country, using information from the global model fit.The technical details for this approach are given in the next section. We return to the application of estimating family planning indicators in Section 4.2.
 
 
-
-
-
+\clearpage
 
 # Methods
 
 The modeling approach introduced in `localhierarchy` was motivated by application like FPET that depend on hierarchical structures associated with national and subnational level estimation, requiring global and local models to be fit. In this section, we introduce the principle setup used for global and local hierarchical models in the context of national estimation. We use general notation and a specific example focused on national level estimation. Applications and an extension to subnational estimation are included in the use cases.
 
-
-
 ## Hierarchical model specification
 
 Suppose we want to estimate some population parameter of interest $\mu_r$ for a population indexed by $r$. For example, $\mu$ could refer to some population health indicator such as service coverage or morbidity or mortality-related outcomes. Index $r$ refers to the population in a region indexed by $r$, for example, a subnational region, a country, or a group of countries. We assume that $\mu$ is unconstrained (possibly after a transformation has been applied) and consider the following general hierarchical model setup, see Figure 2: \begin{align*}
-  \mu_{r^{(l)}}^{(l)} \mid \mu^{(l-1)}_{r^\prime}, \sigma^{(l)}_\theta &\sim N(\mu^{(l-1)}_{r^{(l-1)}}, \sigma^{(l)}_\mu), \text{ for } l > 0,
-\end{align*} 
-where $\mu_{r^{(l)}}^{(l)}$ ... Here, $\mu^{(l-1)}_{r^\prime}$ is the parameter value at one level higher in the hierarchy for the region $r^\prime$ that contains unit $r$. The parameter $\sigma_\mu^{(l)}$ for $l > 0$ describes variability of values of the parameter $\mu$ across geographic units at level $l$ of the hierarchy. At the top level of the hierarchy, $l = 0$, only a single parameter is estimated.
+  \mu_{r^{(l)}}^{(l)} \mid \mu^{(l-1)}_{r^\prime}, \sigma^{(l)}_\theta &\sim N(\mu^{(l-1)}_{r^{(l-1)}}, \sigma^{(l)}), \text{ for } l > 0,
+\end{align*} where $\mu_{r^{(l)}}^{(l)}$ ... Here, $\mu^{(l-1)}_{r^\prime}$ is the parameter value at one level higher in the hierarchy for the region $r^\prime$ that contains unit $r$. The parameter $\sigma^{(l)}$ for $l > 0$ describes variability of values of the parameter $\mu$ across geographic units at level $l$ of the hierarchy. At the top level of the hierarchy, $l = 0$, only a single parameter is estimated.
 
 ```{=latex}
 \begin{figure}[h]
@@ -170,26 +201,26 @@ where $\mu_{r^{(l)}}^{(l)}$ ... Here, $\mu^{(l-1)}_{r^\prime}$ is the parameter 
 ]
 
 % --- Level 0 ---
-\node[level0] (mu0) {$\mu^{(0)} \sim \mathcal{N}(0,s_\mu^2)$};
+\node[level0] (mu0) {$\mu^{(0)} \sim \mathcal{N}(0,s^2)$};
 
 % --- Level 1 ---
-\node[level1, below left=2cm and 3cm of mu0] (mu11) {$\mu^{(1)}_1 \sim \mathcal{N}(\mu^{(0)},\sigma_{\mu,1}^2)$};
+\node[level1, below left=2cm and 3cm of mu0] (mu11) {$\mu^{(1)}_1 \sim \mathcal{N}(\mu^{(0)},\sigma_{1}^2)$};
 \node[level1, right=of mu11] (mu12) {$\mu^{(1)}_2$};
 \node[level1, right=of mu12] (dots1) {$\dots$};
 
 % --- Level 2 ---
-\node[level2, below left=2cm and 0cm of mu11] (mu21) {$\mu^{(2)}_1 \sim \mathcal{N}(\mu^{(1)}_1,\sigma_{\mu,2}^2)$};
+\node[level2, below left=2cm and 0cm of mu11] (mu21) {$\mu^{(2)}_1 \sim \mathcal{N}(\mu^{(1)}_1,\sigma_{2}^2)$};
 \node[level2, right=of mu21] (mu22) {$\mu^{(2)}_2$};
 \node[level2, right=of mu22] (dots2) {$\dots$};
 
 
 % % --- Level 3 ---
-\node[level3, below left=2cm and 0cm of mu21] (mu31) {$\mu^{(3)}_1 \sim \mathcal{N}(\mu^{(2)}_1,\sigma_{\mu,3}^2)$};
+\node[level3, below left=2cm and 0cm of mu21] (mu31) {$\mu^{(3)}_1 \sim \mathcal{N}(\mu^{(2)}_1,\sigma_{3}^2)$};
 \node[level3, right=of mu31] (mu32) {$\mu^{(3)}_2$};
 \node[level3, right=of mu32] (dots3) {$\dots$};
 
 % % % --- Level 4 ---
-% \node[level4, below left=2cm and 0cm of mu31] (mu41) {$\mu^{(4)}_1 \sim \mathcal{N}(\mu^{(3)}_1,\sigma_{\mu,4}^2)$};
+% \node[level4, below left=2cm and 0cm of mu31] (mu41) {$\mu^{(4)}_1 \sim \mathcal{N}(\mu^{(3)}_1,\sigma_{4}^2)$};
 % \node[level4, right=of mu41] (mu42) {$\mu^{(4)}_2$};
 % \node[level4, right=of mu42] (dots4) {$\dots$};
 
@@ -204,10 +235,10 @@ where $\mu_{r^{(l)}}^{(l)}$ ... Here, $\mu^{(l-1)}_{r^\prime}$ is the parameter 
 \end{pgfonlayer}
 
 % Sigma labels inside background blocks
-\node[anchor=north west] at (bg1.east) {$\sigma_{\mu,1}$};
-\node[anchor=north west] at (bg2.east) {$\sigma_{\mu,2}$};
-\node[anchor=north west] at (bg3.east) {$\sigma_{\mu,3}$};
-%\node[anchor=north west] at (bg4.east) {$\sigma_{\mu,4}$};
+\node[anchor=north west] at (bg1.east) {$\sigma_{1}$};
+\node[anchor=north west] at (bg2.east) {$\sigma_{2}$};
+\node[anchor=north west] at (bg3.east) {$\sigma_{3}$};
+%\node[anchor=north west] at (bg4.east) {$\sigma_{4}$};
 % --- Arrows ---
 \draw[arrow] (mu0.south) -- (mu11.north);
 \draw[arrow] (mu0.south) -- (mu12.north);
@@ -233,14 +264,15 @@ where $\mu_{r^{(l)}}^{(l)}$ ... Here, $\mu^{(l-1)}_{r^\prime}$ is the parameter 
 As a specific example, we consider the estimation of country-specific parameters, where countries are organized into subregions of countries (illustrated in Figure 2). In this setting, using alternative notation for the same setup to indicate the level by name, the hierarchical model can be written as follows:
 
 \begin{alignat}{2}
-  \mu_c &\mid \mu_{s[c]}^{(\subregion)}, \sigma_{\mu, \country} &&\sim N(\mu_{s[c]}^{(\subregion)}, \sigma_{\mu, \country}^2), \label{eq-countryhier} \\
-  \mu_s^{(\subregion)} &\mid \mu_{w[s]}^{(\region)}, \sigma_{\mu, \subregion}^2 &&\sim N(\mu_{r[s]}^{(\region)}, \sigma_{\mu, \subregion}^2), \nonumber \\
-  \mu_w^{(\region)} &\mid \mu^{(\glob)}, \sigma_{\mu, \region}^2 &&\sim N(\mu^{(\glob)}, \sigma_{\mu, \region}^2), \nonumber
-\end{alignat} 
-where $c =1,\dots,C$ refers to the country index, $s[c] = 1, .., S$ to the subregion index of country $c$, and $w[s[c]] = 1, .., W$ to the region index of subregion $s[c]$. The parameter $\mu^{(\glob)}$ is the global mean for the parameter of interest, e.g., a global mean for service coverage or mortality. The parameters $\sigma_{\mu, \country}$, $\sigma_{\mu, \subregion}$, and $\sigma_{\mu, \region}$ describe variability in the parameter of interest across countries, subregions, and regions, respectively.
+  \mu_c &\mid \mu_{s[c]}^{(\subregion)}, \sigma_{ \country} &&\sim N(\mu_{s[c]}^{(\subregion)}, \sigma_{ \country}^2), \label{eq-countryhier} \\
+  \mu_s^{(\subregion)} &\mid \mu_{w[s]}^{(\region)}, \sigma_{ \subregion}^2 &&\sim N(\mu_{r[s]}^{(\region)}, \sigma_{ \subregion}^2), \nonumber \\
+  \mu_w^{(\region)} &\mid \mu^{(\glob)}, \sigma_{ \region}^2 &&\sim N(\mu^{(\glob)}, \sigma_{ \region}^2), \nonumber
+\end{alignat} where $c =1,\dots,C$ refers to the country index, $s[c] = 1, .., S$ to the subregion index of country $c$, and $w[s[c]] = 1, .., W$ to the region index of subregion $s[c]$. The parameter $\mu^{(\glob)}$ is the global mean for the parameter of interest, e.g., a global mean for service coverage or mortality. The parameters $\sigma_{ \country}$, $\sigma_{ \subregion}$, and $\sigma_{ \region}$ describe variability in the parameter of interest across countries, subregions, and regions, respectively.
 
-<!-- Here, if $\mu^{(\glob)}$ has prior $\mu^{(\glob)} \sim N(0, s_{\mu, global}^2)$, then $$\mu_c =  s_{global}\cdot \gamma_{global} + \sigma_{\mu, region}\cdot \gamma_{r[s[c]]]}^{(
-egion)} + \sigma_{\mu, subregion}\cdot\gamma_{s[c]}^{(\subregion)} + \sigma_{\mu, country}\cdot\gamma_{\mu, c},$$ with $\gamma \sim N(0,1)$ for each gamma (one global, $R$ regions, $S$ subregions, $C$ countries). -->
+```{=html}
+<!-- Here, if $\mu^{(\glob)}$ has prior $\mu^{(\glob)} \sim N(0, s_{\mu, global}^2)$, then $$\mu_c =  s_{global}\cdot \gamma_{global} + \sigma_{ region}\cdot \gamma_{r[s[c]]]}^{(
+egion)} + \sigma_{ subregion}\cdot\gamma_{s[c]}^{(\subregion)} + \sigma_{ country}\cdot\gamma_{ c},$$ with $\gamma \sim N(0,1)$ for each gamma (one global, $R$ regions, $S$ subregions, $C$ countries). -->
+```
 
 ## Local hierarchical models
 
@@ -264,14 +296,14 @@ We use the term local hierarchical models to refer to a hierarchical model in wh
   Estimate all parameters in hierarchical model, e.g., \\
 \(
   \begin{aligned}
-\mu_w^{(region)} &\sim N(\mu^{(global)}, \sigma_{\mu, region}^2),\\
-\mu_s^{(subregion)} &\sim N(\mu_{w[s]}^{(region)}, \sigma_{\mu, subregion}^2), \\
-\mu_c^{(country)} &\sim N(\mu_{s[c]}^{(subregion)}, \sigma_{\mu, country}^2),  \end{aligned}
+\mu_w^{(region)} &\sim N(\mu^{(global)}, \sigma_{ region}^2),\\
+\mu_s^{(subregion)} &\sim N(\mu_{w[s]}^{(region)}, \sigma_{ subregion}^2), \\
+\mu_c^{(country)} &\sim N(\mu_{s[c]}^{(subregion)}, \sigma_{ country}^2),  \end{aligned}
 \)
 };
 \node[modelbox, below=1cm of globalmodel] (localmodel) {%
   Local national modeling:\\
-  Estimate national parameters only, \\i.e., $\mu_c^{(country)}$ with $\mu_c^{(country)} \sim N(\hat{\mu}_{s[c]}^{(subregion)}, \hat{\sigma}_{\mu, country}^2).$
+  Estimate national parameters only, \\i.e., $\mu_c^{(country)}$ with $\mu_c^{(country)} \sim N(\hat{\mu}_{s[c]}^{(subregion)}, \hat{\sigma}_{ country}^2).$
 };
 
 % --- Data arrow (down then right) ---
@@ -293,10 +325,9 @@ node[midway,above] {Data for one country};
 \end{figure}
 ```
 
-
 A local model is derived from a global one by fixing parameters. Continuing with the specific example, an example local model to produce country estimates using data from one country alone has the following setup:
 
-$$\mu_c \sim N(\hat{\mu}_{s[c]}^{(\subregion)}, \hat{\sigma}_{\mu, \country}^2),$$
+$$\mu_c \sim N(\hat{\mu}_{s[c]}^{(\subregion)}, \hat{\sigma}_{ \country}^2),$$
 
 replacing the hierarchical mean and variances by point estimates. Details are given in the implementation section.
 
@@ -308,8 +339,8 @@ The `localhierarchy` R package contains R functions and example Stan model files
 
 In a typical work flow, a user first fits a global model, followed by local ones. Worked examples are given in the use case section. The global and local models in these examples are fitted using the `localhierarchy` wrapper function `fit_model_localhierarchy`, using its arguments to specify a hierarchical model, data, and, for local fits, pass on outputs from the global model. The wrapper function calls R functions to process data and prepare Stan input data, read in a Stan model, fit the model, and to postprocess the results.
 
-The package includes a user-friendly specification of hierarchical model structures, and associated specification of fixed parameters for local runs. A worked example is given in the first use case. Briefly, if a user wants to specify a hierarchical model like the one introduced above, with the levels world, regions, subregion, and country, <!-- country parameters $\mu_c =  s_{global}\cdot \gamma_{global} + \sigma_{\mu, region}\cdot \gamma_{r[s[c]]]}^{(
-egion)} + \sigma_{\mu, subregion}\cdot\gamma_{s[c]}^{(\subregion)} + \sigma_{\mu, country}\cdot\gamma_{\mu, c}$,  --> using a dataset with information on these groupings, with naming `region`, `subregion`, and `country`, in the R functions, the user can specify the hierarchical model as follows \[Q for herb: refs/credit to be given for this set up to other work?\]:
+The package includes a user-friendly specification of hierarchical model structures, and associated specification of fixed parameters for local runs. A worked example is given in the first use case. Briefly, if a user wants to specify a hierarchical model like the one introduced above, with the levels world, regions, subregion, and country, <!-- country parameters $\mu_c =  s_{global}\cdot \gamma_{global} + \sigma_{ region}\cdot \gamma_{r[s[c]]]}^{(
+egion)} + \sigma_{ subregion}\cdot\gamma_{s[c]}^{(\subregion)} + \sigma_{ country}\cdot\gamma_{ c}$,  --> using a dataset with information on these groupings, with naming `region`, `subregion`, and `country`, in the R functions, the user can specify the hierarchical model as follows \[Q for herb: refs/credit to be given for this set up to other work?\]:
 
 ```{r, eval = FALSE}
 hierarchical_level <- c("intercept",  "region", "subregion", "country")
@@ -324,25 +355,19 @@ hierarchical_terms_fixed <- c("intercept",  "region", "subregion")
 
 Note that even though there is no $\sigma$ at the intercept level, this term is always included in the `hierarchical_sigmas_fixed` vector.
 
-The parameterization used in Stan is a non-centered parameterization. In general notation, for $l>0$, non-centered parameterization refers to writing mean parameters as deviations from higher-level group means: 
-\begin{align*}
+The parameterization used in Stan is a non-centered parameterization. In general notation, for $l>0$, non-centered parameterization refers to writing mean parameters as deviations from higher-level group means: \begin{align*}
   \mu_r^{(l)} &= \mu^{(l-1)} + \sigma^{(l)} \cdot \gamma_{r^\prime}^{(l-1)},
-\end{align*} 
-where $\gamma_r^{(l)} \sim N(0, 1)$. Applied sequentially, and if $\mu^{(0)} \sim N(0, s)$, we get 
-\begin{align*}
+\end{align*} where $\gamma_r^{(l)} \sim N(0, 1)$. Applied sequentially, and if $\mu^{(0)} \sim N(0, s)$, we get \begin{align*}
   \mu_r^{(l)} &= s\cdot\gamma^{(0)} + \sum_{k=1}^{l} \sigma^{(k)} \cdot \gamma_{r^\prime}^{(k)},
-\end{align*}
-where $r^\prime$ now refers more generally to the index of the unit containing the lower-level group. For the specific example of country parameters, the non-centered parameterization is given by 
-\begin{align*}
+\end{align*} where $r^\prime$ now refers more generally to the index of the unit containing the lower-level group. For the specific example of country parameters, the non-centered parameterization is given by \begin{align*}
   \mu_c =  s_{\glob} \cdot {\gamma}_{\glob} + {\sigma}_{\mu, \region}\cdot {\gamma}_{r[s[c]]]}^{(\region)} + {\sigma}_{\mu, \subregion}\cdot{\gamma}_{s[c]}^{(\subregion)} + {\sigma}_{\mu, \country}\cdot\gamma_{c}.
 \end{align*}
 
-Implementation is based on a model matrix. For our model given by the equation above, the following matrix multiplication is used to obtain the vector of $\mu_c$s: $$(\mu_1, ..., \mu_c) = M\cdot (\eta_1, ..., \eta_{1+R+S+C}),$$ where matrix $M$ is a sparse matrix with 1s and 0s, and $(\eta_1, ..., \eta_{1+R+S+C})$ refers to the vector of the product of the standard deviation terms and $\gamma$s, i.e., $\gamma_1 = (s_{\glob}\cdot \gamma_{\glob}, \gamma_2 = \sigma_{\mu, \region} \cdot \gamma_{\mu, 1}^{(\region)},..., \gamma_{1+W+S+C} = \sigma_{\mu, \country}\cdot\gamma_{\mu, C}$. When estimating a subset of parameters in a local model, fixed values of $\sigma$s and $\gamma$s by point estimates (posterior means) from a global fit. For example, for a national model, we get 
-\begin{align*}
+Implementation is based on a model matrix. For our model given by the equation above, the following matrix multiplication is used to obtain the vector of $\mu_c$s: $$(\mu_1, ..., \mu_c) = M\cdot (\eta_1, ..., \eta_{1+R+S+C}),$$ where matrix $M$ is a sparse matrix with 1s and 0s, and $(\eta_1, ..., \eta_{1+R+S+C})$ refers to the vector of the product of the standard deviation terms and $\gamma$s, i.e., $\gamma_1 = (s_{\glob}\cdot \gamma_{\glob}, \gamma_2 = \sigma_{ \region} \cdot \gamma_{ 1}^{(\region)},..., \gamma_{1+W+S+C} = \sigma_{ \country}\cdot\gamma_{ C}$. When estimating a subset of parameters in a local model, fixed values of $\sigma$s and $\gamma$s by point estimates (posterior means) from a global fit. For example, for a national model, we get \begin{align*}
   \mu_c = s_{\glob} \cdot \hat{\gamma}_{\glob} + 
-          \hat{\sigma}_{\mu, \region} \cdot \hat{\gamma}_{r[s[c]]]}^{(\region)} + 
-          \hat{\sigma}_{\mu, \subregion} \cdot \hat{\gamma}_{s[c]}^{(\subregion)} + 
-          \hat{\sigma}_{\mu, \country} \cdot \gamma_{c}.
+          \hat{\sigma}_{ \region} \cdot \hat{\gamma}_{r[s[c]]]}^{(\region)} + 
+          \hat{\sigma}_{ \subregion} \cdot \hat{\gamma}_{s[c]}^{(\subregion)} + 
+          \hat{\sigma}_{ \country} \cdot \gamma_{c}.
 \end{align*}
 
 ## Operation
@@ -353,12 +378,11 @@ Implementation is based on a model matrix. For our model given by the equation a
 
 We present a detailed use case of the `localhierarchy` package using simulated data, followed by an application of that functionality in FPET.
 
-
-
 ## Detailed example using simulated data
 
 ### Simulation setup
-The simulation setup is summarized in Figure 4, panels A and B. Simulation of subnational data is discussed in a later section. 
+
+The simulation setup is summarized in Figure 4, panels A and B. Simulation of subnational data is discussed in a later section.
 
 ```{=latex}
 \begin{figure}[h]
@@ -374,14 +398,14 @@ The simulation setup is summarized in Figure 4, panels A and B. Simulation of su
 ]
 
 % --- Level 0 ---
-\node[level0] (mu0) {$\mu^{(0)} \sim \mathcal{N}(0,s_\mu^2)$};
+\node[level0] (mu0) {$\mu^{(0)} \sim \mathcal{N}(0,s^2)$};
 
 % --- Level 1 ---
-\node[level1, below left=1.5cm and 3cm of mu0] (mu11) {$\mu^{(1)}_1 \sim \mathcal{N}(\mu^{(0)},\sigma_{\mu,1}^2)$};
+\node[level1, below left=1.5cm and 3cm of mu0] (mu11) {$\mu^{(1)}_1 \sim \mathcal{N}(\mu^{(0)},\sigma_{1}^2)$};
 \node[level1, right=of mu11] (mu12) {$\mu^{(1)}_2$};
 \node[level1, right=of mu12] (dots1) {$\dots$};
 % --- Level 2 ---
-\node[level2, below left=1.5cm and 0cm of mu11] (mu21) {$\mu^{(2)}_1 \sim \mathcal{N}(\mu^{(1)}_1,\sigma_{\mu,2}^2)$};
+\node[level2, below left=1.5cm and 0cm of mu11] (mu21) {$\mu^{(2)}_1 \sim \mathcal{N}(\mu^{(1)}_1,\sigma_{2}^2)$};
 \node[level2, right=of mu21] (mu22) {$\mu^{(2)}_2$};
 \node[level2, right=of mu22] (dots2) {$\dots$};
 % --- Background blocks ---
@@ -392,8 +416,8 @@ The simulation setup is summarized in Figure 4, panels A and B. Simulation of su
 \end{pgfonlayer}
 
 % Sigma labels inside background blocks
-\node[anchor=north west] at (bg1.east) {$\sigma_{\mu,1}$, country};
-\node[anchor=north west] at (bg2.east) {$\sigma_{\mu,2}$, subnational region};
+\node[anchor=north west] at (bg1.east) {$\sigma_{1}$, country};
+\node[anchor=north west] at (bg2.east) {$\sigma_{2}$, subnational region};
 % --- Arrows ---
 \draw[arrow] (mu0.south) -- (mu11.north);
 \draw[arrow] (mu0.south) -- (mu12.north);
@@ -479,10 +503,9 @@ The simulation setup is summarized in Figure 4, panels A and B. Simulation of su
 \clearpage
 ```
 
+Panel A in Figure 4 indicates the hierarchical model considered. For national level estimation, we consider countries to be grouped in the world, i.e., $\mu_c|\mu^{(\glob)}, \sigma_{ \country} \sim N(\mu^{(\glob)}, \sigma_{ \country}^2)$. Panel B introduces the likelihood function for national data, given by a normal likelihood with constant variance: $$y_i^{(\country)}|\mu_{c[i]}, \sigma_y^2 \sim N(\mu_{c[i]}, \sigma_y^2),$$ where $c[i]$ refers to the country of country observation $i$. We chose simple normal densities as data generating mechanisms in the simulation, to focus the modeling on the hierarchical model and the `localhierarchy` functionality as opposed to the data model aspects of modeling. In practice, the data model can be set by the user to reflect actual data generating mechanisms, for example, by using a binomial likelihood, considering transformed outcomes, or accounting for sampling errors for observations that were obtained from a complex survey design.
 
-Panel A in Figure 4 indicates the hierarchical model considered. For national level estimation, we consider countries to be grouped in the world, i.e., $\mu_c|\mu^{(\glob)}, \sigma_{\mu, \country} \sim N(\mu^{(\glob)}, \sigma_{\mu, \country}^2)$. Panel B introduces the likelihood function for national data, given by a normal likelihood with constant variance: $$y_i^{(\country)}|\mu_{c[i]}, \sigma_y^2 \sim N(\mu_{c[i]}, \sigma_y^2),$$ where $c[i]$ refers to the country of country observation $i$. We chose simple normal densities as data generating mechanisms in the simulation, to focus the modeling on the hierarchical model and the `localhierarchy` functionality as opposed to the data model aspects of modeling. In practice, the data model can be set by the user to reflect actual data generating mechanisms, for example, by using a binomial likelihood, considering transformed outcomes, or accounting for sampling errors for observations that were obtained from a complex survey design.
-
-Simulated data were generated using  `simulate_multilevel_data` function. We simulate a set of model parameters, setting $\mu^{(\glob)} = 0$, and $\sigma_{\mu,\country} = 0.5$, creating 30 countries, and national data, using $\sigma_y = 0.1$:
+Simulated data were generated using `simulate_multilevel_data` function. We simulate a set of model parameters, setting $\mu^{(\glob)} = 0$, and $\sigma_{\country} = 0.5$, creating 30 countries, and national data, using $\sigma_y = 0.1$:
 
 ```{r}
 dat_all <- simulate_multilevel_data(
@@ -626,13 +649,10 @@ model {
 }
 ```
 
-
-In the model code, the data block contains the input data for the $\gamma$s and $\sigma$s. The `localhierarchy` Stan function `get_mu_star` is used to obtain the $\eta$s. Its arguments also include prior parameters `mu_scalarprior_mean` and `mu_scalarprior_sd`, which refer to the (rescaled) prior mean and standard deviation of $\mu^{(\glob)}$. The model block contains the priors for the $\gamma$s and $\sigma_{\mu}$s, given by 
-\begin{align*}
+In the model code, the data block contains the input data for the $\gamma$s and $\sigma$s. The `localhierarchy` Stan function `get_mu_star` is used to obtain the $\eta$s. Its arguments also include prior parameters `mu_scalarprior_mean` and `mu_scalarprior_sd`, which refer to the (rescaled) prior mean and standard deviation of $\mu^{(\glob)}$. The model block contains the priors for the $\gamma$s and $\sigma_{\mu}$s, given by \begin{align*}
   \mu^{(\glob)} &\sim N(0,1),\\
   \sigma_{\mu} &\sim \text{Half-Normal}(0, s_{\mu}).
-\end{align*} 
-All prior parameters are added as input data to the Stan model.
+\end{align*} All prior parameters are added as input data to the Stan model.
 
 <!-- In fit_model function, prior parameters are set for the specific parname: stan_data\[\[paste0(parname, "\_scalarprior_sd")\]\] \<- etc. The prior sd parameters are used in plotting. For the prior on the intercept, the following transformation is used: mu_global = prior sd\*(gamma + mu_prior_mean), such that gamma = mu_global/sd - mu_prior_mean. (not doing the /sd would be easier for specification going forward?) -->
 
@@ -784,21 +804,33 @@ Plots with prior and posterior densities of the $\sigma$s can be produced as wel
 plot_prior_post_sigmas(fit = global_fit, parname = "mu")
 ```
 
-## Application: national estimation of family planning indicators using FPET
+## Application: National estimation of family planning indicators using FPET
 
-TO ADD
+For family planning estimation, a local model fitting approach was motivated by the need to enable country monitoring and evaluation (M&E) officers to produce estimates for their countries, as part of the Track20 project (ref). The Track20 project works to build the capacity of countries to generate and use data to inform their programming, improve impact, and accelerate progress toward their FP goals. One of the pillars of this approach is the cultivation of a network of M&E officers dedicated to increasing the quality and use of FP data. We developed the family planning estimation tool (FPET), as a local version of a global family planning model, for use by the M&E officers. 
 
 
+
+For local estimation of family planning indicators, the Bayesian model described in section 2 is used. Specifically, hierarchical models are used for estimation of transition model parameters. The workflow used for estimating family planning indicators at the national level is based on model fitting in several steps, including the estimation of long-term trends in the first step, the estimation of all model parameters related to modern use in a second step, the addition of information on the use of traditional methods of contraception in a third step, followed by local model fitting to produce estimates for all indicators of interest. The `localhierarchy` functionality is incorporated in the family planning modeling code base such that all steps are run with the same code base, and parameters can be passed from one model fit to another. Full details on this workflow and model specification are described elsewhere (ref). As an illustration, @fig-allfits shows global and local fits for modern use, demand, and demand satisfied for selected countries in Western Africa. The global fit in red corresponds closely to the local fits, shown in green. 
+
+```{r}
+#| fig-height: 9
+#| fig-width: 7
+#| echo: false
+#| label: fig-allfits
+#| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in in Benin (BEN), Gambia (GMB), and Ghana (GHA). FPET estimates are shown in in colored lines (red for global, green for local), with shaded areas representing 90% credible intervals. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance."
+plots <- readRDS("outputfpet_localglobalfits.rds")
+plots[[1]] /  plots[[2]]/ plots[[3]] # Stack three plots vertically
+```
+\clearpage 
 # Use case 2: Subnational estimation
-
 
 ## Workflow for nationally-informed subnational estimation
 
 For many global health applications, subnational estimation is of interest to inform policy and programmatic decision making at a more local level. If data are limited, models can be considered to share information across regions. We consider here the use of hierarchical models for an indicator of interest. The `localhierarchy` package can be used to fit subnational hierarchical models, following the same principles as for national estimation or through an updated approach. Just as for national-level hierarchical modeling, the starting point for subnational hierarchical modeling is to specify a hierarchical modeling structure for the subnational regions, such as the one from Figure 2. When following the same principles as for national-level hierarchical modeling, a global model can be fitted to a global data base of subnational data, followed by local models for subnational regions.
 
-In addition to a standard approach to subnational modeling, functionality in the `localhierarchy` package can also be used to fit subnational models that are informed by national level data and estimation, referred to here as _nationally-informed subnational estimation_ (NISE). This approach is useful when subnational data are limited, for example, in terms of the number of countries with subnational data, the number of subnational regions with data, the number of observations per subnational region, or due to uncertainty associated with subnational data. An example is given in the case study on family planning estimation, where national level data are available for a large number of country-years while a global subnational data set is more limited in terms of the number of country-years included.
+In addition to a standard approach to subnational modeling, functionality in the `localhierarchy` package can also be used to fit subnational models that are informed by national level data and estimation, referred to here as *nationally-informed subnational estimation* (NISE). This approach is useful when subnational data are limited, for example, in terms of the number of countries with subnational data, the number of subnational regions with data, the number of observations per subnational region, or due to uncertainty associated with subnational data. An example is given in the case study on family planning estimation, where national level data are available for a large number of country-years while a global subnational data set is more limited in terms of the number of country-years included.
 
-The approach followed in NISE is illustrated in Figure 4, for the hierarchical structure from Figure 2. In the NISE approach, the first step is to fit a model to a global data base with national-level data, to obtain estimates of model parameters up to and including national level parameters. This national-level model fit is used in a global subnational fit to a global data base of subnational data. Specifically, in the global subnational fitting step, national level parameters are fixed at point estimates from the global national fit, i.e., $\hat{\sigma}_{\mu, l}$ and $\mu_{\cdot}^{(l)}$ for level $l$ up to the country level. Finally, in a 3rd step, local models can be fitted, using fixed values from the global subnational fit. In the remainder of this section, we illustrate this approach using simulated data, and present an application of this approach for family planning estimation. 
+The approach followed in NISE is illustrated in Figure 4, for the hierarchical structure from Figure 2. In the NISE approach, the first step is to fit a model to a global data base with national-level data, to obtain estimates of model parameters up to and including national level parameters. This national-level model fit is used in a global subnational fit to a global data base of subnational data. Specifically, in the global subnational fitting step, national level parameters are fixed at point estimates from the global national fit, i.e., $\hat{\sigma}_{ l}$ and $\mu_{\cdot}^{(l)}$ for level $l$ up to the country level. Finally, in a 3rd step, local models can be fitted, using fixed values from the global subnational fit. In the remainder of this section, we illustrate this approach using simulated data, and present an application of this approach for family planning estimation.
 
 ```{=latex}
 \begin{figure}[h]
@@ -817,10 +849,10 @@ The approach followed in NISE is illustrated in Figure 4, for the hierarchical s
 Example subnat. hierarchical model:\\
 \(
   \begin{aligned}
-\mu_w^{(region)} &\sim N(\mu^{(global)}, \sigma_{\mu, region}^2),\\
-\mu_s^{(subregion)} &\sim N(\mu_{w[s]}^{(region)}, \sigma_{\mu, subregion}^2), \\
-\mu_c^{(country)} &\sim N(\mu_{s[c]}^{(subregion)}, \sigma_{\mu, country}^2),  \\
-\mu_r^{(subnat)} &\sim N(\mu_{r[c]}^{(country)}, \sigma_{\mu, subnat}^2),  \\
+\mu_w^{(region)} &\sim N(\mu^{(global)}, \sigma_{ region}^2),\\
+\mu_s^{(subregion)} &\sim N(\mu_{w[s]}^{(region)}, \sigma_{ subregion}^2), \\
+\mu_c^{(country)} &\sim N(\mu_{s[c]}^{(subregion)}, \sigma_{ country}^2),  \\
+\mu_r^{(subnat)} &\sim N(\mu_{r[c]}^{(country)}, \sigma_{ subnat}^2),  \\
 \end{aligned}
 \)
 };
@@ -834,12 +866,12 @@ Example subnat. hierarchical model:\\
 \node[modelbox, below=1cm of globalmodel] (subglobalmodel) {%
   Global subnational modeling:\\
   Estimate subset of parameters in \\ hierarchical model, 
-  i.e., $\sigma_{\mu, subnat}$
+  i.e., $\sigma_{ subnat}$
 };
 \node[databox, left=1cm of subglobalmodel] (globalsubdata) {Global data base\\ of subnational data};
 \node[modelbox, below=1cm of subglobalmodel] (localmodel) {%
   Local subnational modeling:\\
-  Estimate subnational parameters only, \\i.e., $\mu_r$ in $\mu_r \sim N(\hat{\mu}_{c[r]}^{(country)}, \hat{\sigma}_{\mu, subnat}^2).$
+  Estimate subnational parameters only, \\i.e., $\mu_r$ in $\mu_r \sim N(\hat{\mu}_{c[r]}^{(country)}, \hat{\sigma}_{ subnat}^2).$
 };
 
 % --- Data arrow  ---
@@ -868,15 +900,15 @@ node[midway,above] {};
 \clearpage
 ```
 
-
 ## Detailed example of subnational estimation using simulated data
 
 ### Simulation setup
-The simulation setup for subnational parameters and data is summarized in Figure 4, Panels A-B-C. As explained above for national estimation, Panel A Figure 4 indicates the hierarchical model considered. For subnational estimation, an additional level is added, with $\mu_r^{(\subnat)} = \mu_{c[r]} + \eta_{r}^{(\subnat)}$, $\eta_{r}^{(\subnat)}|\sigma_{\mu, \subnat} \sim N(0, \sigma_{\mu, \subnat})$.
+
+The simulation setup for subnational parameters and data is summarized in Figure 4, Panels A-B-C. As explained above for national estimation, Panel A Figure 4 indicates the hierarchical model considered. For subnational estimation, an additional level is added, with $\mu_r^{(\subnat)} = \mu_{c[r]} + \eta_{r}^{(\subnat)}$, $\eta_{r}^{(\subnat)}|\sigma_{ \subnat} \sim N(0, \sigma_{ \subnat})$.
 
 As explained earlier as well, we chose simple normal densities as data generating mechanisms in the simulation, to focus the modeling on the hierarchical model and the `localhierarchy` functionality as opposed to the data model aspects of modeling. Subnational data follows a normal distribution with constant variance: $$y^{(subnat)}_i|\mu^{(subnat)}_{g[i]}, \sigma_y^2 \sim N(\mu^{(subnat)}_{r[i]}, \sigma_y^2),$$ where $g[i]$ refers to the subnational region of subnational observation $i$. In this simulation setup, for simplicity, we generate subnational data independently of national-level data, and we use the same constant data variance at the national and subnational levels. In real examples, data variances are likely to differ (for example, because subnational sampling errors are larger at the subnational level) and national and subnational data may be derived from the same source. We discuss an example of those settings in the case study.
 
-Simulated data at the subnational level was generated using the   `simulate_multilevel_data` function described above. For subnational levels, we set  $\sigma_{\mu}^{(\subnat)} = 0.2$, and we created 20 subnational regions in each country and 10 observations per region. In the simulated data, `level1` refers to the country level and `level2` refers to the subnational level. The data sets contain the simulated parameters (`eta`) and data (`y`):
+Simulated data at the subnational level was generated using the `simulate_multilevel_data` function described above. For subnational levels, we set $\sigma_{\mu}^{(\subnat)} = 0.2$, and we created 20 subnational regions in each country and 10 observations per region. In the simulated data, `level1` refers to the country level and `level2` refers to the subnational level. The data sets contain the simulated parameters (`eta`) and data (`y`):
 
 ```{r}
 dat_subnat <- dat_all$data
@@ -962,15 +994,39 @@ plots$level2
 
 <!-- could add back the direct subnat fit here too: two local subnational fits: one created from the sequential approach introduced above, and one create from a subnational global fit that did not use national level information. The results are comparable, as expected.  -->
 
-## Application: subnational estimation of family planning indicators using FPET
+## Application: Subnational estimation of family planning indicators using FPET
 
-For subnational estimation, the workflow used in FPET mirrors the approach described in this paper: a global national model is fitted first, followed by a global subnational model, and finally by local fits. This sequential approach, in which the subnational global model is based on the national global model, was motivated by differences in data availability between national and subnational global databases. For example, when estimating family planning indicators for married women of reproductive age, the global national database contains XX observations from XXX countries, whereas the subnational database includes YY observations from YYY countries. 
+Subnational estimation of family planning indicators is of interest to country M&E officers for informing family planning programming. To that end, the Track20 project compiled survey data at the subnational level over 35 low- and middle income countries. 
 
-ADD
+For subnational estimation, the workflow used mirrors the NISE approach described in this paper: global modeling of national-level indicators is carried out first, followed by  subnational model fitting using a global data base, and finally by local fits. This sequential approach, in which the global subnational model is based on global national modeling, was motivated by differences in data availability between national and subnational global databases: When estimating family planning indicators for married women of reproductive age, the global national database contains observations from 198 countries, whereas the global subnational database includes observations from 35 countries only.
+
+The figures below show illustrations of regional fits for Benin. The subnational model is fitted to all regional data from the country. @fig-subnatoverview illustrates fits in selected regions and differences across regions in 2024. 
+
+```{r}
+#| fig-height: 9
+#| fig-width: 7
+#| echo: false
+#| label: fig-subnatfits
+#| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in subnational regions in Benin. Graphs show mCPR, unmet need for modern methods, demand, and demand satisfied with modern methods. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance. FPET estimates are shown in black, with grey shaded areas representing 90% credible intervals. "
+plots <- readRDS("outputfpet_plotssubnat_BEN.rds")
+plots[["Oueme"]]$married / plots[["Collines"]]$married/ plots[["Donga"]]$married
+```
+
+```{r}
+#| echo: false
+#| label: fig-subnatoverview
+#| fig-cap: "Regional estimates for Benin for modern contraceptive use in 2024. Point estimates and 95% credible intervals shown."
+plots[["comp"]] 
+```
+
+<!-- The figures below show illustrations of regional fits for Cote d'Ivoire. The subnational model is fitted to all data from the country, here the combination of regional data based on the most recent DHS survey, and national data for other survey-years (not shown in regional plots). This results in estimates for recent years based on all available information. An example, estimates of modern contraceptive use in 2024, is shown as well. -->
+
+# Conclusions 
+Bayesian hierarchical models are widely used in global health estimation, where data availability may vary across national or subnational populations. For analysis at a local level, local models are often of interest, referring to models that are derived from global hierarchical models but adapted such that they can be fitted to the data from one population alone. To that end, we introduced the `localHierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required. 
+
+We have used the `localHierarchy` functionality in different projects. We discussed the estimation of family planning indicators, where country M&E officers use the local model to produce estimates at the national and subnational level. In this area, M&E officers have successfully used local models to produce national estimates since 2013 [LA to check year]. Availability of a local modeling tool has enabled users to do additional analyses and check sensitivity of estimates to specific data sources or data quality assumptions. In addition to fitting the model to survey data, users of the local family planning model can also incorporate additional data from routine information systems  (e.g., the number of contraceptive commodities supplied, add REF). These use cases illustrate the value of local models to enable local analysis.
+
+More recently, we have used the `localHierarchy` approach and functionality for estimating coverage indicators for the Countdown to 2030 initiative (ref). By developing the `localHierarchy` package and providing use cases in this paper, we hope that this work can be useful for other global health modelers, to consider local modeling in their own work. 
 
 
-# Conclusions
 
-# Additional details
-
-## 
