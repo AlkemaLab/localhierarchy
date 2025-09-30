@@ -1,9 +1,10 @@
 ---
-title: "`localhierarchy`: an R package to facilitate fitting of global and local Bayesian hierarchical models"
-author: "Leontine, Shauna, Evan, Herb"
-format: 
+title: ""
+author: ""
+format:
   pdf:
     latex-engine: pdflatex    # lualatex or xelatex or pdflatex
+    include-before-body: title.tex
     include-in-header: 
       - file: preamble.tex 
 editor: visual
@@ -16,8 +17,7 @@ abstract: |
   We present the `localHierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required. The package provides R functions and Stan model components to support global modeling, in which all parameters in hierarchical models are estimated, and local modeling, in which parameters are estimated for only one or a small number of populations, using fixed values from a global model fit. 
   
   This article presents a practical introduction to the package for the applied user and illustrates the package’s functionality through examples for national and subnational estimation.
-date: last-modified
-bibliography: references.bib
+bibliography: bibliography.bib
 number-sections: true
 ---
 
@@ -41,11 +41,11 @@ devtools::load_all(here::here())
 
 <!-- % context: global health estimation exercises, use of bayesian hier models, examples -->
 
-In global health estimation, Bayesian hierarchical models have become a cornerstone methodology, enabling the integration of diverse data sources to produce reliable estimates across multiple populations and regions. For example, they are used to estimate family planning indicators for the FP2030 initiative (ref), low birth weight (ref), and maternal mortality by the United Nations Interagency Group (ref). In these efforts, national or subnational estimates are often required for population-periods with limited data availability. Bayesian hierarchical models—whether used directly or for specific components within larger modeling frameworks—are valuable in these contexts because they facilitate the sharing of information across populations. As a result, global modeling exercises typically fit Bayesian hierarchical models to comprehensive global databases, producing national-level estimates for all countries worldwide.
+In global health estimation, Bayesian hierarchical models have become a cornerstone methodology, enabling the integration of diverse data sources to produce reliable estimates across multiple populations and regions. For example, they are used to estimate family planning indicators for the FP2030 initiative [@alkema_2024evol], incidence of low birth weight [@okwaraji_national_2024], abortion and unintended pregnancies rates [@bearak_unintended_2020], and maternal mortality by the United Nations Interagency Group [@peterson_bayesian_2024]. In these efforts, national or subnational estimates are often required for population-periods with limited data availability. Bayesian hierarchical models—whether used directly or for specific components within larger modeling frameworks—are valuable in these contexts because they facilitate the sharing of information across populations. As a result, global modeling exercises typically fit Bayesian hierarchical models to comprehensive global databases, producing national-level estimates for all countries worldwide.
 
 <!-- % introduce local models and how they comapre to global model, why they are needed -->
 
-To facilitate local-level analysis, it is often desirable to use models that are informed by global models but can be fitted to just a subset of the data, such as data from a single country. We refer to these as local models: models derived from global hierarchical models but adapted to be fitted using data from only one population. Beyond allowing model fitting to smaller, specific datasets, local models offer practical advantages such as faster computation, making it feasible for users to perform analyses quickly on their own computers. Additionally, local models enable estimates for different populations to be updated independently, for example, when new data become available. This approach has been used successfully in global estimation exercises for family planning and maternal mortality (ref, ref).
+To facilitate local-level analysis, it is often desirable to use models that are informed by global models but can be fitted to just a subset of the data, such as data from a single country. We refer to these as local models: models derived from global hierarchical models but adapted to be fitted using data from only one population. Beyond allowing model fitting to smaller, specific datasets, local models offer practical advantages such as faster computation, making it feasible for users to perform analyses quickly on their own computers. Additionally, local models enable estimates for different populations to be updated independently, for example, when new data become available. This approach has been used successfully in global estimation exercises for family planning and maternal mortality [@alkema_2024evol; @peterson_bayesian_2024].
 
 A key challenge in the use of local models in global health estimation is synchronizing codebases and data flows between global and local estimation approaches. Synchronizing codebases and data flows is important because the fitting of local models relies on parameter estimates from global models, hence synchronization is important to ensure consistency across global and local models. Synchronization can be particularly challenging for modeling approaches that involve hierarchical estimation of multiple parameters, where the hierarchical structures may differ across parameters.
 
@@ -57,19 +57,29 @@ This article presents a practical introduction to the \texttt{localhierarchy} pa
 
 The Family Planning Estimation Tool (FPET) is widely used to estimate key family planning indicators in countries and regions. Key indicators include modern contraceptive use, demand for family planning, and demand satisfied, referring to the ratio of modern use to demand. Data on such indicators is available from household surveys and routine data systems. FPET estimates are obtained from fitting a Bayesian model to available data. An illustration of FPET estimates and available data is shown in @fig-localfits for three countries in Western Africa.
 
-```{r}
-#| fig-height: 9
-#| fig-width: 7
-#| echo: false
-#| label: fig-localfits
-#| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in Benin (BEN), Gambia (GMB), and Ghana (GHA). Graphs show mCPR, unmet need for modern methods, demand, and demand satisfied with modern methods. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance. FPET estimates are shown in black, with grey shaded areas representing 90% credible intervals."
-plots <- readRDS("outputfpet_localfits.rds")
-plots[[1]] /  plots[[2]]/ plots[[3]] 
-```
+![Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in Benin (BEN), Gambia (GMB), and Ghana (GHA). Graphs show mCPR, unmet need for modern methods, demand, and demand satisfied with modern methods. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance. FPET estimates are shown in black, with grey shaded areas representing 90% credible intervals.](fig/fp_local.jpg){#fig-localfits}
 
-At its core, the Bayesian FPET model employs transition models for demand and demand satisfied to characterize the long-term trajectories of family planning indicators over time within a population, illustrated in @fig-transition. The transition model describes changes in an indicator in terms of three principal parameters: the rate of change, the timing of the transition, and the asymptotic level (the maximum attainable level for an indicator). To allow for population-specific variation in how family planning indicators evolve, the parameters of the transition model are population-specific.
+<!-- ```{r} -->
 
-![Illustration of transition model used in the modeling of family planning indicators. TO DO (if kept): make specific to this text, ie name asymptote, level](fig/transition.png){#fig-transition}
+<!-- #| fig-height: 9 -->
+
+<!-- #| fig-width: 7 -->
+
+<!-- #| echo: false -->
+
+<!-- #| label: fig-localfits -->
+
+<!-- #| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in Benin (BEN), Gambia (GMB), and Ghana (GHA). Graphs show mCPR, unmet need for modern methods, demand, and demand satisfied with modern methods. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance. FPET estimates are shown in black, with grey shaded areas representing 90% credible intervals." -->
+
+<!-- plots <- readRDS("outputfpet_localfits.rds") -->
+
+<!-- plots[[1]] /  plots[[2]]/ plots[[3]]  -->
+
+<!-- ``` -->
+
+At its core, the Bayesian FPET model employs transition models for demand and demand satisfied to characterize the long-term trajectories of family planning indicators over time within a population [@susmann_flexible_2025], illustrated in @fig-transition. The transition model describes changes in an indicator in terms of three principal parameters: the rate of change, the timing of the transition, and the asymptotic level (the maximum attainable level for an indicator). To allow for population-specific variation in how family planning indicators evolve, the parameters of the transition model are population-specific.
+
+![Schematic illustration of transition model used in the modeling of family planning indicators, modified from @susmann_flexible_2025. The transition model describes changes in an indicator (here $\eta_{c,t}$ in terms of three principal parameters: the rate of change, the level in a reference year (here labeled with $\Omega_c$), and the asymptotic level (the maximum attainable level for an indicator (here labeled with $\lambda_c$).](fig/transition.png){#fig-transition width="476"}
 
 Given limited country-specific information on some parameters, Bayesian hierarchical models are used to share information between populations, using hierarchical structures such as the one illustrated in Figure \ref{fig-hierstruc}. Specifically for family planning estimation and forecasting, a hierarchical model is used to estimate the asymptote of the transition of demand from low to high values, and the level of demand in a reference year. @fig-level shows estimates of the level in the reference year at the country level for countries in Western Africa, and for the groupings used in the hierarchical model. @fig-asympt shows estimates for the asymptote. These figures show variation in levels among countries in Western Africa, informed by country-specific data. Estimates of asymptotes are similar across countries in Western Africa because countries have not yet reached the end phase of their transition; the asymptotes in Western African countries are informed by the estimate of the asymptote in sub-Saharan Africa through the hierarchical model.
 
@@ -146,29 +156,49 @@ Given limited country-specific information on some parameters, Bayesian hierarch
 \end{figure}
 ```
 
-```{r, echo = FALSE}
-plots <- readRDS("outputfpet_params.rds")
-```
+<!-- ```{r, echo = FALSE} -->
 
-```{r}
-#| fig-height: 9
-#| fig-width: 7
-#| echo: false
-#| label: fig-level
-#| fig-cap: "Estimates of the level of demand for countries in Western Africa and for higher levels used in the hierarchical model (smaller world regions and major world regions). Point estimates and 95% credible intervals are shown. TO DO: fix formatting, show country names"
-plots$plot_iso_omega /  plots$plot_reg_omega[[3]]/ plots$plot_reg_omega[[2]]
-```
+<!-- plots <- readRDS("outputfpet_params.rds") -->
 
-```{r}
-#| fig-height: 9
-#| fig-width: 7
-#| echo: false
-#| label: fig-asympt
-#| fig-cap: "Estimates of the asymptote for demand for countries in Western Africa and for higher levels used in the hierarchical model (major world regions). Point estimates and 95% credible intervals are shown. TO DO: fix formatting, show country names"
-plots$plot_iso_ptilde /  plots$plot_reg_ptilde[[2]] 
-```
+<!-- ``` -->
 
-The workflow used in FPET to produce country-level estimates is as follows. Firstly, the full Bayesian model is fitted to a global data base of survey data. Data base compilation is carried out by the United Nations Population Division (ref) and the Track20 project (ref). The global model fit provides information on model parameters, including hierarchical parameters, e.g., estimates of asymptotes. Subsequently, a local model can be used to produce FP estimates based on the data from one country, using information from the global model fit. The technical details for this approach are given in the next section. We return to the application of estimating family planning indicators in Section 4.2.
+<!-- ```{r} -->
+
+<!-- #| fig-height: 9 -->
+
+<!-- #| fig-width: 7 -->
+
+<!-- #| echo: false -->
+
+<!-- #| label: fig-level -->
+
+<!-- #| fig-cap: "Estimates of the level of demand for countries in Western Africa and for higher levels used in the hierarchical model (smaller world regions and major world regions). Point estimates and 95% credible intervals are shown. " -->
+
+<!-- plots$plot_reg_omega[[2]]/ plots$plot_reg_omega[[3]]/  plots$plot_iso_omega -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+
+<!-- #| fig-height: 9 -->
+
+<!-- #| fig-width: 7 -->
+
+<!-- #| echo: false -->
+
+<!-- #| label: fig-asympt -->
+
+<!-- #| fig-cap: "Estimates of the asymptote for demand for countries in Western Africa and for higher levels used in the hierarchical model (major world regions). Point estimates and 95% credible intervals are shown. " -->
+
+<!-- plots$plot_reg_ptilde[[2]]  / plots$plot_iso_ptilde -->
+
+<!-- ``` -->
+
+![Estimates of the level of demand for countries in Western Africa and for higher levels used in the hierarchical model (smaller world regions and major world regions). Point estimates and 95% credible intervals are shown.](fig/hier_level.jpg){#fig-level width="685"}
+
+![Estimates of the asymptote for demand for countries in Western Africa and for higher levels used in the hierarchical model (major world regions). Point estimates and 95% credible intervals are shown.](fig/hier_asymptote.jpg){#fig-asympt}
+
+The workflow used in FPET to produce country-level estimates is as follows. Firstly, the full Bayesian model is fitted to a global data base of survey data. Data base compilation is carried out by the United Nations Population Division (see [UNPD world contraceptive use website](https://www.un.org/development/desa/pd/world-contraceptive-use)) and the Track20 project (see [www.track20.org](https://www.track20.org/)). The global model fit provides information on model parameters, including hierarchical parameters, e.g., estimates of asymptotes. Subsequently, a local model can be used to produce FP estimates based on the data from one country, using information from the global model fit. The technical details for this approach are given in the next section. We return to the application of estimating family planning indicators in Section 4.2.
 
 \clearpage
 
@@ -178,9 +208,8 @@ The modeling approach introduced in `localhierarchy` was motivated by applicatio
 
 ## Hierarchical model specification
 
-Suppose we want to estimate a population parameter $\mu_r^{(l)}$ of interest, referring to a population health indicator for region $r$ at level $l$ of the hierarchy. For example, the indicator could refer to some population health indicator such as service coverage or morbidity or mortality-related outcomes. For a given level $l$, index $r$ refers to the population in a particular region indexed by $r$, for example, a subnational region, a country, or a group of countries. We assume that $\mu$ is unconstrained (possibly after a transformation has been applied) and consider the following general hierarchical model setup, see Figure 6: 
-\begin{align*}
-  \mu_{r}^{(l)} \mid \mu^{(l-1)}_{r^\prime}, \sigma_l} &\sim N(\mu^{(l-1)}_{r^\prime}, \sigma_l^2), \text{ for } l > 0,
+Suppose we want to estimate a population parameter $\mu_r^{(l)}$ of interest, referring to a population health indicator for region $r$ at level $l$ of the hierarchy. For example, the indicator could refer to some population health indicator such as service coverage or morbidity or mortality-related outcomes. For a given level $l$, index $r$ refers to the population in a particular region indexed by $r$, for example, a subnational region, a country, or a group of countries. We assume that $\mu$ is unconstrained (possibly after a transformation has been applied) and consider the following general hierarchical model setup, see Figure 6: \begin{align*}
+  \mu_{r}^{(l)} \mid \mu^{(l-1)}_{r^\prime}, \sigma_l &\sim N(\mu^{(l-1)}_{r^\prime}, \sigma_l^2), \text{ for } l > 0,
 \end{align*} where $\mu^{(l-1)}_{r^\prime}$ is the parameter value at one level higher in the hierarchy for the region $r^\prime$ that contains unit $r$. The parameter $\sigma_l$ for $l > 0$ describes variability of values of the parameter $\mu$ across geographic units at level $l$ of the hierarchy. At the top level of the hierarchy, $l = 0$, only a single parameter is estimated.
 
 ```{=latex}
@@ -263,8 +292,8 @@ Suppose we want to estimate a population parameter $\mu_r^{(l)}$ of interest, re
 As a specific example, we consider the estimation of country-specific parameters, where countries are organized into subregions of countries (illustrated in Figure 2). In this setting, using alternative notation for the same setup to indicate the level by name, the hierarchical model can be written as follows:
 
 \begin{alignat}{2}
-  \mu_c^{(\country)}^{(\country)} &\mid \mu_{s[c]}^{(\subregion)}, \sigma_{ \country}^2 &&\sim N(\mu_{s[c]}^{(\subregion)}, \sigma_{ \country}^2), \label{eq-countryhier} \\
-  \mu_s^{(\subregion)} &\mid \mu_{w[s]}^{(\region)}, \sigma_{ \subregion}^2 &&\sim N(\mu_{w[s]}^{(\region)}, \sigma_{ \subregion}^2), \nonumber \\
+  \mu_c^{(\country)} &\mid \mu_{s[c]}^{(\subregion)}, \sigma_{ \country}^2 &&\sim N(\mu_{s[c]}^{(\subregion)}, \sigma_{ \country}^2), \label{eq-countryhier} \\
+  \mu_s^{(\subregion)} &\mid \mu_{w[s]}^{(\region)}, \sigma_{ \subregion}^2 &&\sim N(\mu_{w[s]}^{(\region)}, \sigma_{\subregion}^2), \nonumber \\
   \mu_w^{(\region)} &\mid \mu^{(\glob)}, \sigma_{ \region}^2 &&\sim N(\mu^{(\glob)}, \sigma_{ \region}^2), \nonumber
 \end{alignat} where $c =1,\dots,C$ refers to the country index, $s[c] = 1, .., S$ to the subregion index of country $c$, and $w[s[c]] = 1, .., W$ to the region index of subregion $s[c]$. The parameter $\mu^{(\glob)}$ is the global mean for the parameter of interest, e.g., a global mean for service coverage or mortality. The parameters $\sigma_{ \country}$, $\sigma_{ \subregion}$, and $\sigma_{ \region}$ describe variability in the parameter of interest across countries, subregions, and regions, respectively.
 
@@ -372,7 +401,9 @@ Implementation is based on a model matrix. For our model given by the equation a
 
 ## Operation
 
-\[to finish, LA took mostly from fpemlocal paper\] `localhierarchy` is a publicly available R package stored on Github. For usage, an R (R Core Team, 2020) installation (≥) and a cmdStan (xxx) installation (≥xxx) are required. R can be downloaded on CRAN. Stan install \[add info\] xxx . The `localhierarchy` package can be installed with one of two methods: (1) direct install from Github repository using the `install_ github()` API from the devtools package (Wickham et al., 2020); (2) install from the package binary using the base R function `install.package()`. Package dependencies are listed in the package DESCRIPTION file and will be automatically installed upon installing the main package. There are no minimum RAM, CPU, or HARDDRIVE requirements apart from what is necessary to store model runs, which varies case-by-case.
+`localhierarchy` is a publicly available R package stored on Github. For usage, installation of R (≥4.5.1), Stan (≥2.37.0), and CmdStanR (≥ 0.9.0) are required [@WeloveR; @stan2025; @cmdstanr_2025]. The `localhierarchy` package can be installed from the Github repository. Package dependencies are listed in the package DESCRIPTION file and will be automatically installed upon installing the main package. There are no minimum RAM, CPU, or HARDDRIVE requirements apart from what is necessary to store model runs, which varies case-by-case.
+
+<!-- The `localhierarchy` package can be installed with one of two methods: (1) direct install from Github repository using the `install_ github()` API from the devtools package (Wickham et al., 2020); (2) install from the package binary using the base R function `install.package()`. Package dependencies are listed in the package DESCRIPTION file and will be automatically installed upon installing the main package. There are no minimum RAM, CPU, or HARDDRIVE requirements apart from what is necessary to store model runs, which varies case-by-case. -->
 
 # Use case: National estimation
 
@@ -442,7 +473,7 @@ The simulation setup is summarized in Figure 8, panels A and B. Simulation of su
   background/.style 2 args={rectangle, rounded corners, draw=none, fill=#1, fill opacity=0.15, inner sep=0.5cm, fit=#2}
 ]
 
-\node[level1] (mu0) {$\mu^{(1)}_1$};
+\node[level1] (mu0) {$\mu^{(\country)}_1$};
 
 % --- Level 1 ---
 \node[data, below left=1.5cm and 3cm of mu0] (mu11) {$y^{(country)}_1 \sim \mathcal{N}(\mu^{(\country)}_1,\sigma_{y}^2)$};
@@ -478,7 +509,7 @@ The simulation setup is summarized in Figure 8, panels A and B. Simulation of su
 ]
 
 % keep same colors so now color of level 1 at top 
-\node[level2] (mu0) {$\mu^{(2)}_1$};
+\node[level2] (mu0) {$\mu^{(\subnat)}_1$};
 
 % --- Level 1 ---
 \node[data, below left=1.5cm and 3cm of mu0] (mu11) {$y^{(subnat)}_1 \sim \mathcal{N}(\mu^{(\subnat)}_1,\sigma_{y}^2)$};
@@ -731,19 +762,29 @@ plot_prior_post_sigmas(fit = global_fit, parname = "mu")
 
 ## Application: National estimation of family planning indicators using FPET
 
-For family planning estimation, a local model fitting approach was motivated by the need to enable country monitoring and evaluation (M&E) officers to produce estimates for their countries, as part of the Track20 project (ref). The Track20 project works to build the capacity of countries to generate and use data to inform their programming, improve impact, and accelerate progress toward their FP goals. One of the pillars of this approach is the cultivation of a network of M&E officers dedicated to increasing the quality and use of FP data. We developed the family planning estimation tool (FPET) as a local version of a global family planning model, for use by the M&E officers.
+For family planning estimation, a local model fitting approach was motivated by the need to enable country monitoring and evaluation (M&E) officers to produce estimates for their countries, as part of the Track20 project [@alkema_2024evol]. The Track20 project works to build the capacity of countries to generate and use data to inform their programming, improve impact, and accelerate progress toward their FP goals. One of the pillars of this approach is the cultivation of a network of M&E officers dedicated to increasing the quality and use of FP data. We developed the family planning estimation tool (FPET) as a local version of a global family planning model, for use by the M&E officers.
 
-For local estimation of family planning indicators, the Bayesian model described in section 2 is used. Specifically, hierarchical models are used for estimation of transition model parameters. The workflow used for estimating family planning indicators at the national level is based on model fitting in several steps, including the estimation of long-term trends in the first step, the estimation of all model parameters related to modern use in a second step, the addition of information on the use of traditional methods of contraception in a third step, followed by local model fitting to produce estimates for all indicators of interest. The `localhierarchy` functionality is incorporated in the family planning modeling code base such that all steps are run with the same code base, and parameters can be passed from one model fit to another. Full details on this workflow and model specification are described elsewhere (ref). As an illustration, @fig-allfits shows global and local fits for modern use, demand, and demand satisfied for selected countries in Western Africa. The global fit in red corresponds closely to the local fits, shown in green.
+For local estimation of family planning indicators, the Bayesian model described in section 2 is used. Specifically, hierarchical models are used for estimation of transition model parameters. The workflow used for estimating family planning indicators at the national level is based on model fitting in several steps, including the estimation of long-term trends in the first step, the estimation of all model parameters related to modern use in a second step, the addition of information on the use of traditional methods of contraception in a third step, followed by local model fitting to produce estimates for all indicators of interest. The `localhierarchy` functionality is incorporated in the family planning modeling code base such that all steps are run with the same code base, and parameters can be passed from one model fit to another. Full details on this workflow and model specification are described elsewhere [@alkema_2024evol]. As an illustration, @fig-allfits shows global and local fits for modern use, demand, and demand satisfied for selected countries in Western Africa. The global fit in red corresponds closely to the local fits, shown in green.
 
-```{r}
-#| fig-height: 9
-#| fig-width: 7
-#| echo: false
-#| label: fig-allfits
-#| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in in Benin (BEN), Gambia (GMB), and Ghana (GHA). FPET estimates are shown in in colored lines (red for global, green for local), with shaded areas representing 90% credible intervals. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance."
-plots <- readRDS("outputfpet_localglobalfits.rds")
-plots[[1]] /  plots[[2]]/ plots[[3]] # Stack three plots vertically
-```
+![Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in in Benin (BEN), Gambia (GMB), and Ghana (GHA). FPET estimates are shown in in colored lines (red for global, green for local), with shaded areas representing 90% credible intervals. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance.](fig/fpet_localglobal.jpg){#fig-allfits}
+
+<!-- ```{r} -->
+
+<!-- #| fig-height: 9 -->
+
+<!-- #| fig-width: 7 -->
+
+<!-- #| echo: false -->
+
+<!-- #| label: fig-allfits -->
+
+<!-- #| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in in Benin (BEN), Gambia (GMB), and Ghana (GHA). FPET estimates are shown in in colored lines (red for global, green for local), with shaded areas representing 90% credible intervals. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance." -->
+
+<!-- plots <- readRDS("outputfpet_localglobalfits.rds") -->
+
+<!-- plots[[1]] /  plots[[2]]/ plots[[3]] # Stack three plots vertically -->
+
+<!-- ``` -->
 
 \clearpage
 
@@ -925,24 +966,41 @@ Subnational estimation of family planning indicators is of interest to country M
 
 For subnational estimation, the workflow used mirrors the NISE approach described in this paper: global modeling of national-level indicators is carried out first, followed by subnational model fitting using a global data base, and finally by local fits. This sequential approach, in which the global subnational model is based on global national modeling, was motivated by differences in data availability between national and subnational global databases: When estimating family planning indicators for married women of reproductive age, the global national database contains observations from 198 countries, whereas the global subnational database includes observations from 35 countries only.
 
-The figures below show illustrations of regional fits for Benin. The subnational model is fitted to all regional data from the country. @fig-subnatoverview illustrates fits in selected regions and differences across regions in 2024.
+Figure @fig-subnatfits show illustrations of regional fits for Benin. The subnational model is fitted to all regional data from the country. @fig-subnatoverview illustrates fits in selected regions and differences across regions in 2024.
 
-```{r}
-#| fig-height: 9
-#| fig-width: 7
-#| echo: false
-#| label: fig-subnatfits
-#| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in subnational regions in Benin. Graphs show mCPR, unmet need for modern methods, demand, and demand satisfied with modern methods. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance. FPET estimates are shown in black, with grey shaded areas representing 90% credible intervals. "
-plots <- readRDS("outputfpet_plotssubnat_BEN.rds")
-plots[["Oueme"]]$married / plots[["Collines"]]$married/ plots[["Donga"]]$married
-```
+![Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in subnational regions in Benin. Graphs show mCPR, unmet need for modern methods, demand, and demand satisfied with modern methods. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance. FPET estimates are shown in black, with grey shaded areas representing 90% credible intervals.](fig/fpet_subnat.jpg){#fig-subnatfits}
 
-```{r}
-#| echo: false
-#| label: fig-subnatoverview
-#| fig-cap: "Regional estimates for Benin for modern contraceptive use in 2024. Point estimates and 95% credible intervals shown."
-plots[["comp"]] 
-```
+![Regional estimates for Benin for modern contraceptive use in 2024. Point estimates and 95% credible intervals shown.](fig/subnat_overview.jpg){#fig-subnatoverview}
+
+<!-- ```{r} -->
+
+<!-- #| fig-height: 9 -->
+
+<!-- #| fig-width: 7 -->
+
+<!-- #| echo: false -->
+
+<!-- #| label: fig-subnatfits -->
+
+<!-- #| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in subnational regions in Benin. Graphs show mCPR, unmet need for modern methods, demand, and demand satisfied with modern methods. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance. FPET estimates are shown in black, with grey shaded areas representing 90% credible intervals. " -->
+
+<!-- plots <- readRDS("outputfpet_plotssubnat_BEN.rds") -->
+
+<!-- plots[["Oueme"]]$married / plots[["Collines"]]$married/ plots[["Donga"]]$married -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+
+<!-- #| echo: false -->
+
+<!-- #| label: fig-subnatoverview -->
+
+<!-- #| fig-cap: "Regional estimates for Benin for modern contraceptive use in 2024. Point estimates and 95% credible intervals shown." -->
+
+<!-- plots[["comp"]]  -->
+
+<!-- ``` -->
 
 <!-- The figures below show illustrations of regional fits for Cote d'Ivoire. The subnational model is fitted to all data from the country, here the combination of regional data based on the most recent DHS survey, and national data for other survey-years (not shown in regional plots). This results in estimates for recent years based on all available information. An example, estimates of modern contraceptive use in 2024, is shown as well. -->
 
@@ -950,9 +1008,9 @@ plots[["comp"]]
 
 Bayesian hierarchical models are widely used in global health estimation, where data availability may vary across national or subnational populations. For analysis at a local level, local models are often of interest, referring to models that are derived from global hierarchical models but adapted such that they can be fitted to the data from one population alone. To that end, we introduced the `localHierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required.
 
-We have used the `localHierarchy` functionality in different projects. We discussed the estimation of family planning indicators, where country M&E officers use the local model to produce estimates at the national and subnational level. In this area, M&E officers have successfully used local models to produce national estimates since 2014. Availability of a local modeling tool has enabled users to do additional analyses and check sensitivity of estimates to specific data sources or data quality assumptions. In addition to fitting the model to survey data, users of the local family planning model can also incorporate additional data from routine information systems (e.g., the number of contraceptive commodities supplied, add REF). These use cases illustrate the value of local models to enable local analysis.
+We have used the `localHierarchy` functionality in different projects. We discussed the estimation of family planning indicators, where country M&E officers use the local model to produce estimates at the national and subnational level. In this area, M&E officers have successfully used local models to produce national estimates since 2014. Availability of a local modeling tool has enabled users to do additional analyses and check sensitivity of estimates to specific data sources or data quality assumptions. In addition to fitting the model to survey data, users of the local family planning model can also incorporate additional data from routine information systems (e.g., the number of contraceptive commodities supplied, see [@mooney_emu]). These use cases illustrate the value of local models to enable local analysis.
 
-More recently, we have used the `localHierarchy` approach and functionality for estimating coverage indicators for the Countdown to 2030 initiative (ref). By developing the `localHierarchy` package and providing use cases in this paper, we hope that this work can be useful for other global health modelers, to consider local modeling in their own work.
+More recently, we have used the `localHierarchy` approach and functionality for estimating coverage indicators for the *Countdown to 2030 for Women’s, Children’s and Adolescents’ Health initiative.* This initiative focuses on “tracking progress of life-saving interventions for Reproductive, Maternal, Newborn, Child and Adolescent Health and Nutrition” in low- and middle-income countries, see [www. countdown2030.org](https://www.%20countdown2030.org/). By developing the `localHierarchy` package and providing use cases in this paper, we hope that this work can be useful for other global health modelers, to consider local modeling in their own work.
 
 # Appendix
 
@@ -1030,10 +1088,11 @@ model {
 }
 ```
 
-In the model code, the data block contains the input data for the $\gamma$s and $\sigma$s. The `localhierarchy` Stan function `get_mu_star` is used to obtain the $\eta$s. Its arguments also include prior parameters `mu_scalarprior_mean` and `mu_scalarprior_sd`, which refer to the (rescaled) prior mean and standard deviation of $\mu^{(\glob)}$. The model block contains the priors for the $\gamma$s and $\sigma_{k}$s, given by 
-\begin{align*}
+In the model code, the data block contains the input data for the $\gamma$s and $\sigma$s. The `localhierarchy` Stan function `get_mu_star` is used to obtain the $\eta$s. Its arguments also include prior parameters `mu_scalarprior_mean` and `mu_scalarprior_sd`, which refer to the (rescaled) prior mean and standard deviation of $\mu^{(\glob)}$. The model block contains the priors for the $\gamma$s and $\sigma_{k}$s, given by \begin{align*}
   \mu^{(\glob)} &\sim N(0,1),\\
   \sigma_{k} &\sim \text{Half-Normal}(0, s_{\sigma}).
 \end{align*} All prior parameters are added as input data to the Stan model.
 
 <!-- In fit_model function, prior parameters are set for the specific parname: stan_data\[\[paste0(parname, "\_scalarprior_sd")\]\] \<- etc. The prior sd parameters are used in plotting. For the prior on the intercept, the following transformation is used: mu_global = prior sd\*(gamma + mu_prior_mean), such that gamma = mu_global/sd - mu_prior_mean. (not doing the /sd would be easier for specification going forward?) -->
+
+# References
