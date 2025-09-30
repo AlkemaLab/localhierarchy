@@ -1,8 +1,9 @@
 Package: localhierarchy
 Type: Package
-Title: Flexible set up for hierarchical modeling and local fitting
+Title: localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models}
 Version: 0.1.0
 Authors@R: c(person("Leontine", "Alkema", email = "lalkema@umass.edu", role = c("aut", "cre")),
+              person("Shauna", "Mooney", role = c("aut")),
               person("Evan", "Ray", role = c("aut")),
               person("Herbert", "Susmann", email = "herbps10@gmail.com", role = c("aut"))
             )
@@ -16,3 +17,6 @@ Roxygen: list(markdown = TRUE)
 Imports: 
     purrr
 URL: https://alkemalab.github.io/localhierarchy/
+Suggests: 
+    quarto
+Config/Needs/website: quarto

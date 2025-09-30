@@ -13,13 +13,12 @@ values from a global model fit.
 
 ## Installation
 
-Dependency on `cmdstanr:`
+- Dependency on `cmdstanr:` Instructions for installing `cmdstanr` are
+  available in their [Getting
+  started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) guide.
 
-Instructions for installing `cmdstanr` are available in their [Getting
-started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) guide.
-
-Install `localHierarchy` from Github:
-`remotes::install_github("AlkemaLab/localhierarchy")`
+- Install `localHierarchy` from Github:
+  `remotes::install_github("AlkemaLab/localhierarchy")`
 
 ## Examples
 

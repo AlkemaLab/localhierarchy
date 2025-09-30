@@ -19,12 +19,9 @@ The `localHierarchy` R package provides functionality for fitting Bayesian hiera
 
 ## Installation
 
-Dependency on `cmdstanr:`
+-   Dependency on `cmdstanr:` Instructions for installing `cmdstanr` are available in their [Getting started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) guide.
 
-Instructions for installing `cmdstanr` are available in their [Getting started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) guide.
-
-Install `localHierarchy` from Github:
-`remotes::install_github("AlkemaLab/localhierarchy")`
+-   Install `localHierarchy` from Github: `remotes::install_github("AlkemaLab/localhierarchy")`
 
 ## Examples
 

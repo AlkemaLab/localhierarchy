@@ -4,7 +4,7 @@
 \name{localhierarchy-package}
 \alias{localhierarchy}
 \alias{localhierarchy-package}
-\title{localhierarchy: Flexible set up for hierarchical modeling and local fitting}
+\title{localhierarchy: localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models}}
 \description{
 The LocalHierarchy package implements a flexible set up to estimate parameters hierarchically and to carry out local model fits, whereby higher-level parameters are fixed.
 }
@@ -20,6 +20,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Shauna Mooney
   \item Evan Ray
   \item Herbert Susmann \email{herbps10@gmail.com}
 }
