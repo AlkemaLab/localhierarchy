@@ -20,6 +20,9 @@
 #'   mu_model_matrix, mu_n_terms_fixed, mu_n_terms_estimate,
 #'   mu_raw_fixed, mu_n_sigma_fixed, mu_n_sigma_estimate,
 #'   mu_sigma_fixed`
+#'
+#' @export
+#'
 hierarchical_param_stan_data <- function(param_name,
                                          param_data,
                                          global_fit = NULL,

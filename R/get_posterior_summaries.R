@@ -2,9 +2,9 @@
 
 
 
-#' get_posterior_summaries
+#' Posterior summaries for use in local models
 #'
-#' Get posterior summaries for a set of parameters
+#' Get posterior summaries for a set of parameters for use in local model
 #'
 #' @param fit fit object to summarize
 #' @param params vector of parnames to summarize (w/o index)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_posterior_summaries.R
 \name{get_posterior_summaries}
 \alias{get_posterior_summaries}
-\title{get_posterior_summaries}
+\title{Posterior summaries for use in local models}
 \usage{
 get_posterior_summaries(fit, params = c("mu_raw", "mu_sigma", "nonse"))
 }
@@ -15,5 +15,5 @@ get_posterior_summaries(fit, params = c("mu_raw", "mu_sigma", "nonse"))
 tibble with variable (parname with index used in model) and postmean (posterior mean)
 }
 \description{
-Get posterior summaries for a set of parameters
+Get posterior summaries for a set of parameters for use in local model
 }

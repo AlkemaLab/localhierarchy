@@ -7,7 +7,6 @@
 #' @param column column to check for NAs
 #'
 #' @returns stops if there are NAs in the column or if the column does not exist
-#' @export
 #'
 check_nas <- function(data, column) {
   if(!(column %in% names(data))) {

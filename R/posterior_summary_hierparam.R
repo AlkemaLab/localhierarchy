@@ -137,7 +137,6 @@ extract_parameter_subhierarchical <- function(
 #' @param probs vector of quantiles
 #'
 #' @returns tibble with the requested quantiles
-#' @export
 #'
 quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
   tibble(
@@ -154,7 +153,6 @@ quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
 #'
 #' @returns tibble with 2.5th quantile, posterior mean, and 97.5th quantile, and quant = c(0.025, 0.5, 0.975)
 #'
-#' @export
 #'
 summary_df <- function(x) {
   tibble(
