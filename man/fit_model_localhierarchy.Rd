@@ -35,14 +35,14 @@ fit_model_localhierarchy(
 
 \item{area_select}{area name to use for local run (eg iso code or subnat region name)}
 
-\item{runstep}{type of run, currently one of XXX (see Details).}
+\item{runstep}{Type of run, defines which model fitting step to perform (see Details for options).}
 
 \item{global_fit}{optional global fit object, used to obtain fixed
 values to use for some parameters in the current fit (see Details).}
 
 \item{hierarchical_level}{vector specifying hierarchical structure used for mu}
 
-\item{add_subnational_hierarchy}{level that's added to the hierarchy for subnational, defaults to 'subnat'}
+\item{add_subnational_hierarchy}{level that's added to the hierarchy for subnational, defaults to \code{subnat}}
 
 \item{use_globalsubnat_fromnat}{Logical, whether in a local subnational run,
 to use the global fit derived from national data

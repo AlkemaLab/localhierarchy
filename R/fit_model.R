@@ -11,11 +11,11 @@
 #' @param area column name of the area of each observation (used as geounit; iso or subnational region)
 #' @param area_select area name to use for local run (eg iso code or subnat region name)
 #'
-#' @param runstep type of run, currently one of XXX (see Details).
+#' @param runstep Type of run, defines which model fitting step to perform (see Details for options).
 #' @param global_fit optional global fit object, used to obtain fixed
 #'   values to use for some parameters in the current fit (see Details).
 #' @param hierarchical_level vector specifying hierarchical structure used for mu
-#' @param add_subnational_hierarchy level that's added to the hierarchy for subnational, defaults to 'subnat'
+#' @param add_subnational_hierarchy level that's added to the hierarchy for subnational, defaults to `subnat`
 #' @param use_globalsubnat_fromnat Logical, whether in a local subnational run,
 #' to use the global fit derived from national data
 #' if TRUE and local subnat run, global_fit needs to contain object `fit_globalsubnat_fromnat`
