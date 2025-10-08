@@ -8,6 +8,8 @@
 #'
 #' @returns a list of initial values for the model parameters
 #'
+#' @importFrom truncnorm rtruncnorm
+#'
 init_fun_localhierarchy <- function(chain_id, stan_data){
   set.seed(chain_id)
   inits <- list()

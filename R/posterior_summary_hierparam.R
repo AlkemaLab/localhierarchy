@@ -13,6 +13,7 @@
 #'  these mus are obtained by summing up all relevant etas
 #' for morethan1param, each level has a list where k refers to the index
 #' @export
+#' @importFrom tidybayes spread_draws
 #'
 posterior_summary_hierparam_localhierarchy <- function(fit, parname, morethan1param = FALSE,
                                         hierarchical_levels = fit$hierarchical_level){
@@ -55,10 +56,12 @@ posterior_summary_hierparam_localhierarchy <- function(fit, parname, morethan1pa
   }
   if (!morethan1param){
     res <- map(mu, function(tibble_samples)
-      tibble_samples %>% select(name, value)  %>% reframe(summary_df(value), .by = name))
+      tibble_samples %>% dplyr::select(name, value)  %>%
+        dplyr::reframe(summary_df(value), .by = name))
   } else {
     res <- map(mu, function(tibble_samples)
-      tibble_samples %>% select(name, value, k)  %>% reframe(summary_df(value), .by = c(name, k)))
+      tibble_samples %>% dplyr::select(name, value, k)  %>%
+        dplyr::reframe(summary_df(value), .by = c(name, k)))
   }
   return(res)
 }

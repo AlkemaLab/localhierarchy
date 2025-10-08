@@ -31,7 +31,8 @@ get_posterior_summaries_localhierarchy <- function(
     purrr::list_rbind()%>%
     # add column wtith parname w/o []
     dplyr::mutate(
-      variable_no_index = stringr::str_split_i(string = variable, pattern = fixed("["), i = 1)
+      variable_no_index = stringr::str_split_i(string = variable,
+                                               pattern = stringr::fixed("["), i = 1)
     )
 
   return(combined_summary)

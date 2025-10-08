@@ -42,6 +42,8 @@ is_there_a_comma <- function(variable){
 #'
 #' @returns matrix with rows and columns corresponding to the indices in the variable
 #'
+#' @importFrom tidyr pivot_wider pivot_longer
+#'
 create_a_matrix <- function(post_summ){
   res <- post_summ %>%
     mutate(
@@ -82,7 +84,7 @@ create_a_matrix <- function(post_summ){
 variable_exists_in_draws <- function(fit, var_name) {
   all_variables <- posterior::variables(fit$samples$draws())
   all_variables_no_index <- stringr::str_split_i(string = all_variables,
-                                                 pattern = fixed("["),
+                                                 pattern = stringr::fixed("["),
                                                  i = 1)
   return(any(all_variables_no_index == var_name))
 }
@@ -100,12 +102,7 @@ variable_exists_in_draws <- function(fit, var_name) {
 #' @returns data frame with the same columns as `estimate_df` plus columns containing
 #' just the variable name and the indices.
 #'
-#' @examples
-#' split_var_name_and_index(
-#' estimate_df = tibble(variable = c("a[1]", "a[2]")), num_inds = 1)
-#' split_var_name_and_index(
-#' estimate_df = tibble(variable = c("a[1,1]", "a[2,1]")), num_inds = 2)
-#'
+##'
 split_var_name_and_index <- function(estimate_df, num_inds) {
   # column names for indices, starting from "i"
   ind_names <- letters[seq(from = 9, length = num_inds)]
@@ -135,6 +132,11 @@ split_var_name_and_index <- function(estimate_df, num_inds) {
 # split_var_name_and_index(
 #   estimate_df = tibble(variable = c("a[1]", "a[2]")),
 #   num_inds = 2)
+#
+# split_var_name_and_index(
+# estimate_df = tibble::tibble(variable = c("a[1]", "a[2]")), num_inds = 1)
+# split_var_name_and_index(
+# estimate_df = tibble::tibble(variable = c("a[1,1]", "a[2,1]")), num_inds = 2)
 
 
 #' Starting from an array of parameter values (of dimension 1 or 2),

@@ -16,14 +16,17 @@
 #'
 #' @export
 #'
+#' @importFrom posterior as_draws_list
+#' @importFrom bayesplot mcmc_dens_overlay
+#'
 plot_muraw_localhierarchy <- function(fit, parname, morethan1param = FALSE,
                         nresultsperpage = 30){
   helper_get_plots_allmuraw <- function(samples_tibble){
     parnames <- names(samples_tibble)[-seq(1,3)] # %>% select(-.chain, -.iteration, -.draw))
-    samp <- as_draws_list(samples_tibble)
+    samp <- posterior::as_draws_list(samples_tibble)
     plots_allmuraw <- list()
     for (parname in parnames){
-      plots_allmuraw[[parname]] <- mcmc_dens_overlay(samp, pars = parname) +
+      plots_allmuraw[[parname]] <- bayesplot::mcmc_dens_overlay(samp, pars = parname) +
         # warning when adding the dnorm, not sure why
         stat_function(fun = dnorm, color = "red")
     }
@@ -88,6 +91,8 @@ plot_muraw_localhierarchy <- function(fit, parname, morethan1param = FALSE,
 #'
 #' @returns Plot with density of sigma_estimate and prior added
 #' @export
+#'
+#'@importFrom truncnorm dtruncnorm
 #'
 plot_prior_post_sigmas_localhierarchy <- function(fit, parname){
   # sigmas, fine to look at all k's combined

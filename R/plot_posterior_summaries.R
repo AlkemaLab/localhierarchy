@@ -12,6 +12,7 @@
 #' @param k_select optional, if res contains k, which k values to show? if NULL, all k values are shown
 #' @param dodge used for offsetting plots, default is 0.5
 #'
+#' @export
 #' @returns ggplot object
 #'
 plot_posterior_summaries_localhierarchy <- function(

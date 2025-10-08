@@ -11,8 +11,9 @@
 #' @returns tibble with unique hierarchical levels (one column for each level) and index "c" assigned based on area
 #' @export
 #'
+#'
 #' @examples
-#' survey_dat <- tibble(subcluster = c("A", "A", "B", "B"),
+#' survey_dat <- tibble::tibble(subcluster = c("A", "A", "B", "B"),
 #'     iso = c("iso1", "iso2", "iso3", "iso4"))
 #' get_geo_unit_index_data(survey_dat,
 #'         hierarchical_levels = c("intercept", "subcluster", "iso"),

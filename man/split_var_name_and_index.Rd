@@ -24,10 +24,3 @@ For a data frame of estimates with a column that contains combined info
 about a variable name and row and/or column indices, add columns containing
 just the variable name and the indices.
 }
-\examples{
-split_var_name_and_index(
-estimate_df = tibble(variable = c("a[1]", "a[2]")), num_inds = 1)
-split_var_name_and_index(
-estimate_df = tibble(variable = c("a[1,1]", "a[2,1]")), num_inds = 2)
-
-}

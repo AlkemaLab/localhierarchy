@@ -10,7 +10,6 @@ format:
 editor: visual
 execute:
   cache: true
-  
 abstract: | 
   Bayesian hierarchical models are widely used in global health estimation, where data availability may vary across national or subnational populations. Such models are typically fitted to a global database, e.g., to produce national-level estimates for all countries in the world or in some region. To facilitate analysis at a local level, models are often desirable that are informed by global models but can be fitted to just a subset of the data, such as data for one country. We refer to such models as local models: models that are derived from global hierarchical models but adapted such that they can be fitted to the data from one population alone. 
   
@@ -25,17 +24,6 @@ number-sections: true
 
 ```{r}
 #| include: false
-library(here)
-library(tidyverse)
-library(ggplot2)
-library(haven)
-library(stringr)
-library(cmdstanr)
-library(truncnorm) # for inits
-library(bayesplot) # diagnostic plots
-library(posterior) # else error for as_draws_list
-library(tidybayes)
-library(patchwork)
 library(localhierarchy)
 ```
 
@@ -559,7 +547,7 @@ dat_nat <- dat_all$data_1levelup
 In the simulated data, `level1` refers to the country level. The data sets contain the simulated parameters (`eta`; the deviation away from the global mean) and data (`y`):
 
 ```{r}
-dat_nat |> select(level1,  mu_global, level1_eta, y)
+dat_nat |> dplyr::select(level1,  mu_global, level1_eta, y)
 ```
 
 ### Model fitting
@@ -637,7 +625,7 @@ The `post_summ` object contains posterior means for relevant model parameters. F
 
 ```{r}
 global_fit$post_summ |> 
-  filter(variable_no_index == "mu_sigma")
+  dplyr::filter(variable_no_index == "mu_sigma")
 ```
 
 A local fit can be estimated by passing on the global fit object to the wrapper function and including data for countries of interest. Here we do local runs for all countries, by including the entire data set, and specify what to fix using the `runstep` argument:
@@ -689,8 +677,10 @@ In addition to fixing parameters of hierarchical models, other non-country-speci
 The package includes several functions to produce and check outputs. The function `posterior_summary_hierparam` is used to summarize posterior draws for hierarchical parameters, to produce summaries of $\mu$ at any level of interest. It takes a fitted model object and a parameter name as input and returns a list with each entry referring one level, and the results (e.g., estimates for $\mu$ estimates) for that level. Here we obtain these results for the global and local model:
 
 ```{r, message=FALSE, warning=FALSE}
-res_global <- posterior_summary_hierparam(fit = global_fit, parname = "mu")
-res_local <- posterior_summary_hierparam(fit = fit_local, parname = "mu")
+res_global <- posterior_summary_hierparam_localhierarchy(
+  fit = global_fit, parname = "mu")
+res_local <- posterior_summary_hierparam_localhierarchy(
+  fit = fit_local, parname = "mu")
 ```
 
 Example output for the global model is as follows:
@@ -699,10 +689,10 @@ Example output for the global model is as follows:
 res_local$level1
 ```
 
-The column `name` includes the country names, given by simple indicares in this simulation. The column `quant` above refers to posterior means and upper and lower bounds of 95% credible intervals. We can create plots to show outputs, for example for the first 4 countries:
+The column `name` includes the country names, given by simple indices in this simulation. The column `quant` above refers to posterior means and upper and lower bounds of 95% credible intervals. We can create plots to show outputs, for example for the first 4 countries:
 
 ```{r}
-plots <- plot_posterior_summaries(
+plots <- plot_posterior_summaries_localhierarchy(
   res = res_global, 
   modelname1 = "global",
   hierarchy_select = "level1",
@@ -715,7 +705,7 @@ plots$level1
 By plotting results from global and local models, we can check how estimates compare and how values have been fixed in the local runs. For example, here we see how country estimates compare between global and local models:
 
 ```{r}
-plots <- plot_posterior_summaries(
+plots <- plot_posterior_summaries_localhierarchy(
   res = res_local, 
   modelname1 = "local",
   res2 = res_global, 
@@ -732,7 +722,7 @@ Estimates are similar, as expected.
 When visualizing higher levels, we see how parameters were fixed in the local model:
 
 ```{r}
-plots <- plot_posterior_summaries(
+plots <- plot_posterior_summaries_localhierarchy(
   res = res_local, 
   modelname1 = "local",
   res2 = res_global, 
@@ -745,7 +735,7 @@ plots$intercept
 We can also create plots for the $\gamma$s (`mu_raw`s):
 
 ```{r, message=FALSE, warning=FALSE}
-plots <- plot_mu_raw(fit = global_fit, parname = "mu")
+plots <- plot_muraw_localhierarchy(fit = global_fit, parname = "mu")
 ```
 
 This gives a list with plots, including summary plots and plots with priors and posteriors. For example, the figures below show the first 30 $\gamma$s, followed by the prior-posterior densities for the first $\gamma$ (referring to the intercept).
@@ -882,7 +872,7 @@ Simulated data at the subnational level was generated using the `simulate_multil
 
 ```{r}
 dat_subnat <- dat_all$data
-dat_subnat |> select(level1, level2, mu_global, level1_eta, level2_eta, y)
+dat_subnat |> dplyr::select(level1, level2, mu_global, level1_eta, level2_eta, y)
 ```
 
 ### Modeling
@@ -918,9 +908,9 @@ By comparing the fit summaries from the global national and global subnational f
 
 ```{r}
 global_fit$post_summ |>
-  filter(str_detect(variable_no_index, "sigma"))
+  dplyr::filter(stringr::str_detect(variable_no_index, "sigma"))
 global_fitsubnat_seq$post_summ |>
-  filter(str_detect(variable_no_index, "sigma"))
+  dplyr::filter(stringr::str_detect(variable_no_index, "sigma"))
 ```
 
 We can use the subnational global fit to do a local subnational fit, using the `runstep = "local_subnational"` setting:
@@ -939,19 +929,19 @@ Similarly to the local national run, in subnational local runs, hierarchical lev
 We can create and check summaries of subnational fits using the same functions for national fits. Below we compare the subnational global fit with the local subnational fit. The results are comparable, as expected.
 
 ```{r, message=FALSE, warning=FALSE}
-res_globalsubnat_seq <- posterior_summary_hierparam(
+res_globalsubnat_seq <- posterior_summary_hierparam_localhierarchy(
   fit = global_fitsubnat_seq,
   parname = "mu"
 )
 
-res_local_seq <- posterior_summary_hierparam(
+res_local_seq <- posterior_summary_hierparam_localhierarchy(
   fit = fit_local_seq, 
   parname = "mu"
 )
 ```
 
 ```{r}
-plots <- plot_posterior_summaries(
+plots <- plot_posterior_summaries_localhierarchy(
   res = res_local_seq, 
   modelname1 = "local",
   res2 = res_globalsubnat_seq, modelname2 = "global",
@@ -1114,7 +1104,7 @@ In the model code, the data block contains the input data for the $\gamma$s and 
 ## Appendix II: Documentation of the `fit_model_localhierarchy` function {#sec-helpfilefitmodel}
 
 | **Argument** | **Description** |
-|----|----|
+|------------------------------------|------------------------------------|
 | **`survey_df`** | Tibble with survey data |
 | **`y`** | Column name of outcome, defaults to **`y`**. |
 | **`area`** | Column name of the area of each observation (used as geounit; iso or subnational region) |
