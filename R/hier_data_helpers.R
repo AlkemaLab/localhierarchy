@@ -1,5 +1,11 @@
 
 
+#' Is there a comma?
+#'
+#' @param variable character string to be checked for comma
+#'
+#' @returns Boolean
+#'
 is_there_a_comma <- function(variable){
   grepl(
     pattern = ",",
@@ -35,7 +41,6 @@ is_there_a_comma <- function(variable){
 #' variable examples are `a[1,1]`, `a[2,1]`, etc.
 #'
 #' @returns matrix with rows and columns corresponding to the indices in the variable
-#' @export
 #'
 create_a_matrix <- function(post_summ){
   res <- post_summ %>%
@@ -94,7 +99,6 @@ variable_exists_in_draws <- function(fit, var_name) {
 #'
 #' @returns data frame with the same columns as `estimate_df` plus columns containing
 #' just the variable name and the indices.
-#' @export
 #'
 #' @examples
 #' split_var_name_and_index(

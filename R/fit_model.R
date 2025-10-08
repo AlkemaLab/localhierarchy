@@ -37,6 +37,8 @@
 #' For subnational global fits, the list includes fit_globalsubnat_fromnat, which is the global fit with
 #' additional subnational sigmas added to the postsum object.
 #'
+#' @export
+#'
 #' @details
 #' The `fit_model_localhierarchy` function fits the toy example for hierarchical models/seq fitting.
 #' The argument \code{runstep} determines the type of run to perform. The
@@ -45,7 +47,7 @@
 #' * "local_national": Fit the model to data from a single country, using a global_national fit.
 #' * "global_subnational": Fit the model to global database with subnational data, using a global_national fit.
 #' * "local_subnational": Fit the model to subnational data from a single country or region, using a global_subnational fit.
-#' This is also explained in the documentation folder.
+#' This is also explained in the article with the package.
 #'
 #' Details on hierarchical set ups used
 #' The package allows the structure of the hierarchical prior to be configured by the user
@@ -69,7 +71,6 @@
 #' (e.g., all countries), while the current fit uses data from a smaller number
 #' of locations.
 #' When using a global_fit to fix parameter values, what exactly is fixed is determined by the runstep and global_fit combi.
-#' see options in function
 #'
 #' @importFrom cmdstanr cmdstan_model write_stan_file
 #' @importFrom tibble tibble
@@ -323,7 +324,7 @@ fit_model_localhierarchy <- function(
     result <- c(result,
                 samples = fit)
     if (runstep %in% c("global_national", "global_subnational")){
-      post_summ <- get_posterior_summaries(result)
+      post_summ <- get_posterior_summaries_localhierarchy(result)
       result <- c(result,
           list(post_summ = post_summ))
       if (runstep %in% c("global_subnational")){

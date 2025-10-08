@@ -13,9 +13,10 @@
 #' summary plots gives summary CIs, nresultsperpage at a time.
 #' plots_allmuraw gives all the individual plots of each mu_raw, with density per chain and prior added
 #' If morethan1param = TRUE, then each list contains a list per parameter k
-#' #' @export
 #'
-plot_mu_raw <- function(fit, parname, morethan1param = FALSE,
+#' @export
+#'
+plot_muraw_localhierarchy <- function(fit, parname, morethan1param = FALSE,
                         nresultsperpage = 30){
   helper_get_plots_allmuraw <- function(samples_tibble){
     parnames <- names(samples_tibble)[-seq(1,3)] # %>% select(-.chain, -.iteration, -.draw))
@@ -88,7 +89,7 @@ plot_mu_raw <- function(fit, parname, morethan1param = FALSE,
 #' @returns Plot with density of sigma_estimate and prior added
 #' @export
 #'
-plot_prior_post_sigmas <- function(fit, parname){
+plot_prior_post_sigmas_localhierarchy <- function(fit, parname){
   # sigmas, fine to look at all k's combined
   samp <- fit$samples$draws(paste0(parname, "_sigma_estimate"))
   parnames <- dimnames(samp)[[3]]

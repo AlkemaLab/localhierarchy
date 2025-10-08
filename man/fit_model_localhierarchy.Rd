@@ -88,7 +88,7 @@ following run steps are supported:
 \item "local_national": Fit the model to data from a single country, using a global_national fit.
 \item "global_subnational": Fit the model to global database with subnational data, using a global_national fit.
 \item "local_subnational": Fit the model to subnational data from a single country or region, using a global_subnational fit.
-This is also explained in the documentation folder.
+This is also explained in the article with the package.
 }
 
 Details on hierarchical set ups used
@@ -113,5 +113,4 @@ provided via the \code{global_fit} argument. In a typical use case, the
 (e.g., all countries), while the current fit uses data from a smaller number
 of locations.
 When using a global_fit to fix parameter values, what exactly is fixed is determined by the runstep and global_fit combi.
-see options in function
 }

@@ -12,7 +12,7 @@
 #' @returns tibble with variable (parname with index used in model) and postmean (posterior mean)
 #' @export
 #'
-get_posterior_summaries <- function(
+get_posterior_summaries_localhierarchy <- function(
     fit,
     params = c("mu_raw", "mu_sigma", "nonse")
 ) {
@@ -54,7 +54,6 @@ get_posterior_summaries <- function(
 #' it is just the stacking
 
 #' @returns tibble with variable (parname with index used in model) and postmean (posterior mean)
-#' @export
 #'
 get_posterior_summary_one_param <- function(
     fit,

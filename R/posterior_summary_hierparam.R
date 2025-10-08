@@ -1,6 +1,6 @@
 
 
-#' posterior_summary_hierparam
+#' posterior_summary_hierparam_localhierarchy
 #'
 #' Calculate posterior summaries for hierarchical parameters
 #'
@@ -14,7 +14,7 @@
 #' for morethan1param, each level has a list where k refers to the index
 #' @export
 #'
-posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
+posterior_summary_hierparam_localhierarchy <- function(fit, parname, morethan1param = FALSE,
                                         hierarchical_levels = fit$hierarchical_level){
   print("Calculating posterior summary for hierarchical parameters")
   print("This can take a little while")
@@ -76,7 +76,6 @@ posterior_summary_hierparam <- function(fit, parname, morethan1param = FALSE,
 #' these mus are obtained by summing up all relevant etas
 #' variables are `name`, `value`, `.draw/iteration/chain'
 #' and `k` referring to parameter index if morethan1param = TRUE
-#' @export
 #'
 extract_parameter_subhierarchical <- function(
     hierarchical_data,

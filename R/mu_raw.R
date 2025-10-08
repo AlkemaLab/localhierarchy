@@ -9,7 +9,6 @@
 #' @param morethan1param does parname refer to more than 1 parameter (a vector)
 #'
 #' @returns tibble with samples of parname_raw_estimate, including info on hierarchical level
-#' @export
 #'
 get_mu_raw_labeled <- function(fit, parname, morethan1param = FALSE){
   # mu_raw_estimate is saved directly so getting those is not difficult

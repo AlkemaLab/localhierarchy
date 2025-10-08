@@ -17,6 +17,8 @@ abstract: |
   We present the `localHierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required. The package provides R functions and Stan model components to support global modeling, in which all parameters in hierarchical models are estimated, and local modeling, in which parameters are estimated for only one or a small number of populations, using fixed values from a global model fit. 
   
   This article presents a practical introduction to the package for the applied user and illustrates the package’s functionality through examples for national and subnational estimation.
+  
+keywords: Bayesian hierarchical model; R; Stan; Local models 
 bibliography: bibliography.bib
 number-sections: true
 ---
@@ -34,7 +36,7 @@ library(bayesplot) # diagnostic plots
 library(posterior) # else error for as_draws_list
 library(tidybayes)
 library(patchwork)
-devtools::load_all(here::here())
+library(localhierarchy)
 ```
 
 # Introduction
@@ -79,7 +81,7 @@ The Family Planning Estimation Tool (FPET) is widely used to estimate key family
 
 At its core, the Bayesian FPET model employs transition models for demand and demand satisfied to characterize the long-term trajectories of family planning indicators over time within a population [@susmann_flexible_2025], illustrated in @fig-transition. The transition model describes changes in an indicator in terms of three principal parameters: the rate of change, the timing of the transition, and the asymptotic level (the maximum attainable level for an indicator). To allow for population-specific variation in how family planning indicators evolve, the parameters of the transition model are population-specific.
 
-![Schematic illustration of transition model used in the modeling of family planning indicators, modified from @susmann_flexible_2025. The transition model describes changes in an indicator (here $\eta_{c,t}$ in terms of three principal parameters: the rate of change, the level in a reference year (here labeled with $\Omega_c$), and the asymptotic level (the maximum attainable level for an indicator (here labeled with $\lambda_c$).](fig/transition.png){#fig-transition width="476"}
+![Schematic illustration of transition model used in the modeling of family planning indicators. The transition model describes changes in an indicator (here $\eta_{c,t}$ in terms of three principal parameters: the rate of change, the level in a reference year (here labeled with $\Omega_c$), and the asymptotic level (the maximum attainable level for an indicator (here labeled with $\lambda_c$). This figure has been reproduced with permission from @susmann_flexible_2025.](fig/transition.png){#fig-transition width="476"}
 
 Given limited country-specific information on some parameters, Bayesian hierarchical models are used to share information between populations, using hierarchical structures such as the one illustrated in Figure \ref{fig-hierstruc}. Specifically for family planning estimation and forecasting, a hierarchical model is used to estimate the level of demand in a reference year and the asymptote of the transition of demand from low to high values. @fig-level shows estimates of the level in the reference year at the country level for countries in Western Africa, and for the groupings used in the hierarchical model. @fig-asympt shows estimates for the asymptote. These figures show variation in levels among countries in Western Africa, informed by country-specific data. Estimates of asymptotes are similar across countries in Western Africa because countries have not yet reached the end phase of their transition; the asymptotes in Western African countries are informed by the estimate of the asymptote in sub-Saharan Africa through the hierarchical model.
 
@@ -759,7 +761,7 @@ plots[["plots_allmuraw"]][[1]]
 Plots with prior and posterior densities of the $\sigma$s can be produced as well:
 
 ```{r}
-plot_prior_post_sigmas(fit = global_fit, parname = "mu")
+plot_prior_post_sigmas_localhierarchy(fit = global_fit, parname = "mu")
 ```
 
 ## Application: National estimation of family planning indicators using FPET {#sec-fpetnat}
@@ -1013,6 +1015,18 @@ Bayesian hierarchical models are widely used in global health estimation, where 
 We have used the `localHierarchy` functionality in different projects. We discussed the estimation of family planning indicators, where country M&E officers use the local model to produce estimates at the national and subnational level. In this area, M&E officers have successfully used local models to produce national estimates since 2014. Availability of a local modeling tool has enabled users to do additional analyses and check sensitivity of estimates to specific data sources or data quality assumptions. In addition to fitting the model to survey data, users of the local family planning model can also incorporate additional data from routine information systems (e.g., the number of contraceptive commodities supplied at family planning facilities, see [@mooney_emu]). These use cases illustrate the value of local models to enable local analysis.
 
 More recently, we have used the `localHierarchy` approach and functionality for estimating coverage indicators for the *Countdown to 2030 for Women’s, Children’s and Adolescents’ Health initiative.* This initiative focuses on “tracking progress of life-saving interventions for Reproductive, Maternal, Newborn, Child and Adolescent Health and Nutrition” in low- and middle-income countries, see [www. countdown2030.org](https://www.%20countdown2030.org/). By developing the `localHierarchy` package and providing use cases in this paper, we hope that this work can be useful for other global health modelers, to consider local modeling in their own work.
+
+### Data availability statement {.unnumbered}
+
+No data are associated with the software tool described in this article.
+
+### Software availability {.unnumbered}
+
+The R package is available at [github.com/AlkemaLab/localhierarchy](https://github.com/AlkemaLab/localhierarchy) and Zenodo \[to do: add reference\]. The code is licensed XXX.
+
+### Grant information {.unnumbered}
+
+This work was supported, in whole or in part, by the Gates Foundation (INV-00844 and OPP1192802). Under the grant conditions of the Foundation, a Creative Commons Attribution 4.0 Generic License has already been assigned to the Author Accepted Manuscript version that might arise from this submission.
 
 # Appendix
 
