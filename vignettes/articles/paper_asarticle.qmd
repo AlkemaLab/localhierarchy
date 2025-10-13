@@ -17,9 +17,9 @@ author: ""
 #   - name: "Evan Ray"
 #     affiliations:
 #       - id: "1"
-#   - name: "Herbert Susmann"
+#   - name: "Herbert P. Susmann"
 #     affiliations:
-#       - name: "Division of Biostatistics, Department of Population Health, NYU, USA"
+#       - name: "Division of Biostatistics, Department of Population Health, NYU Grossman School of Medicine, USA"
 # 
 #         id: "3"
 
