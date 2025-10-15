@@ -1,0 +1,178 @@
+---
+title: "Fitting Bayesian hierarchical models at the national level using `localHierarchy`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{your-vignette-name}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(localhierarchy)
+```
+
+
+
+We present a detailed use case of the `localhierarchy` package using simulated data. For full details, see main article.
+
+# Simulation setup
+Simulated data were generated using the `simulate_multilevel_data` function. We simulate a set of model parameters, setting $\mu^{(\mathrm{global})} = 0$, and $\sigma_{\mathrm{country}} = 0.5$, creating 30 countries, and national data, using $\sigma_y = 0.1$. The function call is as follows (note that the function also generates parameters and data at the subnational level, these are not used in this vignette):
+
+```{r}
+dat_all <- simulate_multilevel_data(
+  n_levels = 2,
+  n_units_perlevel = c(30, 20),
+  sigma_perlevel = c(0.5, 0.2), # national and subnational level
+  mu_global = 0,
+  add_data = TRUE,
+  n_data = 10,
+  sigma_y = 0.1, # used for national and subnational data
+  add_data1levelup = TRUE
+)
+dat_nat <- dat_all$data_1levelup
+```
+
+In the simulated data, `level1` refers to the country level. The data sets contain the simulated parameters (`eta`; the deviation away from the global mean) and data (`y`):
+
+```{r}
+dat_nat |> dplyr::select(level1,  mu_global, level1_eta, y)
+```
+
+# Model fitting
+
+We can fit global and local models using the `fit_model_localhierarchy` wrapper function, as shown later in this section. We first provide implementation details, using the main functions of the package and excerpts from the Stan model.
+
+For model fitting, the first step is to specify a hierarchical structure, using `intercept` and names included in the survey data. For national level estimation, `level1` is the name used in the data:
+
+```{r}
+hierarchical_level <- c("intercept",  "level1")
+```
+
+We can use the function `fit_model_localhierarchy` for model fitting. The argument `runstep` is used to define the type of model, setting it to `"global_national"` results in fitting a model to all data without fixing any parameters. Other arguments include the hierarchical level specification, the area, and survey data. When calling the function, print statements are used to inform the user of key points related to the model fit:
+
+```{r}
+global_fit <- fit_model_localhierarchy(
+  runstep = "global_national",
+  hierarchical_level = hierarchical_level,
+  area = "level1",
+  survey_df = dat_nat
+)
+```
+
+
+The `global_fit` object includes posterior samples and other metadata about the fit.
+
+```{r}
+names(global_fit)
+```
+
+The `post_summ` object contains posterior means for relevant model parameters. For example:
+
+```{r}
+global_fit$post_summ |> 
+  dplyr::filter(variable_no_index == "mu_sigma")
+```
+
+A local fit can be estimated by passing on the global fit object to the wrapper function and including data for countries of interest. Here we do local runs for all countries, by including the entire data set, and specify what to fix using the `runstep` argument:
+
+```{r}
+fit_local <- fit_model_localhierarchy(
+  runstep = "local_national",
+  global_fit = global_fit,
+  area = "level1",
+  survey_df = dat_nat
+)
+```
+
+When doing a local national run with `runstep = "local_national"`, the hierarchical levels are taken from the global fit, and non-country-specific parameters are fixed. This is indicated in the print statements above. 
+
+
+
+# Processing model fits
+
+The package includes several functions to produce and check outputs. The function `posterior_summary_hierparam` is used to summarize posterior draws for hierarchical parameters, to produce summaries of $\mu$ at any level of interest. It takes a fitted model object and a parameter name as input and returns a list with each entry referring one level, and the results (e.g., estimates for $\mu$ estimates) for that level. Here we obtain these results for the global and local model:
+
+```{r, message=FALSE, warning=FALSE}
+res_global <- posterior_summary_hierparam_localhierarchy(
+  fit = global_fit, parname = "mu")
+res_local <- posterior_summary_hierparam_localhierarchy(
+  fit = fit_local, parname = "mu")
+```
+
+Example output for the global model is as follows:
+
+```{r}
+res_local$level1
+```
+
+The column `name` includes the country names, given by simple indices in this simulation. The column `quant` above refers to posterior means and upper and lower bounds of 95% credible intervals. We can create plots to show outputs, for example for the first 4 countries:
+
+```{r}
+plots <- plot_posterior_summaries_localhierarchy(
+  res = res_global, 
+  modelname1 = "global",
+  hierarchy_select = "level1",
+  areas_select = unique(res_local$level1$name)[1:4]
+)
+
+plots$level1
+```
+
+By plotting results from global and local models, we can check how estimates compare and how values have been fixed in the local runs. For example, here we see how country estimates compare between global and local models:
+
+```{r}
+plots <- plot_posterior_summaries_localhierarchy(
+  res = res_local, 
+  modelname1 = "local",
+  res2 = res_global, 
+  modelname2 = "global", 
+  hierarchy_select = "level1",
+  areas_select = unique(res_local$level1$name)[1:4]
+)
+
+plots$level1
+```
+
+Estimates are similar, as expected.
+
+When visualizing higher levels, we see how parameters were fixed in the local model:
+
+```{r}
+plots <- plot_posterior_summaries_localhierarchy(
+  res = res_local, 
+  modelname1 = "local",
+  res2 = res_global, 
+  modelname2 = "global"
+)
+
+plots$intercept 
+```
+
+We can also create plots for the $\gamma$s (`mu_raw`s):
+
+```{r, message=FALSE, warning=FALSE}
+plots <- plot_muraw_localhierarchy(fit = global_fit, parname = "mu")
+```
+
+This gives a list with plots, including summary plots and plots with priors and posteriors. For example, the figures below show the first 30 $\gamma$s, followed by the prior-posterior densities for the first $\gamma$ (referring to the intercept).
+
+```{r}
+plots[["summary_plots"]][[1]]
+```
+
+```{r}
+plots[["plots_allmuraw"]][[1]]
+```
+
+Plots with prior and posterior densities of the $\sigma$s can be produced as well:
+
+```{r}
+plot_prior_post_sigmas_localhierarchy(fit = global_fit, parname = "mu")
+```

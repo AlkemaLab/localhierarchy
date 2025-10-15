@@ -222,11 +222,19 @@ fit_model_localhierarchy <- function(
   ##### Set up hierarchical structures ######
   stan_data[["mu_isvector"]] <- mu_isvector
   parname <- "mu"
+
+  ### get the model file
+
+
   if (!mu_isvector){
-    stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_muscalar.stan"))
+    #stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_muscalar.stan"))
+    ### for pkgdown to be able to find the file, need to use the install
+    stan_file_path <- system.file("stan/hierfunctions_seq_muscalar.stan", package = "localhierarchy")
   } else {
     stan_data[["mu_k_terms"]] <- 3 # 2 or higher
-    stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_muvector.stan"))
+    #stan_file_path = file.path(here::here("inst/stan/", "hierfunctions_seq_muvector.stan"))
+    ### for pkgdown to be able to find the file, need to use the install
+    stan_file_path <- system.file("stan/hierfunctions_seq_muvector.stan", package = "localhierarchy")
   }
   stan_data[[paste0(parname, "_scalarprior_sd")]] <- 1
   stan_data[[paste0(parname, "_scalarprior_mean")]] <- 0

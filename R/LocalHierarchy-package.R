@@ -13,6 +13,7 @@
 #' @importFrom purrr map
 #' @importFrom purrr map_int
 #' @importFrom purrr map2_int map_dbl
+#' @importFrom rlang sym
 #' @importFrom stats dnorm quantile rnorm
 #' @importFrom stringr fixed
 #' @importFrom tibble tibble

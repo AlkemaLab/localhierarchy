@@ -1,6 +1,6 @@
 Package: localhierarchy
 Type: Package
-Title: localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models}
+Title: An R package to facilitate fitting of global and local Bayesian hierarchical models
 Version: 0.1.0
 Authors@R: c(person("Leontine", "Alkema", email = "lalkema@umass.edu", role = c("aut", "cre")),
               person("Shauna", "Mooney", role = c("aut")),
@@ -21,11 +21,15 @@ Imports:
     ggplot2,
     posterior,
     purrr,
+    rlang,
     stringr,
     tibble,
     tidyr,
     truncnorm
 URL: https://alkemalab.github.io/localhierarchy/
 Suggests: 
-    quarto
+    knitr,
+    quarto,
+    rmarkdown
 Config/Needs/website: quarto
+VignetteBuilder: knitr

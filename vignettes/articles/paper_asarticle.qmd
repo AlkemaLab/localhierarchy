@@ -1,9 +1,10 @@
 ---
-# for rendering to pdf
-title: ""
-author: ""
+# # for rendering to pdf
+# title: ""
+# author: ""
 # for rendering to html
-# title: "localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models"
+title: "localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models"
+author: "Leontine Alkema (lalkema@umass.edu), Shauna Mooney, Evan Ray, and Herbert Susmann"
 # author:
 #   - name: "Leontine Alkema"
 #     affiliations:
@@ -19,20 +20,18 @@ author: ""
 #       - id: "1"
 #   - name: "Herbert P. Susmann"
 #     affiliations:
-#       - name: "Division of Biostatistics, Department of Population Health, NYU Grossman School of Medicine, USA"
-# 
+#       - name: "Division of Biostatistics, Department of Population Health, NYU, USA"
 #         id: "3"
-
 date: today
 format:
-  # html:
-  #   number-sections: true
-  pdf:
+  html:
     number-sections: true
-    latex-engine: pdflatex
-    include-before-body: title.tex
-    include-in-header:
-      - file: preamble.tex
+  # pdf:
+  #   number-sections: true
+  #   latex-engine: pdflatex
+  #   include-before-body: title.tex
+  #   include-in-header:
+  #     - file: preamble.tex
 #  docx: default  # Enable if you want Word output format as well
 editor: visual
 # execute:
@@ -47,6 +46,7 @@ abstract: |
 keywords: Bayesian hierarchical model; R; Stan; Local models for one population
 bibliography: bibliography.bib
 ---
+
 
 ```{r}
 #| include: false
@@ -231,8 +231,7 @@ Suppose we want to estimate a population parameter $\mu_r^{(l)}$ of interest, re
 
 \begin{align*}
   \mu_{r}^{(l)} \mid \mu^{(l-1)}_{r^\prime}, \sigma_l &\sim N(\mu^{(l-1)}_{r^\prime}, \sigma_l^2), \text{ for } l > 0,
-\end{align*}
-where $\mu^{(l-1)}_{r^\prime}$ is the parameter value at one level higher in the hierarchy for the region $r^\prime$ that contains unit $r$. The parameter $\sigma_l$ for $l > 0$ describes variability of values of the parameter $\mu$ across geographic units at level $l$ of the hierarchy. At the top level of the hierarchy, $l = 0$, only a single parameter is estimated.
+\end{align*} where $\mu^{(l-1)}_{r^\prime}$ is the parameter value at one level higher in the hierarchy for the region $r^\prime$ that contains unit $r$. The parameter $\sigma_l$ for $l > 0$ describes variability of values of the parameter $\mu$ across geographic units at level $l$ of the hierarchy. At the top level of the hierarchy, $l = 0$, only a single parameter is estimated.
 
 <!-- ```{=latex} -->
 
@@ -367,15 +366,14 @@ where $\mu^{(l-1)}_{r^\prime}$ is the parameter value at one level higher in the
 As a specific example, we consider the estimation of country-specific parameters, where countries are organized into subregions of countries (illustrated in Figure \ref{fig-hiermodel}). In this setting, using alternative notation for the same setup to indicate the level by name, the hierarchical model can be written as follows:
 
 \begin{alignat}{2}
-  \mu_c^{(\country)} &\mid \mu_{s[c]}^{(\subregion)}, \sigma_{ \country}^2 &&\sim N(\mu_{s[c]}^{(\subregion)}, \sigma_{ \country}^2), \label{eq-countryhier} \\
-  \mu_s^{(\subregion)} &\mid \mu_{w[s]}^{(\region)}, \sigma_{ \subregion}^2 &&\sim N(\mu_{w[s]}^{(\region)}, \sigma_{\subregion}^2), \nonumber \\
-  \mu_w^{(\region)} &\mid \mu^{(\glob)}, \sigma_{ \region}^2 &&\sim N(\mu^{(\glob)}, \sigma_{ \region}^2), \nonumber
-\end{alignat} 
-where $c =1,\dots,C$ refers to the country index, $s[c] = 1, .., S$ to the subregion index of country $c$, and $w[s[c]] = 1, .., W$ to the region index of subregion $s[c]$. The parameter $\mu^{(\glob)}$ is the global mean for the parameter of interest, e.g., a global mean for service coverage or mortality. The parameters $\sigma_{ \country}$, $\sigma_{ \subregion}$, and $\sigma_{ \region}$ describe variability in the parameter of interest across countries, subregions, and regions, respectively.
+  \mu_c^{(\mathrm{country})} &\mid \mu_{s[c]}^{(\mathrm{subregion})}, \sigma_{ \mathrm{country}}^2 &&\sim N(\mu_{s[c]}^{(\mathrm{subregion})}, \sigma_{ \mathrm{country}}^2), \label{eq-countryhier} \\
+  \mu_s^{(\mathrm{subregion})} &\mid \mu_{w[s]}^{(\mathrm{region})}, \sigma_{ \mathrm{subregion}}^2 &&\sim N(\mu_{w[s]}^{(\mathrm{region})}, \sigma_{\mathrm{subregion}}^2), \nonumber \\
+  \mu_w^{(\mathrm{region})} &\mid \mu^{(\mathrm{global})}, \sigma_{ \mathrm{region}}^2 &&\sim N(\mu^{(\mathrm{global})}, \sigma_{ \mathrm{region}}^2), \nonumber
+\end{alignat} where $c =1,\dots,C$ refers to the country index, $s[c] = 1, .., S$ to the subregion index of country $c$, and $w[s[c]] = 1, .., W$ to the region index of subregion $s[c]$. The parameter $\mu^{(\mathrm{global})}$ is the global mean for the parameter of interest, e.g., a global mean for service coverage or mortality. The parameters $\sigma_{ \mathrm{country}}$, $\sigma_{ \mathrm{subregion}}$, and $\sigma_{ \mathrm{region}}$ describe variability in the parameter of interest across countries, subregions, and regions, respectively.
 
 ```{=html}
-<!-- Here, if $\mu^{(\glob)}$ has prior $\mu^{(\glob)} \sim N(0, s_{\mu, global}^2)$, then $$\mu_c =  s_{global}\cdot \gamma_{global} + \sigma_{ region}\cdot \gamma_{r[s[c]]]}^{(
-egion)} + \sigma_{ subregion}\cdot\gamma_{s[c]}^{(\subregion)} + \sigma_{ country}\cdot\gamma_{ c},$$ with $\gamma \sim N(0,1)$ for each gamma (one global, $R$ regions, $S$ subregions, $C$ countries). -->
+<!-- Here, if $\mu^{(\mathrm{global})}$ has prior $\mu^{(\mathrm{global})} \sim N(0, s_{\mu, global}^2)$, then $$\mu_c =  s_{global}\cdot \gamma_{global} + \sigma_{ region}\cdot \gamma_{r[s[c]]]}^{(
+egion)} + \sigma_{ subregion}\cdot\gamma_{s[c]}^{(\mathrm{subregion})} + \sigma_{ country}\cdot\gamma_{ c},$$ with $\gamma \sim N(0,1)$ for each gamma (one global, $R$ regions, $S$ subregions, $C$ countries). -->
 ```
 
 ## Local hierarchical models
@@ -474,8 +472,7 @@ We use the term local hierarchical models to refer to a hierarchical model in wh
 
 A local model is derived from a global one by fixing parameters. Continuing with the specific example, an example local model to produce country estimates using data from one country alone has the following setup:
 
-$$\mu_c^{(\country)} \sim N(\hat{\mu}_{s[c]}^{(\subregion)}, \hat{\sigma}_{ \country}^2),$$
-replacing the hierarchical mean and variances by point estimates $\hat{\mu}_{s[c]}^{(\subregion)}$ and $\hat{\sigma}_{\country}^2$, respectively. Details are given in the implementation section.
+$$\mu_c^{(\mathrm{country})} \sim N(\hat{\mu}_{s[c]}^{(\mathrm{subregion})}, \hat{\sigma}_{ \mathrm{country}}^2),$$ replacing the hierarchical mean and variances by point estimates $\hat{\mu}_{s[c]}^{(\mathrm{subregion})}$ and $\hat{\sigma}_{\mathrm{country}}^2$, respectively. Details are given in the implementation section.
 
 The `localhierachy` package provides a general implementation of local models by facilitating the fixing of subsets of parameters. Continuing with the general notation introduced above, in the package, a local model for one parameter of level $l$ is derived by fixing $\sigma_k$ for $k=1, ..., l$ and fixing $\mu_{\cdot}^{(k)}$ for $k = 1, .., l-1$ at posterior means derived from a global fit. More generally, if a model was fitted using data up to level $l$, the user can create a local model by fixing $\sigma_k$ at all levels $k$ up to some chosen level $K_{\sigma}$. Similarly, the $\mu^{(k)}$ parameters can be fixed at all levels $k$ up to a level $K_{\mu} \leq K_{\sigma}$.
 
@@ -485,8 +482,8 @@ The `localhierarchy` R package contains R functions and example Stan model files
 
 In a typical work flow, a user first fits a global model, followed by local ones. Worked examples are given in the use cases in @sec-nationalusecase and @sec-subnatusecase. The global and local models in these examples are fitted using the `localhierarchy` wrapper function `fit_model_localhierarchy`, using its arguments to specify a hierarchical model, data, and, for local fits, the output of the global model. The wrapper function calls R functions to process data and prepare Stan input data, read in a Stan model, fit the model, and post-process the results.
 
-The package includes a user-friendly specification of hierarchical model structures, and associated specification of fixed parameters for local runs. A worked example is given in the first use case (@sec-nationalusecase). Briefly, if a user wants to specify a hierarchical model with the levels world, regions, subregion, and country, <!-- country parameters $\mu_c^{(\country)} =  s_{global}\cdot \gamma_{global} + \sigma_{ region}\cdot \gamma_{r[s[c]]]}^{(
-egion)} + \sigma_{ subregion}\cdot\gamma_{s[c]}^{(\subregion)} + \sigma_{ country}\cdot\gamma_{ c}$,  --> using a dataset with information on these groupings, with naming `region`, `subregion`, and `country`, in the R functions, the user can specify the hierarchical model as follows:
+The package includes a user-friendly specification of hierarchical model structures, and associated specification of fixed parameters for local runs. A worked example is given in the first use case (@sec-nationalusecase). Briefly, if a user wants to specify a hierarchical model with the levels world, regions, subregion, and country, <!-- country parameters $\mu_c^{(\mathrm{country})} =  s_{global}\cdot \gamma_{global} + \sigma_{ region}\cdot \gamma_{r[s[c]]]}^{(
+egion)} + \sigma_{ subregion}\cdot\gamma_{s[c]}^{(\mathrm{subregion})} + \sigma_{ country}\cdot\gamma_{ c}$,  --> using a dataset with information on these groupings, with naming `region`, `subregion`, and `country`, in the R functions, the user can specify the hierarchical model as follows:
 
 ```{r, eval = FALSE}
 hierarchical_level <- c("intercept",  "region", "subregion", "country")
@@ -503,17 +500,17 @@ Note that even though there is no $\sigma$ at the intercept level, this term is 
 
 The Stan implementation of the model uses a non-centered parameterization. In general notation, for $l>0$, a non-centered parameterization refers to writing mean parameters as deviations from higher-level group means: \begin{align*}
   \mu_r^{(l)} &= \mu^{(l-1)} + \sigma_l \cdot \gamma_{r}^{(l)},
-\end{align*} where $\gamma_r^{(l)} \sim N(0, 1)$. Applied sequentially, and if $\mu^{(0)} \sim N(0,s_{\glob})$ with prior standard deviation $s_{\glob}$, we get \begin{align*}
-  \mu_r^{(l)} &= s_{\glob}\cdot\gamma^{(0)} + \sum_{k=1}^{l} \sigma_k \cdot \gamma_{r^\prime}^{(k)},
+\end{align*} where $\gamma_r^{(l)} \sim N(0, 1)$. Applied sequentially, and if $\mu^{(0)} \sim N(0,s_{\mathrm{global}})$ with prior standard deviation $s_{\mathrm{global}}$, we get \begin{align*}
+  \mu_r^{(l)} &= s_{\mathrm{global}}\cdot\gamma^{(0)} + \sum_{k=1}^{l} \sigma_k \cdot \gamma_{r^\prime}^{(k)},
 \end{align*} where $r^\prime$ now refers more generally to the index of the unit containing the lower-level group. For the specific example of country parameters, the non-centered parameterization is given by \begin{align*}
-  \mu_c^{(\country)} =  s_{\glob} \cdot {\gamma}^{(\glob)} + {\sigma}_{\region}\cdot {\gamma}_{w[s[c]]]}^{(\region)} + {\sigma}_{\subregion}\cdot{\gamma}_{s[c]}^{(\subregion)} + {\sigma}_{\country}\cdot\gamma_{c}^{(\country)}.
+  \mu_c^{(\mathrm{country})} =  s_{\mathrm{global}} \cdot {\gamma}^{(\mathrm{global})} + {\sigma}_{\mathrm{region}}\cdot {\gamma}_{w[s[c]]]}^{(\mathrm{region})} + {\sigma}_{\mathrm{subregion}}\cdot{\gamma}_{s[c]}^{(\mathrm{subregion})} + {\sigma}_{\mathrm{country}}\cdot\gamma_{c}^{(\mathrm{country})}.
 \end{align*}
 
-Implementation is based on a model matrix. For our model given by the equation above, the following matrix multiplication is used to obtain the vector of $\mu_c^{(\country)}$s: $$(\mu_1^{(\country)}, ..., \mu_c^{(\country)}) = M\cdot (\eta_1, ..., \eta_{1+R+S+C})',$$ where matrix $M$ is a sparse matrix with 1s and 0s, and $(\eta_1, ..., \eta_{1+R+S+C})$ refers to the vector of the product of the standard deviation terms and $\gamma$ terms, i.e., $\eta_1 = s_{\glob}\cdot \gamma_{\glob}, \eta_2 = \sigma_{ \region} \cdot \gamma_{ 1}^{(\region)}, ..., \eta_{1+W+S+C} = \sigma_{ \country}\cdot\gamma_{ C}^{(\country)}$. When estimating a subset of parameters in a local model, the values of $\sigma$s and $\gamma$s are fixed to point estimates (posterior means) from a global fit. For example, for a national model, we get \begin{align*}
-  \mu_c = s_{\glob} \cdot \hat{\gamma}_{\glob} + 
-          \hat{\sigma}_{ \region} \cdot \hat{\gamma}_{w[s[c]]]}^{(\region)} + 
-          \hat{\sigma}_{ \subregion} \cdot \hat{\gamma}_{s[c]}^{(\subregion)} + 
-          \hat{\sigma}_{ \country} \cdot \gamma_{c}^{(\country)}.
+Implementation is based on a model matrix. For our model given by the equation above, the following matrix multiplication is used to obtain the vector of $\mu_c^{(\mathrm{country})}$s: $$(\mu_1^{(\mathrm{country})}, ..., \mu_c^{(\mathrm{country})}) = M\cdot (\eta_1, ..., \eta_{1+R+S+C})',$$ where matrix $M$ is a sparse matrix with 1s and 0s, and $(\eta_1, ..., \eta_{1+R+S+C})$ refers to the vector of the product of the standard deviation terms and $\gamma$ terms, i.e., $\eta_1 = s_{\mathrm{global}}\cdot \gamma_{\mathrm{global}}, \eta_2 = \sigma_{ \mathrm{region}} \cdot \gamma_{ 1}^{(\mathrm{region})}, ..., \eta_{1+W+S+C} = \sigma_{ \mathrm{country}}\cdot\gamma_{ C}^{(\mathrm{country})}$. When estimating a subset of parameters in a local model, the values of $\sigma$s and $\gamma$s are fixed to point estimates (posterior means) from a global fit. For example, for a national model, we get \begin{align*}
+  \mu_c = s_{\mathrm{global}} \cdot \hat{\gamma}_{\mathrm{global}} + 
+          \hat{\sigma}_{ \mathrm{region}} \cdot \hat{\gamma}_{w[s[c]]]}^{(\mathrm{region})} + 
+          \hat{\sigma}_{ \mathrm{subregion}} \cdot \hat{\gamma}_{s[c]}^{(\mathrm{subregion})} + 
+          \hat{\sigma}_{ \mathrm{country}} \cdot \gamma_{c}^{(\mathrm{country})}.
 \end{align*}
 
 ## Operation
@@ -558,19 +555,19 @@ The simulation setup is summarized in @fig-simusetup, top and center panels. Sim
 
 <!-- % --- Level 0 --- -->
 
-<!-- \node[level0] (mu0) {$\mu^{(\glob)} \sim \mathcal{N}(0,s_\glob^2)$}; -->
+<!-- \node[level0] (mu0) {$\mu^{(\mathrm{global})} \sim \mathcal{N}(0,s_\mathrm{global}^2)$}; -->
 
 <!-- % --- Level 1 --- -->
 
-<!-- \node[level1, below left=1.5cm and 3cm of mu0] (mu11) {$\mu^{(\country)}_1 \sim \mathcal{N}(\mu^{(\glob)},\sigma_{\country}^2)$}; -->
+<!-- \node[level1, below left=1.5cm and 3cm of mu0] (mu11) {$\mu^{(\mathrm{country})}_1 \sim \mathcal{N}(\mu^{(\mathrm{global})},\sigma_{\mathrm{country}}^2)$}; -->
 
-<!-- \node[level1, right=of mu11] (mu12) {$\mu^{(\country)}_2$}; -->
+<!-- \node[level1, right=of mu11] (mu12) {$\mu^{(\mathrm{country})}_2$}; -->
 
 <!-- \node[level1, right=of mu12] (dots1) {$\dots$}; -->
 
 <!-- % --- Level 2 --- -->
 
-<!-- \node[level2, below left=1.5cm and 0cm of mu11] (mu21) {$\mu^{(\subnat)}_1 \sim \mathcal{N}(\mu^{(\country)}_1,\sigma_{\subnat}^2)$}; -->
+<!-- \node[level2, below left=1.5cm and 0cm of mu11] (mu21) {$\mu^{(\mathrm{subnat})}_1 \sim \mathcal{N}(\mu^{(\mathrm{country})}_1,\sigma_{\mathrm{subnat}}^2)$}; -->
 
 <!-- \node[level2, right=of mu21] (mu22) {$\mu^{(2)}_2$}; -->
 
@@ -590,9 +587,9 @@ The simulation setup is summarized in @fig-simusetup, top and center panels. Sim
 
 <!-- % Sigma labels inside background blocks -->
 
-<!-- \node[anchor=north west] at (bg1.east) {$\sigma_{\country}$, country}; -->
+<!-- \node[anchor=north west] at (bg1.east) {$\sigma_{\mathrm{country}}$, country}; -->
 
-<!-- \node[anchor=north west] at (bg2.east) {$\sigma_{\subnat}$, subnational region}; -->
+<!-- \node[anchor=north west] at (bg2.east) {$\sigma_{\mathrm{subnat}}$, subnational region}; -->
 
 <!-- % --- Arrows --- -->
 
@@ -636,11 +633,11 @@ The simulation setup is summarized in @fig-simusetup, top and center panels. Sim
 
 <!-- ] -->
 
-<!-- \node[level1] (mu0) {$\mu^{(\country)}_1$}; -->
+<!-- \node[level1] (mu0) {$\mu^{(\mathrm{country})}_1$}; -->
 
 <!-- % --- Level 1 --- -->
 
-<!-- \node[data, below left=1.5cm and 3cm of mu0] (mu11) {$y^{(country)}_1 \sim \mathcal{N}(\mu^{(\country)}_1,\sigma_{y}^2)$}; -->
+<!-- \node[data, below left=1.5cm and 3cm of mu0] (mu11) {$y^{(country)}_1 \sim \mathcal{N}(\mu^{(\mathrm{country})}_1,\sigma_{y}^2)$}; -->
 
 <!-- \node[data, right=of mu11] (mu12) {$y^{(country)}_2$}; -->
 
@@ -698,11 +695,11 @@ The simulation setup is summarized in @fig-simusetup, top and center panels. Sim
 
 <!-- % keep same colors so now color of level 1 at top  -->
 
-<!-- \node[level2] (mu0) {$\mu^{(\subnat)}_1$}; -->
+<!-- \node[level2] (mu0) {$\mu^{(\mathrm{subnat})}_1$}; -->
 
 <!-- % --- Level 1 --- -->
 
-<!-- \node[data, below left=1.5cm and 3cm of mu0] (mu11) {$y^{(subnat)}_1 \sim \mathcal{N}(\mu^{(\subnat)}_1,\sigma_{y}^2)$}; -->
+<!-- \node[data, below left=1.5cm and 3cm of mu0] (mu11) {$y^{(subnat)}_1 \sim \mathcal{N}(\mu^{(\mathrm{subnat})}_1,\sigma_{y}^2)$}; -->
 
 <!-- \node[data, right=of mu11] (mu12) {$y^{(subnat)}_2$}; -->
 
@@ -742,9 +739,9 @@ The simulation setup is summarized in @fig-simusetup, top and center panels. Sim
 
 ![Diagram of simulation settings. Top: Hierarchical model for generating country and subnational parameters. Center: Data generating mechanism for national data, illustrated for the first country. Bottom: Data generating mechanism for subnational data, illustrated for the first subnational region (used only in Section 5).](fig/simusetup.jpg){#fig-simusetup width="618"}
 
-The top panel in Figure \ref{fig-simusetup} indicates the hierarchical model considered. For national level estimation, we consider countries to be grouped in the world, i.e., $\mu_c^{(\country)}|\mu^{(\glob)}, \sigma_{ \country} \sim N(\mu^{(\glob)}, \sigma_{ \country}^2)$. The center panel introduces the likelihood function for national data, given by a normal likelihood with constant variance: $$y_i^{(\country)}|\mu_{c[i]}^{(\country)}, \sigma_y^2 \sim N(\mu_{c[i]}^{(\country)}, \sigma_y^2),$$ where $c[i]$ refers to the country of country observation $i$. We chose simple normal densities as data generating mechanisms in the simulation, to focus the modeling on the hierarchical model and the `localhierarchy` functionality as opposed to the data model aspects of modeling. In practice, the data model can be set by the user to reflect actual data generating mechanisms, for example, by using a binomial likelihood, considering transformed outcomes, or accounting for sampling errors for observations that were obtained from a complex survey design.
+The top panel in Figure \ref{fig-simusetup} indicates the hierarchical model considered. For national level estimation, we consider countries to be grouped in the world, i.e., $\mu_c^{(\mathrm{country})}|\mu^{(\mathrm{global})}, \sigma_{ \mathrm{country}} \sim N(\mu^{(\mathrm{global})}, \sigma_{ \mathrm{country}}^2)$. The center panel introduces the likelihood function for national data, given by a normal likelihood with constant variance: $$y_i^{(\mathrm{country})}|\mu_{c[i]}^{(\mathrm{country})}, \sigma_y^2 \sim N(\mu_{c[i]}^{(\mathrm{country})}, \sigma_y^2),$$ where $c[i]$ refers to the country of country observation $i$. We chose simple normal densities as data generating mechanisms in the simulation, to focus the modeling on the hierarchical model and the `localhierarchy` functionality as opposed to the data model aspects of modeling. In practice, the data model can be set by the user to reflect actual data generating mechanisms, for example, by using a binomial likelihood, considering transformed outcomes, or accounting for sampling errors for observations that were obtained from a complex survey design.
 
-Simulated data were generated using the `simulate_multilevel_data` function. We simulate a set of model parameters, setting $\mu^{(\glob)} = 0$, and $\sigma_{\country} = 0.5$, creating 30 countries, and national data, using $\sigma_y = 0.1$. The function call is as follows (note that the function also generates parameters and data at the subnational level, these are used in Section 5):
+Simulated data were generated using the `simulate_multilevel_data` function. We simulate a set of model parameters, setting $\mu^{(\mathrm{global})} = 0$, and $\sigma_{\mathrm{country}} = 0.5$, creating 30 countries, and national data, using $\sigma_y = 0.1$. The function call is as follows (note that the function also generates parameters and data at the subnational level, these are used in Section 5):
 
 ```{r}
 dat_all <- simulate_multilevel_data(
@@ -1042,13 +1039,13 @@ The approach followed in NISE is illustrated in @fig-nise. In the NISE approach,
 
 <!--   \begin{aligned} -->
 
-<!-- \mu_w^{(\region)} &\sim N(\mu^{(\glob)}, \sigma_{ \region}^2),\\ -->
+<!-- \mu_w^{(\mathrm{region})} &\sim N(\mu^{(\mathrm{global})}, \sigma_{ \mathrm{region}}^2),\\ -->
 
-<!-- \mu_s^{(\subregion)} &\sim N(\mu_{w[s]}^{(\region)}, \sigma_{ \subregion}^2), \\ -->
+<!-- \mu_s^{(\mathrm{subregion})} &\sim N(\mu_{w[s]}^{(\mathrm{region})}, \sigma_{ \mathrm{subregion}}^2), \\ -->
 
-<!-- \mu_c^{(\country)} &\sim N(\mu_{s[c]}^{(\subregion)}, \sigma_{ \country}^2),  \\ -->
+<!-- \mu_c^{(\mathrm{country})} &\sim N(\mu_{s[c]}^{(\mathrm{subregion})}, \sigma_{ \mathrm{country}}^2),  \\ -->
 
-<!-- \mu_r^{(\subnat)} &\sim N(\mu_{c[r]}^{(\country)}, \sigma_{ \subnat}^2),  \\ -->
+<!-- \mu_r^{(\mathrm{subnat})} &\sim N(\mu_{c[r]}^{(\mathrm{country})}, \sigma_{ \mathrm{subnat}}^2),  \\ -->
 
 <!-- \end{aligned} -->
 
@@ -1140,11 +1137,11 @@ The approach followed in NISE is illustrated in @fig-nise. In the NISE approach,
 
 ### Simulation setup
 
-The simulation setup for subnational parameters and data is summarized in Figure \ref{fig-simusetup} in three panels. As explained above for national estimation, the top panel indicates the hierarchical model considered. For subnational estimation, an additional level is added, with $\mu_r^{(\subnat)} = \mu_{c[r]}^{(\country)} + \eta_{r}^{(\subnat)}$, $\eta_{r}^{(\subnat)}|\sigma_{ \subnat} \sim N(0, \sigma_{ \subnat})$.
+The simulation setup for subnational parameters and data is summarized in Figure \ref{fig-simusetup} in three panels. As explained above for national estimation, the top panel indicates the hierarchical model considered. For subnational estimation, an additional level is added, with $\mu_r^{(\mathrm{subnat})} = \mu_{c[r]}^{(\mathrm{country})} + \eta_{r}^{(\mathrm{subnat})}$, $\eta_{r}^{(\mathrm{subnat})}|\sigma_{ \mathrm{subnat}} \sim N(0, \sigma_{ \mathrm{subnat}})$.
 
 As previously explained, we chose simple normal densities as data generating mechanisms in the simulation, to focus the modeling on the hierarchical model and the `localhierarchy` functionality as opposed to the data model aspects of modeling. Subnational data follows a normal distribution with constant variance: $$y^{(subnat)}_i|\mu^{(subnat)}_{r[i]}, \sigma_y^2 \sim N(\mu^{(subnat)}_{r[i]}, \sigma_y^2),$$ where $r[i]$ refers to the subnational region of subnational observation $i$. In this simulation setup, for simplicity, we generate subnational data independently of national-level data, and we use the same constant data variance at the national and subnational levels. In real examples, data variances are likely to differ (for example, because subnational sampling errors are larger at the subnational level) and national and subnational data may be derived from the same source. We discuss an example of those settings in the case study.
 
-Simulated data at the subnational level was generated using the `simulate_multilevel_data` function described above. For subnational levels, we set $\sigma_{\subnat} = 0.2$, and we created 20 subnational regions in each country and 10 observations per region. In the simulated data, `level1` refers to the country level and `level2` refers to the subnational level. The data sets contain the simulated parameters (`eta`) and data (`y`):
+Simulated data at the subnational level was generated using the `simulate_multilevel_data` function described above. For subnational levels, we set $\sigma_{\mathrm{subnat}} = 0.2$, and we created 20 subnational regions in each country and 10 observations per region. In the simulated data, `level1` refers to the country level and `level2` refers to the subnational level. The data sets contain the simulated parameters (`eta`) and data (`y`):
 
 ```{r}
 dat_subnat <- dat_all$data
@@ -1260,7 +1257,7 @@ No data are associated with the software tool described in this article.
 
 ### Software availability {.unnumbered}
 
-The R package is available at [github.com/AlkemaLab/localhierarchy](https://github.com/AlkemaLab/localhierarchy) and Zenodo \[to do: add reference\]. The code is licensed XXX.
+The R package is available at [github.com/AlkemaLab/localhierarchy](https://github.com/AlkemaLab/localhierarchy). <!-- and Zenodo \[to do: add reference\]. --> This code is distributed under the BSD 3-Clause License. See the R package's LICENSE file for details.
 
 ### Grant information {.unnumbered}
 
@@ -1299,7 +1296,7 @@ transformed parameters {
 
 Here we use that $(\mu_1^{(country)}, ..., \mu_C^{(country)}) = M \cdot (\eta_1, ..., \eta_C)$, where matrix $M$ is a sparse matrix with 1s and 0s, and $(\eta_1, ..., \eta_c)$ refers to the vector with products of standard deviation and $\gamma$ terms. The function `get_mu` calculates the vector of $\mu_c^{(country)}$s from the vector of $\eta$s (`mu_star` in the Stan model) and a decomposition of $M$ into different parts $U$, $V$, $W$. This implementation uses the sparse representation of the model matrix $M$ with Stan functions `csr_matrix_times_vector` and `crs_extract`.
 
-The second Stan model excerpt concerns the specification of the $\eta$s (`mu_star`). This vector is obtained by multiplying the vector of $\gamma$s, which is referred to as `mu_raw` in the Stan model by their respective standard deviation, i.e., the vector containing $s_{\glob}$ (labeled `mu_scalarprior_mean` in the Stan model) and the vector of stacked $\sigma$s (labeled `mu_sigma` in the Stan model). To allow for global and local models, additions `_estimate` and `_fixed` are used to allow for splitting the `mu_raw` vector into two parts, one for fixed and one for estimated parameters. Similarly, vector `mu_sigma` is also split into two parts, one part for fixed and one part for estimated parameters. Relevant Stan code is as follows:
+The second Stan model excerpt concerns the specification of the $\eta$s (`mu_star`). This vector is obtained by multiplying the vector of $\gamma$s, which is referred to as `mu_raw` in the Stan model by their respective standard deviation, i.e., the vector containing $s_{\mathrm{global}}$ (labeled `mu_scalarprior_mean` in the Stan model) and the vector of stacked $\sigma$s (labeled `mu_sigma` in the Stan model). To allow for global and local models, additions `_estimate` and `_fixed` are used to allow for splitting the `mu_raw` vector into two parts, one for fixed and one for estimated parameters. Similarly, vector `mu_sigma` is also split into two parts, one part for fixed and one part for estimated parameters. Relevant Stan code is as follows:
 
 ```{r, eval = FALSE}
 data {
@@ -1342,8 +1339,8 @@ model {
 }
 ```
 
-In the model code, the data block contains the input data for the $\gamma$s and $\sigma$s. The `localhierarchy` Stan function `get_mu_star` is used to obtain the $\eta$s. Its arguments also include prior parameters `mu_scalarprior_mean` and `mu_scalarprior_sd`, which refer to the (rescaled) prior mean and standard deviation of $\mu^{(\glob)}$. The model block contains the priors for the $\gamma$s and $\sigma_{k}$s, given by \begin{align*}
-  \mu^{(\glob)} &\sim N(0,1),\\
+In the model code, the data block contains the input data for the $\gamma$s and $\sigma$s. The `localhierarchy` Stan function `get_mu_star` is used to obtain the $\eta$s. Its arguments also include prior parameters `mu_scalarprior_mean` and `mu_scalarprior_sd`, which refer to the (rescaled) prior mean and standard deviation of $\mu^{(\mathrm{global})}$. The model block contains the priors for the $\gamma$s and $\sigma_{k}$s, given by \begin{align*}
+  \mu^{(\mathrm{global})} &\sim N(0,1),\\
   \sigma_{k} &\sim \text{Half-Normal}(0, s_{\sigma}).
 \end{align*} All prior parameters are added as input data to the Stan model.
 
@@ -1396,3 +1393,4 @@ Optionally, model parameters can be fixed to values from a previous model fit pr
 List that contains samples, stan_data, other information relevant to model fit (arguments), and for global fits, point estimates of relevant parameters (post_summ). For subnational global fits, the list includes fit_globalsubnat_fromnat, which is the global fit with additional subnational sigmas added to the postsum object.
 
 # References
+
