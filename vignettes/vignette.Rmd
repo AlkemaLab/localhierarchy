@@ -1,8 +1,8 @@
 ---
-title: "[Vignette] Fitting Bayesian hierarchical models at the national level using the R package localhierarchy"
+title: "[Vignette] Global and local model fitting using the R package localhierarchy"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Fitting Bayesian hierarchical models at the national level using localhierarchy}
+  %\VignetteIndexEntry{[Vignette] Global and local model fitting using the R package localhierarchy}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,7 +17,9 @@ knitr::opts_chunk$set(
 
 
 
-We present a detailed use case of the `localhierarchy` package using simulated data. For full details, see main article.
+This vignette demonstrates how to do global and local model fitting based on simulated data, to illustrate the functionality to do estimation at a national and subnational level. 
+Detailed explanations of the model set up and code are given in the main article. 
+
 
 
 ```{r setup}
@@ -25,7 +27,7 @@ library(localhierarchy)
 ```
 
 # Simulation setup
-Simulated data were generated using the `simulate_multilevel_data` function. We simulate a set of model parameters, setting $\mu^{(\mathrm{global})} = 0$, and $\sigma_{\mathrm{country}} = 0.5$, creating 30 countries, and national data, using $\sigma_y = 0.1$. The function call is as follows (note that the function also generates parameters and data at the subnational level, these are not used in this vignette):
+Simulated data were generated using the `simulate_multilevel_data` function. We simulate a set of model parameters, setting $\mu^{(\mathrm{global})} = 0$, and $\sigma_{\mathrm{country}} = 0.5$, creating 30 countries, and national data, using $\sigma_y = 0.1$. The function call is as follows (note that the function also generates parameters and data at the subnational level, these are used in the second section):
 
 ```{r}
 dat_all <- simulate_multilevel_data(
@@ -47,9 +49,7 @@ In the simulated data, `level1` refers to the country level. The data sets conta
 dat_nat |> dplyr::select(level1,  mu_global, level1_eta, y)
 ```
 
-# Model fitting
-
-We can fit global and local models using the `fit_model_localhierarchy` wrapper function, as shown later in this section. We first provide implementation details, using the main functions of the package and excerpts from the Stan model.
+# National model fitting
 
 For model fitting, the first step is to specify a hierarchical structure, using `intercept` and names included in the survey data. For national level estimation, `level1` is the name used in the data:
 
@@ -97,7 +97,7 @@ When doing a local national run with `runstep = "local_national"`, the hierarchi
 
 
 
-# Processing model fits
+## Processing model fits
 
 The package includes several functions to produce and check outputs. The function `posterior_summary_hierparam` is used to summarize posterior draws for hierarchical parameters, to produce summaries of $\mu$ at any level of interest. It takes a fitted model object and a parameter name as input and returns a list with each entry referring one level, and the results (e.g., estimates for $\mu$ estimates) for that level. Here we obtain these results for the global and local model:
 
@@ -177,4 +177,81 @@ Plots with prior and posterior densities of the $\sigma$s can be produced as wel
 
 ```{r}
 plot_prior_post_sigmas_localhierarchy(fit = global_fit, parname = "mu")
+```
+
+
+
+
+# Subnational model fitting
+
+The simulated data at the subnational level is given by:
+```{r}
+dat_subnat <- dat_all$data
+dat_subnat |> dplyr::select(level1, level2, mu_global, level1_eta, level2_eta, y)
+```
+
+A *nationally-informed subnational estimation* (NISE) model is fitted as follows:
+
+```{r}
+area_subnat <- "level2"
+global_fitsubnat_seq <- fit_model_localhierarchy(
+   runstep = "global_subnational",
+   area = area_subnat, # subnational area name 
+   survey_df = dat_subnat, # pass on subnat data
+   # for NISE:
+   global_fit = global_fit, # global national fit
+   # what level to add to the hierarchy, compared to the 
+   # global national model 
+   add_subnational_hierarchy = area_subnat
+  )
+```
+
+Through the `add_subnational_hierarchy` argument, and as shown in the printed statements, the hierarchical structure is now given by intercept $\rightarrow$ country $\rightarrow$ subnational level. By default, the world mean and across-country variance are fixed. 
+
+By comparing the fit summaries from the global national and global subnational fits for the $\sigma$s, we see that, as expected, one additional $\sigma_{\mu}$ is estimated in the subnational model (to capture variability across subnational regions) and the $\sigma_{\mu}$ at the higher country level is the same in the global national and subnational fit:
+
+```{r}
+global_fit$post_summ |>
+  dplyr::filter(stringr::str_detect(variable_no_index, "sigma"))
+global_fitsubnat_seq$post_summ |>
+  dplyr::filter(stringr::str_detect(variable_no_index, "sigma"))
+```
+
+We can use the subnational global fit to do a local subnational fit, using the `runstep = "local_subnational"` setting:
+
+```{r}
+fit_local_seq <- fit_model_localhierarchy(
+  runstep = "local_subnational",
+  area = area_subnat,
+  survey_df = dat_subnat,
+  global_fit = global_fitsubnat_seq
+)
+```
+
+Similarly to the local national run, in subnational local runs, hierarchical levels and which parameters are fixed is set in the wrapper function; we estimate subnational parameters only. Point estimates in the subnational global fit include point estimates from the national global run as well as point estimates from the global subnational fit. By default, parameters that are duplicated between the two fits, e.g., world region or country means, are taken from the national global run. This is implemented as such to avoid the situation where local runs would fail for countries that were not included in the subnational global fitting, i.e., when country parameters were fixed and missing from the subnational fit. Alternatively, if the user wants to use parameter estimates from the subnational global fit in these settings, the argument `use_globalsubnat_fromnat` can be used when calling the `fit_model_localhierarchy` function (see documentation). 
+
+We can create and check summaries of subnational fits using the same functions for national fits. Below we compare the subnational global fit with the local subnational fit. The results are comparable, as expected.
+
+```{r, message=FALSE, warning=FALSE}
+res_globalsubnat_seq <- posterior_summary_hierparam_localhierarchy(
+  fit = global_fitsubnat_seq,
+  parname = "mu"
+)
+
+res_local_seq <- posterior_summary_hierparam_localhierarchy(
+  fit = fit_local_seq, 
+  parname = "mu"
+)
+```
+
+```{r}
+plots <- plot_posterior_summaries_localhierarchy(
+  res = res_local_seq, 
+  modelname1 = "local",
+  res2 = res_globalsubnat_seq, modelname2 = "global",
+  hierarchy_select = "level2",
+  areas_select = unique(res_local_seq$level2$name)[1:30]
+)
+
+plots$level2
 ```
