@@ -2,7 +2,7 @@
 % Please edit documentation in R/posterior_summary_hierparam.R
 \name{posterior_summary_hierparam_localhierarchy}
 \alias{posterior_summary_hierparam_localhierarchy}
-\title{posterior_summary_hierparam_localhierarchy}
+\title{Calculate posterior summaries for hierarchical parameters}
 \usage{
 posterior_summary_hierparam_localhierarchy(
   fit,

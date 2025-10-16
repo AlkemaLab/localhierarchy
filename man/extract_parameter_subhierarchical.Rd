@@ -32,3 +32,4 @@ variables are \code{name}, \code{value}, \verb{.draw/iteration/chain' and }k` re
 \description{
 extract_parameter_subhierarchical
 }
+\keyword{internal}

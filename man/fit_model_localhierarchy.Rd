@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_model.R
 \name{fit_model_localhierarchy}
 \alias{fit_model_localhierarchy}
-\title{Fit model for localhierarchy model}
+\title{Fit localhierarchy example model}
 \usage{
 fit_model_localhierarchy(
   survey_df,
@@ -77,7 +77,7 @@ For subnational global fits, the list includes fit_globalsubnat_fromnat, which i
 additional subnational sigmas added to the postsum object.
 }
 \description{
-This function fits the localhierarchy model
+This function fits the localhierarchy example model
 }
 \details{
 The \code{fit_model_localhierarchy} function fits the toy example for hierarchical models/seq fitting.

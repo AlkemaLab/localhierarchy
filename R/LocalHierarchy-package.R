@@ -21,5 +21,7 @@
 #' @importFrom tidyr pivot_wider
 #' @importFrom truncnorm rtruncnorm
 #' @importFrom utils data
+#' @importFrom glue glue
+#' @importFrom readr parse_number
 ## usethis namespace: end
 NULL

@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_geo_unit_index_data.R
 \name{get_geo_unit_index_data}
 \alias{get_geo_unit_index_data}
-\title{Get geo_unit_index_data}
+\title{Get unique hierarchical levels from survey data}
 \usage{
 get_geo_unit_index_data(data, hierarchical_levels, area)
 }

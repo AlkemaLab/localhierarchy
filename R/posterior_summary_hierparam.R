@@ -1,7 +1,5 @@
 
 
-#' posterior_summary_hierparam_localhierarchy
-#'
 #' Calculate posterior summaries for hierarchical parameters
 #'
 #' @param fit needs to include parname_star
@@ -79,7 +77,7 @@ posterior_summary_hierparam_localhierarchy <- function(fit, parname, morethan1pa
 #' these mus are obtained by summing up all relevant etas
 #' variables are `name`, `value`, `.draw/iteration/chain'
 #' and `k` referring to parameter index if morethan1param = TRUE
-#'
+#' @keywords internal
 extract_parameter_subhierarchical <- function(
     hierarchical_data,
     subhierarchy,
@@ -139,7 +137,7 @@ extract_parameter_subhierarchical <- function(
 #' @param probs vector of quantiles
 #'
 #' @returns tibble with the requested quantiles
-#'
+#' @keywords internal
 quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
   tibble(
     val = quantile(x, probs, na.rm = TRUE),
@@ -155,7 +153,7 @@ quantile_df <- function(x, probs = c(0.025, 0.5, 0.975)) {
 #'
 #' @returns tibble with 2.5th quantile, posterior mean, and 97.5th quantile, and quant = c(0.025, 0.5, 0.975)
 #'
-#'
+#' @keywords internal
 summary_df <- function(x) {
   tibble(
     val = c(quantile(x, 0.025, na.rm = TRUE),

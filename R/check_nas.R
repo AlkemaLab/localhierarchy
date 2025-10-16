@@ -8,6 +8,7 @@
 #'
 #' @returns stops if there are NAs in the column or if the column does not exist
 #'
+#' @keywords internal
 check_nas <- function(data, column) {
   if(!(column %in% names(data))) {
     stop(glue::glue("Could not find column {column}."))

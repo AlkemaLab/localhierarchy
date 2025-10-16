@@ -15,5 +15,5 @@ plot_prior_post_sigmas_localhierarchy(fit, parname)
 Plot with density of sigma_estimate and prior added
 }
 \description{
-This function plots the prior and posterior densities of sigma_estimate parameters,
+This function plots the prior and posterior densities of sigma_estimate parameters.
 }

@@ -40,6 +40,6 @@ e.g. at national level if lowest level is subnational (default: FALSE).}
 A tibble with columns for each level, mu_global, etas, and their total labeled y
 }
 \description{
-Simulates a nested multilevel data structure with etas at each level.
+Simulates a nested multilevel data structure.
 Lowest level can be used as observational error.
 }

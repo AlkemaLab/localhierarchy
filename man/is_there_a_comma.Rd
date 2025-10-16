@@ -15,3 +15,4 @@ Boolean
 \description{
 Is there a comma?
 }
+\keyword{internal}

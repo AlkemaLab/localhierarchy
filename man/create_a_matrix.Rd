@@ -17,3 +17,4 @@ matrix with rows and columns corresponding to the indices in the variable
 This function takes a postsumm object and returns a matrix with the
 relevant information
 }
+\keyword{internal}

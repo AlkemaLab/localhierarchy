@@ -2,9 +2,9 @@
 
 
 
-#' Fit model for localhierarchy model
+#' Fit localhierarchy example model
 #'
-#' This function fits the localhierarchy model
+#' This function fits the localhierarchy example model
 #'
 #' @param survey_df tibble with survey data
 #' @param y column name of outcome, defaults to `y`.

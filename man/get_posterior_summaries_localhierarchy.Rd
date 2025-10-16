@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_posterior_summaries.R
 \name{get_posterior_summaries_localhierarchy}
 \alias{get_posterior_summaries_localhierarchy}
-\title{Posterior summaries for use in local models}
+\title{Get posterior summaries for use in local models}
 \usage{
 get_posterior_summaries_localhierarchy(
   fit,

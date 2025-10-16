@@ -22,3 +22,4 @@ Determine whether or not a variable exists in draws from a fit
 This is similar to the function posterior:::check_existing_variables,
 but note that function is not exported from posterior
 }
+\keyword{internal}

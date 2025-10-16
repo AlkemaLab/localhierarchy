@@ -1,8 +1,8 @@
 
 
-#' Plot prior and posterior densities of mu_raw
+#' Plot prior and posterior densities of location parameters
 #'
-#' This function plots the posterior densities of mu_raw parameters, with prior added.
+#' This function plots the posterior densities of location (`mu_raw`) parameters, with priors added.
 #'
 #' @param fit List that includes "parname"_raw_estimate and stan_data
 #' @param parname Selected parameter name (example: mu)
@@ -84,7 +84,7 @@ plot_muraw_localhierarchy <- function(fit, parname, morethan1param = FALSE,
 
 #' Plot prior and posteriors of sigmas from hierarchical models
 #'
-#' This function plots the prior and posterior densities of sigma_estimate parameters,
+#' This function plots the prior and posterior densities of sigma_estimate parameters.
 #'
 #' @param fit List, needs to include parname_sigma_estimate and stan_data
 #' @param parname Selected parameter name (example: "mu")

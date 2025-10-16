@@ -17,3 +17,4 @@ stops if there are NAs in the column or if the column does not exist
 \description{
 This function checks if there are any NAs in a specified column of a data frame.
 }
+\keyword{internal}

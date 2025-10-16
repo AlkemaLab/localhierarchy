@@ -1,25 +1,42 @@
+localhierarchy
+================
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# localHierarchy
+# Background
 
-The `localHierarchy` R package provides functionality for fitting
+Bayesian hierarchical models are widely used in global health
+estimation, where data availability may vary across national or
+subnational populations. Such models are typically fitted to a global
+database, e.g., to produce national-level estimates for all countries in
+the world or in some region. To facilitate analysis at a local level,
+models are often desirable that are informed by global models but can be
+fitted to just a subset of the data, such as data for one country. We
+refer to such models as local models: models that are derived from
+global hierarchical models but adapted such that they can be fitted to
+the data from one population alone.
+
+The `localhierarchy` R package provides functionality for fitting
 Bayesian hierarchical models in settings where both global and local
 estimation is required. The package provides R functions and Stan model
 components to support global modeling, in which all parameters in
-hierarchical models are estimated, and local modeling, where parameters
-are estimated for only one or a small number of populations, using fixed
-values from a global model fit.
+hierarchical models are estimated, and local modeling, in which
+parameters are estimated for only one or a small number of populations,
+using fixed values from a global model fit.
 
-## Installation
+The article on this website presents a practical introduction to the
+package for the applied user and illustrates the package’s functionality
+through examples for national and subnational estimation.
 
-- Dependency on `cmdstanr:` Instructions for installing `cmdstanr` are
-  available in their [Getting
+# Installation
+
+- `localhierarchy` depends on `cmdstanr:` Instructions for installing
+  `cmdstanr` are available in their [Getting
   started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) guide.
 
-- Install `localHierarchy` from Github:
+- Install `localhierarchy` from Github:
   `remotes::install_github("AlkemaLab/localhierarchy")`
 
-## Examples
+# Examples
 
-to do: add from paper
+See vignette and article.

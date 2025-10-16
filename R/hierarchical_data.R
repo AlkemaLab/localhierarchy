@@ -1,5 +1,5 @@
 
-#' Hierarchical_data
+#' Create hierarchical data structure for a hierarchical model.
 #'
 #' Create hierarchical data structure for a hierarchical model.
 #'

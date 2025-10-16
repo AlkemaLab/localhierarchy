@@ -1,8 +1,8 @@
 ---
-title: "Fitting Bayesian hierarchical models at the national level using `localHierarchy`"
+title: "[Vignette] Fitting Bayesian hierarchical models at the national level using the R package localhierarchy"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{your-vignette-name}
+  %\VignetteIndexEntry{Fitting Bayesian hierarchical models at the national level using localhierarchy}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,13 +14,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(localhierarchy)
-```
 
 
 
 We present a detailed use case of the `localhierarchy` package using simulated data. For full details, see main article.
+
+
+```{r setup}
+library(localhierarchy)
+```
 
 # Simulation setup
 Simulated data were generated using the `simulate_multilevel_data` function. We simulate a set of model parameters, setting $\mu^{(\mathrm{global})} = 0$, and $\sigma_{\mathrm{country}} = 0.5$, creating 30 countries, and national data, using $\sigma_y = 0.1$. The function call is as follows (note that the function also generates parameters and data at the subnational level, these are not used in this vignette):

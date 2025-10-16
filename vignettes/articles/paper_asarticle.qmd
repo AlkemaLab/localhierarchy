@@ -3,7 +3,7 @@
 # title: ""
 # author: ""
 # for rendering to html
-title: "localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models"
+title: "[Article] localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models"
 author: "Leontine Alkema (lalkema@umass.edu), Shauna Mooney, Evan Ray, and Herbert Susmann"
 # author:
 #   - name: "Leontine Alkema"
@@ -40,13 +40,12 @@ editor: visual
 abstract: |
   Bayesian hierarchical models are widely used in global health estimation, where data availability may vary across national or subnational populations. Such models are typically fitted to a global database, e.g., to produce national-level estimates for all countries in the world or in some region. To facilitate analysis at a local level, models are often desirable that are informed by global models but can be fitted to just a subset of the data, such as data for one country. We refer to such models as local models: models that are derived from global hierarchical models but adapted such that they can be fitted to the data from one population alone.
 
-  We present the `localHierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required. The package provides R functions and Stan model components to support global modeling, in which all parameters in hierarchical models are estimated, and local modeling, in which parameters are estimated for only one or a small number of populations, using fixed values from a global model fit.
+  We present the `localhierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required. The package provides R functions and Stan model components to support global modeling, in which all parameters in hierarchical models are estimated, and local modeling, in which parameters are estimated for only one or a small number of populations, using fixed values from a global model fit.
 
   This article presents a practical introduction to the package for the applied user and illustrates the package’s functionality through examples for national and subnational estimation.
 keywords: Bayesian hierarchical model; R; Stan; Local models for one population
 bibliography: bibliography.bib
 ---
-
 
 ```{r}
 #| include: false
@@ -1245,11 +1244,11 @@ For subnational estimation, the workflow used mirrors the NISE approach describe
 
 # Conclusions
 
-Bayesian hierarchical models are widely used in global health estimation, where data availability may vary across national or subnational populations. For analysis at a local level, local models are often of interest, referring to models that are derived from global hierarchical models but adapted such that they can be fitted to the data from one population alone. To that end, we introduced the `localHierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required.
+Bayesian hierarchical models are widely used in global health estimation, where data availability may vary across national or subnational populations. For analysis at a local level, local models are often of interest, referring to models that are derived from global hierarchical models but adapted such that they can be fitted to the data from one population alone. To that end, we introduced the `localhierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required.
 
-We have used the `localHierarchy` functionality in multiple projects. We discussed the estimation of family planning indicators, for which country M&E officers use the local model to produce estimates at the national and subnational level. In this area, M&E officers have successfully used local models to produce national estimates since 2014. Availability of a local modeling tool has enabled users to do additional analyses and check sensitivity of estimates to specific data sources or data quality assumptions. In addition to fitting the model to survey data, users of the local family planning model can also incorporate additional data from routine information systems (e.g., the number of contraceptive commodities supplied at family planning facilities, see [@mooney_emu]). These use cases illustrate the value of local models to enable local analysis.
+We have used the `localhierarchy` functionality in multiple projects. We discussed the estimation of family planning indicators, for which country M&E officers use the local model to produce estimates at the national and subnational level. In this area, M&E officers have successfully used local models to produce national estimates since 2014. Availability of a local modeling tool has enabled users to do additional analyses and check sensitivity of estimates to specific data sources or data quality assumptions. In addition to fitting the model to survey data, users of the local family planning model can also incorporate additional data from routine information systems (e.g., the number of contraceptive commodities supplied at family planning facilities, see [@mooney_emu]). These use cases illustrate the value of local models to enable local analysis.
 
-More recently, we have used the `localHierarchy` approach and functionality for estimating coverage indicators for the *Countdown to 2030 for Women’s, Children’s and Adolescents’ Health initiative.* This initiative focuses on “tracking progress of life-saving interventions for Reproductive, Maternal, Newborn, Child and Adolescent Health and Nutrition” in low- and middle-income countries, see [www. countdown2030.org](https://www.%20countdown2030.org/). By developing the `localHierarchy` package and providing use cases in this paper, we hope that this work can be useful for other global health modelers, to consider local modeling in their own work.
+More recently, we have used the `localhierarchy` approach and functionality for estimating coverage indicators for the *Countdown to 2030 for Women’s, Children’s and Adolescents’ Health initiative.* This initiative focuses on “tracking progress of life-saving interventions for Reproductive, Maternal, Newborn, Child and Adolescent Health and Nutrition” in low- and middle-income countries, see [www. countdown2030.org](https://www.%20countdown2030.org/). By developing the `localhierarchy` package and providing use cases in this paper, we hope that this work can be useful for other global health modelers, to consider local modeling in their own work.
 
 ### Data availability statement {.unnumbered}
 
@@ -1393,4 +1392,3 @@ Optionally, model parameters can be fixed to values from a previous model fit pr
 List that contains samples, stan_data, other information relevant to model fit (arguments), and for global fits, point estimates of relevant parameters (post_summ). For subnational global fits, the list includes fit_globalsubnat_fromnat, which is the global fit with additional subnational sigmas added to the postsum object.
 
 # References
-

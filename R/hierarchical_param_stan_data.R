@@ -10,7 +10,7 @@
 #' @param hierarchical_terms_fixed character vector specifying hierarchical
 #'   levels for which the terms should be fixed (subset of `hierarchical_levels`).
 #'   Used only if global fit is provided.
-#' @param hierarchical_terms_fixed character vector specifying hierarchical
+#' @param hierarchical_sigmas_fixed character vector specifying hierarchical
 #'   levels for which the terms should be fixed (subset of `hierarchical_levels`, intercept is always included)
 #'   Used only if global fit is provided.
 #'

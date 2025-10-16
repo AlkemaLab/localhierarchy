@@ -10,6 +10,7 @@
 #'
 #' @importFrom truncnorm rtruncnorm
 #'
+#' @keywords internal
 init_fun_localhierarchy <- function(chain_id, stan_data){
   set.seed(chain_id)
   inits <- list()

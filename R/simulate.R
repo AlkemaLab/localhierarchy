@@ -1,6 +1,6 @@
 #' Simulate multilevel data
 #'
-#' Simulates a nested multilevel data structure with etas at each level.
+#' Simulates a nested multilevel data structure.
 #' Lowest level can be used as observational error.
 #'
 #' @param n_levels Number of hierarchical levels (default: 3).

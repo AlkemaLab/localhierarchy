@@ -21,6 +21,10 @@ hierarchical_param_stan_data(
 parameter estimates for any specified hierarchical units to fix. Defaults to NULL, no fixing.}
 
 \item{hierarchical_terms_fixed}{character vector specifying hierarchical
+levels for which the terms should be fixed (subset of \code{hierarchical_levels}).
+Used only if global fit is provided.}
+
+\item{hierarchical_sigmas_fixed}{character vector specifying hierarchical
 levels for which the terms should be fixed (subset of \code{hierarchical_levels}, intercept is always included)
 Used only if global fit is provided.}
 }

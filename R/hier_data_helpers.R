@@ -6,6 +6,7 @@
 #'
 #' @returns Boolean
 #'
+#' @keywords internal
 is_there_a_comma <- function(variable){
   grepl(
     pattern = ",",
@@ -43,7 +44,7 @@ is_there_a_comma <- function(variable){
 #' @returns matrix with rows and columns corresponding to the indices in the variable
 #'
 #' @importFrom tidyr pivot_wider pivot_longer
-#'
+#' @keywords internal
 create_a_matrix <- function(post_summ){
   res <- post_summ %>%
     mutate(
@@ -81,6 +82,7 @@ create_a_matrix <- function(post_summ){
 #'
 #' @return TRUE or FALSE indicating whether or not the variable exists in the
 #' fit.
+#' @keywords internal
 variable_exists_in_draws <- function(fit, var_name) {
   all_variables <- posterior::variables(fit$samples$draws())
   all_variables_no_index <- stringr::str_split_i(string = all_variables,
@@ -91,7 +93,8 @@ variable_exists_in_draws <- function(fit, var_name) {
 
 
 
-#' split_var_name_and_index
+#' Split variable name and index
+#'
 #' For a data frame of estimates with a column that contains combined info
 #' about a variable name and row and/or column indices, add columns containing
 #' just the variable name and the indices.
@@ -101,8 +104,7 @@ variable_exists_in_draws <- function(fit, var_name) {
 #'
 #' @returns data frame with the same columns as `estimate_df` plus columns containing
 #' just the variable name and the indices.
-#'
-##'
+#' @keywords internal
 split_var_name_and_index <- function(estimate_df, num_inds) {
   # column names for indices, starting from "i"
   ind_names <- letters[seq(from = 9, length = num_inds)]
@@ -141,7 +143,16 @@ split_var_name_and_index <- function(estimate_df, num_inds) {
 
 #' Starting from an array of parameter values (of dimension 1 or 2),
 #' create a data frame with columns `variable` with the combined parameter name
-#' and indices, and `median` with the parameter values
+#' and indices, and `mean` with the parameter values
+#'
+#' @param param_values Parameter values
+#' @param num_inds Dimension (1 or 2)
+#' @param n Number of indices
+#' @param m For dimension 2, the number of indices in the 2nd dimension
+#' @param param_name Parameter name
+#' @returns Data frame with columns `variable` with the combined parameter name
+#' and indices, and `mean` with the parameter values
+#' @keywords internal
 param_array_to_indexed_df <- function(
     param_values,
     num_inds,

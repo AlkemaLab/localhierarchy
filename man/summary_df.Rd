@@ -15,3 +15,4 @@ tibble with 2.5th quantile, posterior mean, and 97.5th quantile, and quant = c(0
 \description{
 This function computes posterior summaries for a given vector and returns them in a tibble format.
 }
+\keyword{internal}

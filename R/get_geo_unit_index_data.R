@@ -1,6 +1,6 @@
 
 
-#' Get geo_unit_index_data
+#' Get unique hierarchical levels from survey data
 #'
 #' Get unique hierarchical levels from survey data and assign index "c" based on area.
 #'

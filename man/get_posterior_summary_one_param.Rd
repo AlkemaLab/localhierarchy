@@ -22,3 +22,4 @@ tibble with variable (parname with index used in model) and postmean (posterior 
 \description{
 Get posterior summary for one parameter
 }
+\keyword{internal}

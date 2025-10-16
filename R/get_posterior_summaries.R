@@ -2,7 +2,7 @@
 
 
 
-#' Posterior summaries for use in local models
+#' Get posterior summaries for use in local models
 #'
 #' Get posterior summaries for a set of parameters for use in local model
 #'
@@ -56,6 +56,7 @@ get_posterior_summaries_localhierarchy <- function(
 
 #' @returns tibble with variable (parname with index used in model) and postmean (posterior mean)
 #'
+#' @keywords internal
 get_posterior_summary_one_param <- function(
     fit,
     param_name) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/hierarchical_data.R
 \name{hierarchical_data}
 \alias{hierarchical_data}
-\title{Hierarchical_data}
+\title{Create hierarchical data structure for a hierarchical model.}
 \usage{
 hierarchical_data(geo_unit_index_data, hierarchical_level)
 }

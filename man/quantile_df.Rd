@@ -17,3 +17,4 @@ tibble with the requested quantiles
 \description{
 This function computes quantiles for a given vector and returns them in a tibble format.
 }
+\keyword{internal}

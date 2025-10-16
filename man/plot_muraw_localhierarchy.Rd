@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior_post.R
 \name{plot_muraw_localhierarchy}
 \alias{plot_muraw_localhierarchy}
-\title{Plot prior and posterior densities of mu_raw}
+\title{Plot prior and posterior densities of location parameters}
 \usage{
 plot_muraw_localhierarchy(
   fit,
@@ -27,5 +27,5 @@ plots_allmuraw gives all the individual plots of each mu_raw, with density per c
 If morethan1param = TRUE, then each list contains a list per parameter k
 }
 \description{
-This function plots the posterior densities of mu_raw parameters, with prior added.
+This function plots the posterior densities of location (\code{mu_raw}) parameters, with priors added.
 }

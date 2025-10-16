@@ -4,12 +4,28 @@
 \alias{param_array_to_indexed_df}
 \title{Starting from an array of parameter values (of dimension 1 or 2),
 create a data frame with columns \code{variable} with the combined parameter name
-and indices, and \code{median} with the parameter values}
+and indices, and \code{mean} with the parameter values}
 \usage{
 param_array_to_indexed_df(param_values, num_inds, n, m, param_name)
+}
+\arguments{
+\item{param_values}{Parameter values}
+
+\item{num_inds}{Dimension (1 or 2)}
+
+\item{n}{Number of indices}
+
+\item{m}{For dimension 2, the number of indices in the 2nd dimension}
+
+\item{param_name}{Parameter name}
+}
+\value{
+Data frame with columns \code{variable} with the combined parameter name
+and indices, and \code{mean} with the parameter values
 }
 \description{
 Starting from an array of parameter values (of dimension 1 or 2),
 create a data frame with columns \code{variable} with the combined parameter name
-and indices, and \code{median} with the parameter values
+and indices, and \code{mean} with the parameter values
 }
+\keyword{internal}

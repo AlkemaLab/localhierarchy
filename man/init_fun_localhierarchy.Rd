@@ -17,3 +17,4 @@ a list of initial values for the model parameters
 \description{
 This function sets the initial values for the parameters in a simple hierarchical model.
 }
+\keyword{internal}
