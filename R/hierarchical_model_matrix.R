@@ -1,6 +1,6 @@
 
 
-#' hierarchical_model_matrix
+#' Hierarchical model matrix
 #'
 #' Create list with information including a model matrix, associated with the geo_unit_data and hierarchical_levels
 #'

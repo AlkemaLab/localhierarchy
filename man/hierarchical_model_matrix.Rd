@@ -2,7 +2,7 @@
 % Please edit documentation in R/hierarchical_model_matrix.R
 \name{hierarchical_model_matrix}
 \alias{hierarchical_model_matrix}
-\title{hierarchical_model_matrix}
+\title{Hierarchical model matrix}
 \usage{
 hierarchical_model_matrix(geo_unit_index_data, hierarchical_level)
 }

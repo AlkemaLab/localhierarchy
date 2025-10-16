@@ -1,10 +1,11 @@
 ---
 # # for rendering to pdf
-# title: ""
-# author: ""
-# for rendering to html
-title: "[Article] localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models"
-author: "Leontine Alkema (lalkema@umass.edu), Shauna Mooney, Evan Ray, and Herbert Susmann"
+title: ""
+author: ""
+# # for rendering to html
+# title: "[Article] localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models"
+# author: "Leontine Alkema (lalkema@umass.edu), Shauna Mooney, Evan Ray, and Herbert Susmann"
+### nope
 # author:
 #   - name: "Leontine Alkema"
 #     affiliations:
@@ -24,14 +25,14 @@ author: "Leontine Alkema (lalkema@umass.edu), Shauna Mooney, Evan Ray, and Herbe
 #         id: "3"
 date: today
 format:
-  html:
-    number-sections: true
-  # pdf:
+  # html:
   #   number-sections: true
-  #   latex-engine: pdflatex
-  #   include-before-body: title.tex
-  #   include-in-header:
-  #     - file: preamble.tex
+  pdf:
+    number-sections: true
+    latex-engine: pdflatex
+    include-before-body: title.tex
+    include-in-header:
+      - file: preamble.tex
 #  docx: default  # Enable if you want Word output format as well
 editor: visual
 # execute:
