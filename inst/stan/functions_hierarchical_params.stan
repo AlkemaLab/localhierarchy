@@ -1,9 +1,8 @@
 
-
-
 /**
  * function get_mu_star
- * calculates mu_star FOR ONE PARAMETER MU from inputs for vector mu_sigmasigmawpriorsd and (mu_fixed, mu_raw) vector.
+ * calculates mu_star FOR ONE PARAMETER MU from inputs for
+ * vector mu_sigmasigmawpriorsd and (mu_fixed, mu_raw) vector.
  * for hierarchical model for one parameter
  * using fixed and estimated values of mu_sigmas and mu_raws, where fixed values are for higher order levels only.
  * part 1: to get mu_sigmawpriorsd
@@ -24,8 +23,7 @@
  * @param mu_re_end Vector with end indices of the different hier levels
  * @return Vector of mu_stars
  */
-vector get_mu_star(//vector mu_sigma,
-  // mu_sigma part
+vector get_mu_star(
  int mu_n_sigma,
  int mu_n_sigma_fixed, int mu_n_sigma_estimate,
  vector mu_sigma_fixed, vector mu_sigma_estimate,
@@ -120,6 +118,7 @@ vector get_mu(vector mu_star, int mu_raw_n_terms,
  * @param mu_n_sigma_estimate Number of estimated sigmas
  * @param mudimhk_sigma_fixed Fixed sigma values
  * @param mudimhk_sigma_estimate Estimated sigma values
+ * @param mudimhk_scalarprior_mean Prior mean for intercept (repeated across the parameters, scalar)
  * @param mudimhk_scalarprior_sd Prior sd for intercept (repeated across the parameters, scalar)
  * @param mu_raw_n_terms Number of mu_raws
  * @param mu_raw_n_terms_fixed Number of fixed mu_raws
