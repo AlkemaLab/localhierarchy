@@ -1197,7 +1197,7 @@ fit_local_seq <- fit_model_localhierarchy(
 )
 ```
 
-Similarly to the local national run, in subnational local runs, hierarchical levels and which parameters are fixed is set in the wrapper function; we estimate subnational parameters only. Point estimates in the subnational global fit include point estimates from the national global run as well as point estimates from the global subnational fit. By default, parameters that are duplicated between the two fits, e.g., world region or country means, are taken from the national global run. This is implemented as such to avoid the situation where local runs would fail for countries that were not included in the subnational global fitting, i.e., when country parameters were fixed and missing from the subnational fit. Alternatively, if the user wants to use parameter estimates from the subnational global fit in these settings, the argument `use_globalsubnat_fromnat` can be used when calling the `fit_model_localhierarchy` function (see documentation). 
+Similarly to the local national run, in subnational local runs, hierarchical levels and which parameters are fixed is set in the wrapper function; we estimate subnational parameters only. Point estimates in the subnational global fit include point estimates from the national global run as well as point estimates from the global subnational fit. By default, parameters that are duplicated between the two fits, e.g., world region or country means, are taken from the national global run. This is implemented as such to avoid the situation where local runs would fail for countries that were not included in the subnational global fitting, i.e., when country parameters were fixed and missing from the subnational fit. Alternatively, if the user wants to use parameter estimates from the subnational global fit in these settings, the argument `use_globalsubnat_fromnat` can be used when calling the `fit_model_localhierarchy` function (see documentation).
 
 We can create and check summaries of subnational fits using the same functions for national fits. Below we compare the subnational global fit with the local subnational fit. The results are comparable, as expected.
 
@@ -1294,7 +1294,22 @@ transformed parameters {
 
 Here we use that $(\mu_1^{(country)}, ..., \mu_C^{(country)}) = M \cdot (\eta_1, ..., \eta_C)$, where matrix $M$ is a sparse matrix with 1s and 0s, and $(\eta_1, ..., \eta_c)$ refers to the vector with products of standard deviation and $\gamma$ terms. The function `get_mu` calculates the vector of $\mu_c^{(country)}$s from the vector of $\eta$s (`mu_star` in the Stan model) and a decomposition of $M$ into different parts $U$, $V$, $W$. This implementation uses the sparse representation of the model matrix $M$ with Stan functions `csr_matrix_times_vector` and `crs_extract`.
 
-The second Stan model excerpt concerns the specification of the $\eta$s (`mu_star`). This vector is obtained by multiplying the vector of $\gamma$s, which is referred to as `mu_raw` in the Stan model by their respective standard deviation, i.e., the vector containing $s_{\mathrm{global}}$ (labeled `mu_scalarprior_mean` in the Stan model) and the vector of stacked $\sigma$s (labeled `mu_sigma` in the Stan model). To allow for global and local models, additions `_estimate` and `_fixed` are used to allow for splitting the `mu_raw` vector into two parts, one for fixed and one for estimated parameters. Similarly, vector `mu_sigma` is also split into two parts, one part for fixed and one part for estimated parameters. Relevant Stan code is as follows:
+The second Stan model excerpt concerns the specification of the $\eta$s (`mu_star`). This vector is obtained by multiplying the parameter vector of $\gamma$s, which is referred to as `mu_raw` in the Stan model by their respective standard deviation, i.e., <!-- the vector containing $s_{\mathrm{global}}$ (labeled `mu_scalarprior_mean` in the Stan model) and  --> the parameter vector of stacked $\sigma$s (labeled `mu_sigma` in the Stan model). The model block contains the prior for the $\gamma$s and $\sigma_{k}$s, given by \begin{align*}
+  \gamma^{(k)} &\sim N(0,1),\\
+  \sigma_{k} &\sim \text{Half-Normal}(0, w_{0, \mu}),
+\end{align*} 
+where $w_{0, \mu}$ refers to the prior standard deviation for $\sigma_k$, called `prior_sd_sigma_estimate` in the Stan model file. The `localhierarchy` Stan function `get_mu_star` is used to carry out this multiplication to obtain the $\eta$s. The arguments for `get_mu_star` include prior parameters $m_{0, \mu}$, `mu_scalarprior_mean`, and $s_{0, \mu}$, `mu_scalarprior_sd`, which refer to the (rescaled) prior mean and standard deviation of $\mu^{(\mathrm{global})}$, where $\mu^{(\mathrm{global})} = s_{0, \mu}(m_{0, \mu} + \gamma^{(\mathrm{global})})$. Combined with the standard normal prior on $\gamma^{(\mathrm{global})}$, the resulting prior on the intercept $\mu^{(\mathrm{global})}$ is given by: \begin{align*}
+  \mu^{(\mathrm{global})} &\sim N(s_{0, \mu}\cdot m_{0, \mu}, s_{0, \mu}).
+\end{align*} All prior parameters ($m_{0, \mu}, s_{0, \mu}, w_{0, \mu}$) are added as input data to the Stan model.
+
+
+
+<!-- ```{r, eval = F} -->
+<!-- mu_raw[1] = mu_raw[1] + mu_prior_mean; -->
+<!--   vector[mu_raw_n_terms] mu_star = scale_blocks(mu_raw, mu_raw_n_terms, mu_sigmawpriorsd, mu_n_sigma + 1, mu_re_start, mu_re_end); -->
+<!-- ``` -->
+
+To allow for global and local models, additions `_estimate` and `_fixed` are used to allow for splitting the `mu_raw` vector into two parts, one for fixed and one for estimated parameters. Similarly, vector `mu_sigma` is also split into two parts, one part for fixed and one part for estimated parameters. Relevant Stan code is as follows:
 
 ```{r, eval = FALSE}
 data {
@@ -1336,13 +1351,6 @@ model {
   to_vector(mu_sigma_estimate) ~ normal(0, mu_prior_sd_sigma_estimate);
 }
 ```
-
-In the model code, the data block contains the input data for the $\gamma$s and $\sigma$s. The `localhierarchy` Stan function `get_mu_star` is used to obtain the $\eta$s. Its arguments also include prior parameters `mu_scalarprior_mean` and `mu_scalarprior_sd`, which refer to the (rescaled) prior mean and standard deviation of $\mu^{(\mathrm{global})}$. The model block contains the priors for the $\gamma$s and $\sigma_{k}$s, given by \begin{align*}
-  \mu^{(\mathrm{global})} &\sim N(0,1),\\
-  \sigma_{k} &\sim \text{Half-Normal}(0, s_{\sigma}).
-\end{align*} All prior parameters are added as input data to the Stan model.
-
-<!-- In fit_model function, prior parameters are set for the specific parname: stan_data\[\[paste0(parname, "\_scalarprior_sd")\]\] \<- etc. The prior sd parameters are used in plotting. For the prior on the intercept, the following transformation is used: mu_global = prior sd\*(gamma + mu_prior_mean), such that gamma = mu_global/sd - mu_prior_mean. (not doing the /sd would be easier for specification going forward?) -->
 
 ## Appendix II: Documentation of the `fit_model_localhierarchy` function {#sec-helpfilefitmodel}
 
