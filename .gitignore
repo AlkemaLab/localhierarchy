@@ -6,7 +6,7 @@
 private/
 inst/doc
 .exe
-.DS_Store
+**/.DS_Store
 /Meta/
 docs
 cache

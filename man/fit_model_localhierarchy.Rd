@@ -86,10 +86,11 @@ following run steps are supported:
 \itemize{
 \item "global_national": Fit the global model.
 \item "local_national": Fit the model to data from a single country, using a global_national fit.
-\item "global_subnational": Fit the model to global database with subnational data, using a global_national fit.
+\item "global_subnational": Fit the model to global database with subnational data, using a global_national fit (NISE modeling).
 \item "local_subnational": Fit the model to subnational data from a single country or region, using a global_subnational fit.
-This is also explained in the article with the package.
 }
+
+The options are also explained in the article with the package.
 
 Details on hierarchical set ups used
 The package allows the structure of the hierarchical prior to be configured by the user

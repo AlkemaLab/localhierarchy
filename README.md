@@ -3,7 +3,7 @@ localhierarchy
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Background
+## Background
 
 Bayesian hierarchical models are widely used in global health
 estimation, where data availability may vary across national or
@@ -26,9 +26,9 @@ using fixed values from a global model fit.
 
 The article on this website presents a practical introduction to the
 package for the applied user and illustrates the package’s functionality
-through examples for national and subnational estimation.
+through examples for national estimation.
 
-# Installation
+## Installation
 
 - `localhierarchy` depends on `cmdstanr:` Instructions for installing
   `cmdstanr` are available in their [Getting
@@ -37,6 +37,31 @@ through examples for national and subnational estimation.
 - Install `localhierarchy` from Github:
   `remotes::install_github("AlkemaLab/localhierarchy")`
 
-# Examples
+## Examples
 
-See vignette and article.
+See article.
+
+## Citation
+
+Please cite as follows:
+
+``` r
+citation("localhierarchy")
+#> To cite package 'localhierarchy' in publications use:
+#> 
+#>   Alkema L, Mooney S, Ray E, Susmann H (2025). _localhierarchy: An R
+#>   package to facilitate fitting of global and local Bayesian
+#>   hierarchical models_. R package version 0.9,
+#>   <https://alkemalab.github.io/localhierarchy/>.
+#> 
+#> A BibTeX entry for LaTeX users is
+#> 
+#>   @Manual{,
+#>     title = {localhierarchy: An R package to facilitate fitting of global and local Bayesian
+#> hierarchical models},
+#>     author = {Leontine Alkema and Shauna Mooney and Evan Ray and Herbert Susmann},
+#>     year = {2025},
+#>     note = {R package version 0.9},
+#>     url = {https://alkemalab.github.io/localhierarchy/},
+#>   }
+```

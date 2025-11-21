@@ -1,15 +1,16 @@
 Package: localhierarchy
 Type: Package
 Title: An R package to facilitate fitting of global and local Bayesian hierarchical models
-Version: 0.1.0
+Version: 0.9
 Authors@R: c(person("Leontine", "Alkema", email = "lalkema@umass.edu", role = c("aut", "cre")),
               person("Shauna", "Mooney", role = c("aut")),
               person("Evan", "Ray", role = c("aut")),
               person("Herbert", "Susmann", email = "herbps10@gmail.com", role = c("aut"))
             )
+Year: 2025
 Description: The LocalHierarchy package implements a flexible set up to estimate parameters hierarchically 
     and to carry out local model fits, whereby higher-level parameters are fixed.  
-License: GPL (>= 3)
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
