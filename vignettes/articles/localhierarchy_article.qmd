@@ -1,50 +1,9 @@
 ---
-# # # for rendering to pdf
-# title: ""
-# author: ""
-# # for rendering to html
-title: "[Article] localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models"
+title: "localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models"
 author: "Leontine Alkema (lalkema@umass.edu), Shauna Mooney, Evan Ray, and Herbert Susmann"
-# ## nope
-# author:
-#   - name: "Leontine Alkema"
-#     affiliations:
-#       - name: "Department of Biostatistics and Epidemiology, University of Massachusetts Amherst, USA"
-#         id: "1"
-#     email: "lalkema@umass.edu"
-#   - name: "Shauna Mooney"
-#     affiliations:
-#       - name: "Hamilton Institute and Department of Mathematics and Statistics, Maynooth University, Ireland"
-#         id: "2"
-#   - name: "Evan Ray"
-#     affiliations:
-#       - id: "1"
-#   - name: "Herbert P. Susmann"
-#     affiliations:
-#       - name: "Division of Biostatistics, Department of Population Health, NYU, USA"
-#         id: "3"
 date: today
-format:
-  html:
-    number-sections: true
-  # pdf:
-  #   number-sections: true
-  #   latex-engine: pdflatex
-  #   include-before-body: title.tex
-  #   include-in-header:
-  #     - file: preamble.tex
-#  docx: default  # Enable if you want Word output format as well
+format: html
 editor: visual
-# execute:
-#   cache: true
-
-abstract: |
-  Bayesian hierarchical models are widely used in global health estimation, where data availability may vary across national or subnational populations. Such models are typically fitted to a global database, e.g., to produce national-level estimates for all countries in the world or in some region. To facilitate analysis at a local level, models are often desirable that are informed by global models but can be fitted to just a subset of the data, such as data for one country. We refer to such models as local models: models that are derived from global hierarchical models but adapted such that they can be fitted to the data from one population alone.
-
-  We present the `localhierarchy` R package, which provides functionality for fitting Bayesian hierarchical models in settings where both global and local estimation is required. The package provides R functions and Stan model components to support global modeling, in which all parameters in hierarchical models are estimated, and local modeling, in which parameters are estimated for only one or a small number of populations, using fixed values from a global model fit.
-
-  This article presents a practical introduction to the package for the applied user and illustrates the package’s functionality through examples for national estimation.
-keywords: Bayesian hierarchical model; R; Stan; Local models for one population
 ---
 
 ```{r}
