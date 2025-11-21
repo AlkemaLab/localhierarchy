@@ -36,7 +36,10 @@ through examples for national estimation.
 
 ## Examples
 
-See article.
+See
+[article](https://alkemalab.github.io/localhierarchy/articles/localhierarchy_article.html)
+on package website, at
+[https://alkemalab.github.io/localhierarchy](https://alkemalab.github.io/localhierarchy/index.html).
 
 ## Citation
 
@@ -54,8 +57,7 @@ citation("localhierarchy")
 #> A BibTeX entry for LaTeX users is
 #> 
 #>   @Manual{,
-#>     title = {localhierarchy: An R package to facilitate fitting of global and local Bayesian
-#> hierarchical models},
+#>     title = {localhierarchy: An R package to facilitate fitting of global and local Bayesian hierarchical models},
 #>     author = {Leontine Alkema and Shauna Mooney and Evan Ray and Herbert Susmann},
 #>     year = {2025},
 #>     note = {R package version 0.9},
