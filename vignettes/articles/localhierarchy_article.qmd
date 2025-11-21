@@ -55,11 +55,7 @@ library(localhierarchy)
 
 # Introduction
 
-<!-- % context: global health estimation exercises, use of bayesian hier models, examples -->
-
 In global health estimation, Bayesian hierarchical models have become a cornerstone methodology, enabling the integration of diverse data sources to produce reliable estimates across multiple populations and regions. For example, they are used to estimate and forecast family planning indicators for the FP2030 initiative [@alkema_2024evol], incidence of low birth weight [@okwaraji_national_2024], abortion and unintended pregnancies rates [@bearak_unintended_2020], and maternal mortality by the United Nations Interagency Group [@peterson_bayesian_2024]. In these efforts, national or subnational estimates are often required for population-periods with limited data availability. In these contexts, Bayesian hierarchical models -— whether used directly or for specific components within larger modeling frameworks -- are valuable because they facilitate the sharing of information across populations. Global modeling exercises typically fit Bayesian hierarchical models to comprehensive global databases, producing national-level estimates for all countries worldwide.
-
-<!-- % introduce local models and how they compare to global model, why they are needed -->
 
 To facilitate analysis of a single population, it is often desirable to use models that are informed by global models but can be fitted to just a subset of the data, such as data from a single country. We refer to these as local models: models derived from global hierarchical models but adapted to be fit using data from only one population. Beyond allowing model fitting to smaller, specific datasets, local models offer practical advantages such as faster computation, making it feasible for users to perform analyses quickly on their own computers. Additionally, local models enable estimates for different populations to be updated independently, for example, when new data become available. This approach has been used successfully in global estimation exercises for family planning and maternal mortality [@alkema_2024evol; @peterson_bayesian_2024].
 
@@ -80,136 +76,6 @@ At its core, the Bayesian FPET model employs transition models for demand and de
 ![Schematic illustration of transition model used in the modeling of family planning indicators. The transition model describes changes in an indicator (here $\eta_{c,t}$) in terms of three principal parameters: the rate of change, the level in a reference year (here labeled with $\Omega_c$), and the asymptotic level (the maximum attainable level for an indicator (here labeled with $\lambda_c$). This figure has been reproduced with permission from @susmann_flexible_2025.](fig/transition.png){#fig-transition width="476"}
 
 Given limited country-specific information on some parameters, Bayesian hierarchical models are used to share information between populations, using hierarchical structures such as the one illustrated in @fig-hierstruc. Specifically for family planning estimation and forecasting, a hierarchical model is used to estimate the level of demand in a reference year and the asymptote of the transition of demand from low to high values. @fig-level shows estimates of the level in the reference year at the country level for countries in Western Africa, and for the groupings used in the hierarchical model. @fig-asympt shows estimates for the asymptote. These figures show variation in levels among countries in Western Africa, informed by country-specific data. Estimates of asymptotes are similar across countries in Western Africa because countries have not yet reached the end phase of their transition. The asymptotes of these Western African countries are informed by the estimate of the asymptote in sub-Saharan Africa through the hierarchical model.
-
-<!-- figure hier structure  -->
-
-<!-- ```{=latex} -->
-
-<!-- \begin{figure}[h] -->
-
-<!-- \begin{adjustbox}{max size={\textwidth}{\textheight},center} -->
-
-<!-- %\resizebox{\textwidth}{\textwidth}{ -->
-
-<!-- \begin{tikzpicture}[%scale=0.8, -->
-
-<!--   box/.style={rectangle, draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center}, -->
-
-<!--   level0/.style={box, fill=world!40}, -->
-
-<!--   level1/.style={box, fill=blue!20}, -->
-
-<!--   level2/.style={box, fill=purple!20}, -->
-
-<!--   level3/.style={box, fill=country!40, minimum width=2.2cm}, -->
-
-<!--     level4/.style={box, fill=data!20, minimum width=2.2cm}, -->
-
-<!--   arrow/.style={-{Latex[length=3mm]}, thick}, -->
-
-<!--   faintarrow/.style={-{Latex[length=2mm]}, thick, opacity=0.4}, -->
-
-<!--   background/.style 2 args={rectangle, rounded corners, draw=none, fill=#1, fill opacity=0.15, inner sep=0.5cm, fit=#2} -->
-
-<!-- ] -->
-
-<!-- % --- Level 0 --- -->
-
-<!-- \node[level0] (mu0) {World}; -->
-
-<!-- % --- Level 1 --- -->
-
-<!-- \node[level1, below left=1cm and 3cm of mu0] (mu11) {Sub-Saharan Africa}; -->
-
-<!-- \node[level1, right=of mu11] (mu12) {South-East Asia}; -->
-
-<!-- \node[level1, right=of mu12] (dots1) {$\dots$}; -->
-
-<!-- % --- Level 2 --- -->
-
-<!-- \node[level2, below left=1cm and 0cm of mu11] (mu21) {Western Africa}; -->
-
-<!-- \node[level2, right=of mu21] (mu22) {Eastern Africa}; -->
-
-<!-- \node[level2, right=of mu22] (dots2) {$\dots$}; -->
-
-<!-- % % --- Level 3 --- -->
-
-<!-- \node[level3, below left=1cm and 0cm of mu21] (mu31) {Senegal}; -->
-
-<!-- \node[level3, right=of mu31] (mu32) {Burkina Faso}; -->
-
-<!-- \node[level3, right=of mu32] (dots3) {$\dots$}; -->
-
-<!-- % % % --- Level 4 --- -->
-
-<!-- % \node[level4, below left=1cm and 0cm of mu31] (mu41) {Data point 1}; -->
-
-<!-- % \node[level4, right=of mu41] (mu42) {Data point 2}; -->
-
-<!-- % \node[level4, right=of mu42] (dots4) {$\dots$}; -->
-
-<!-- % --- Background blocks --- -->
-
-<!-- \begin{pgfonlayer}{background} -->
-
-<!--   \node[background={world!40}{(mu0)}] {}; -->
-
-<!--   \node[background={blue!20}{(mu11)(mu12)(dots1)}] (bg1) {}; -->
-
-<!--   \node[background={pink!60}{(mu21)(mu22)(dots2) }] (bg2) {}; -->
-
-<!--  \node[background={country!40}{(mu31)(mu32)(dots3)}] (bg3) {}; -->
-
-<!--  % \node[background={data!40}{(mu41)(mu42)(dots4)}] (bg4) {}; -->
-
-<!-- \end{pgfonlayer} -->
-
-<!-- % Sigma labels inside background blocks -->
-
-<!-- \node[anchor=north west] at (bg1.east) {Major world regions}; -->
-
-<!-- \node[anchor=north west] at (bg2.east) {Smaller world regions}; -->
-
-<!-- \node[anchor=north west] at (bg3.east) {Countries}; -->
-
-<!-- %\node[anchor=north west] at (bg4.east) %{Country data}; -->
-
-<!-- % --- Arrows --- -->
-
-<!-- \draw[arrow] (mu0.south) -- (mu11.north); -->
-
-<!-- \draw[arrow] (mu0.south) -- (mu12.north); -->
-
-<!-- \draw[arrow] (mu0.south) -- (dots1.north); -->
-
-<!-- \draw[arrow] (mu11.south) -- (mu21.north); -->
-
-<!-- \draw[arrow] (mu11.south) -- (mu22.north); -->
-
-<!-- \draw[arrow] (mu11.south) -- (dots2.north); -->
-
-<!-- \draw[arrow] (mu21.south) -- (mu31.north); -->
-
-<!-- \draw[arrow] (mu21.south) -- (mu32.north); -->
-
-<!-- \draw[arrow] (mu21.south) -- (dots3.north); -->
-
-<!-- % \draw[arrow] (mu31.south) -- (mu41.north); -->
-
-<!-- % \draw[arrow] (mu31.south) -- (mu42.north); -->
-
-<!-- % \draw[arrow] (mu31.south) -- (dots4.north); -->
-
-<!-- \end{tikzpicture}%} -->
-
-<!-- \end{adjustbox} -->
-
-<!-- \caption{Illustration of hierarchical grouping of countries in world regions.}\label{fig-hierstruc} -->
-
-<!-- \end{figure} -->
-
-<!-- ``` -->
 
 ![Illustration of hierarchical grouping of countries in world regions.](fig/worldregions.jpg){#fig-hierstruc width="631"}
 
@@ -233,134 +99,6 @@ Suppose we want to estimate a population parameter $\mu_r^{(l)}$ of interest, re
   \mu_{r}^{(l)} \mid \mu^{(l-1)}_{r^\prime}, \sigma_l &\sim N(\mu^{(l-1)}_{r^\prime}, \sigma_l^2), \text{ for } l > 0,
 \end{align*} where $\mu^{(l-1)}_{r^\prime}$ is the parameter value at one level higher in the hierarchy for the region $r^\prime$ that contains unit $r$. The parameter $\sigma_l$ for $l > 0$ describes variability of values of the parameter $\mu$ across geographic units at level $l$ of the hierarchy. At the top level of the hierarchy, $l = 0$, only a single parameter is estimated.
 
-<!-- ```{=latex} -->
-
-<!-- \begin{figure}[h] -->
-
-<!-- \begin{adjustbox}{max size={\textwidth}{\textheight},center} -->
-
-<!-- %\resizebox{\textwidth}{\textwidth}{ -->
-
-<!-- \begin{tikzpicture}[ -->
-
-<!--   box/.style={rectangle, draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center}, -->
-
-<!--   level0/.style={box, fill=yellow!40}, -->
-
-<!--   level1/.style={box, fill=blue!20}, -->
-
-<!--   level2/.style={box, fill=purple!20}, -->
-
-<!--   level3/.style={box, fill=orange!40, minimum width=2.2cm}, -->
-
-<!--    level4/.style={box, fill=green!20, minimum width=2.2cm}, -->
-
-<!--   arrow/.style={-{Latex[length=3mm]}, thick}, -->
-
-<!--   faintarrow/.style={-{Latex[length=2mm]}, thick, opacity=0.4}, -->
-
-<!--   background/.style 2 args={rectangle, rounded corners, draw=none, fill=#1, fill opacity=0.15, inner sep=0.5cm, fit=#2} -->
-
-<!-- ] -->
-
-<!-- % --- Level 0 --- -->
-
-<!-- \node[level0] (mu0) {$\mu^{(0)} \sim \mathcal{N}(0,s_0^2)$}; -->
-
-<!-- % --- Level 1 --- -->
-
-<!-- \node[level1, below left=2cm and 3cm of mu0] (mu11) {$\mu^{(1)}_1 \sim \mathcal{N}(\mu^{(0)},\sigma_{1}^2)$}; -->
-
-<!-- \node[level1, right=of mu11] (mu12) {$\mu^{(1)}_2$}; -->
-
-<!-- \node[level1, right=of mu12] (dots1) {$\dots$}; -->
-
-<!-- % --- Level 2 --- -->
-
-<!-- \node[level2, below left=2cm and 0cm of mu11] (mu21) {$\mu^{(2)}_1 \sim \mathcal{N}(\mu^{(1)}_1,\sigma_{2}^2)$}; -->
-
-<!-- \node[level2, right=of mu21] (mu22) {$\mu^{(2)}_2$}; -->
-
-<!-- \node[level2, right=of mu22] (dots2) {$\dots$}; -->
-
-<!-- % % --- Level 3 --- -->
-
-<!-- \node[level3, below left=2cm and 0cm of mu21] (mu31) {$\mu^{(3)}_1 \sim \mathcal{N}(\mu^{(2)}_1,\sigma_{3}^2)$}; -->
-
-<!-- \node[level3, right=of mu31] (mu32) {$\mu^{(3)}_2$}; -->
-
-<!-- \node[level3, right=of mu32] (dots3) {$\dots$}; -->
-
-<!-- % % % --- Level 4 --- -->
-
-<!-- % \node[level4, below left=2cm and 0cm of mu31] (mu41) {$\mu^{(4)}_1 \sim \mathcal{N}(\mu^{(3)}_1,\sigma_{4}^2)$}; -->
-
-<!-- % \node[level4, right=of mu41] (mu42) {$\mu^{(4)}_2$}; -->
-
-<!-- % \node[level4, right=of mu42] (dots4) {$\dots$}; -->
-
-<!-- % --- Background blocks --- -->
-
-<!-- \begin{pgfonlayer}{background} -->
-
-<!--   \node[background={yellow!40}{(mu0)}] {}; -->
-
-<!--   \node[background={blue!20}{(mu11)(mu12)(dots1)}] (bg1) {}; -->
-
-<!--   \node[background={pink!60}{(mu21)(mu22)(dots2) }] (bg2) {}; -->
-
-<!--  \node[background={orange!40}{(mu31)(mu32)(dots3)}] (bg3) {}; -->
-
-<!-- % \node[background={green!40}{(mu41)(mu42)(dots4)}] (bg4) {}; -->
-
-<!-- \end{pgfonlayer} -->
-
-<!-- % Sigma labels inside background blocks -->
-
-<!-- \node[anchor=north west] at (bg1.east) {$\sigma_{1}$}; -->
-
-<!-- \node[anchor=north west] at (bg2.east) {$\sigma_{2}$}; -->
-
-<!-- \node[anchor=north west] at (bg3.east) {$\sigma_{3}$}; -->
-
-<!-- %\node[anchor=north west] at (bg4.east) {$\sigma_{4}$}; -->
-
-<!-- % --- Arrows --- -->
-
-<!-- \draw[arrow] (mu0.south) -- (mu11.north); -->
-
-<!-- \draw[arrow] (mu0.south) -- (mu12.north); -->
-
-<!-- \draw[arrow] (mu0.south) -- (dots1.north); -->
-
-<!-- \draw[arrow] (mu11.south) -- (mu21.north); -->
-
-<!-- \draw[arrow] (mu11.south) -- (mu22.north); -->
-
-<!-- \draw[arrow] (mu11.south) -- (dots2.north); -->
-
-<!-- \draw[arrow] (mu21.south) -- (mu31.north); -->
-
-<!-- \draw[arrow] (mu21.south) -- (mu32.north); -->
-
-<!-- \draw[arrow] (mu21.south) -- (dots3.north); -->
-
-<!-- % \draw[arrow] (mu31.south) -- (mu41.north); -->
-
-<!-- % \draw[arrow] (mu31.south) -- (mu42.north); -->
-
-<!-- % \draw[arrow] (mu31.south) -- (dots4.north); -->
-
-<!-- \end{tikzpicture} -->
-
-<!-- \end{adjustbox} -->
-
-<!-- \caption{General specification of a hierarchical model.}\label{fig-hiermodel} -->
-
-<!-- \end{figure} -->
-
-<!-- ``` -->
-
 ![General specification of a hierarchical model.](fig/hiermodel.jpg){#fig-hiermodel width="613"}
 
 As a specific example, we consider the estimation of country-specific parameters, where countries are organized into subregions of countries (illustrated in Figure \ref{fig-hiermodel}). In this setting, using alternative notation for the same setup to indicate the level by name, the hierarchical model can be written as follows:
@@ -379,94 +117,6 @@ egion)} + \sigma_{ subregion}\cdot\gamma_{s[c]}^{(\mathrm{subregion})} + \sigma_
 ## Local hierarchical models
 
 We use the term local hierarchical models to refer to a hierarchical model in which a subset of parameters have been fixed at posterior mean estimates obtained from a fit of the model to a larger data set. A typical workflow for local estimation of national level outcomes is illustrated in @fig-workflow. For national estimation using the model given by Eq.\ref{eq-countryhier}, the user starts by fitting a global model, using a global data base and estimating all parameters in a hierarchical model. In a local model, data from one country are used and parameters that are not country-specific are fixed using parameter estimates from the global model fit.
-
-<!-- ```{=latex} -->
-
-<!-- \begin{figure}[h] -->
-
-<!-- \begin{adjustbox}{max size={\textwidth}{\textheight},center} -->
-
-<!-- \begin{tikzpicture}[ -->
-
-<!--   box/.style={rectangle, draw, thick, rounded corners, minimum width=6cm, align=left, inner sep=6pt}, -->
-
-<!--   databox/.style={box, fill=data!20}, -->
-
-<!--   modelbox/.style={box, fill=param!20}, -->
-
-<!--   arrowdata/.style={-{Latex[length=3mm]}, thick, data}, -->
-
-<!--   arrowparam/.style={-{Latex[length=3mm]}, thick, param!80}, -->
-
-<!--   font=\sffamily -->
-
-<!-- ] -->
-
-<!-- % --- Nodes --- -->
-
-<!-- \node[databox] (globaldata) {Global data base of country data}; -->
-
-<!-- \node[modelbox, below=1cm of globaldata] (globalmodel) {% -->
-
-<!--   Global national modeling:\\ -->
-
-<!--   Estimate all parameters in hierarchical model, e.g., \\ -->
-
-<!-- \( -->
-
-<!--   \begin{aligned} -->
-
-<!-- \mu_w^{(region)} &\sim N(\mu^{(global)}, \sigma_{ region}^2),\\ -->
-
-<!-- \mu_s^{(subregion)} &\sim N(\mu_{w[s]}^{(region)}, \sigma_{ subregion}^2), \\ -->
-
-<!-- \mu_c^{(country)} &\sim N(\mu_{s[c]}^{(subregion)}, \sigma_{ country}^2),  \end{aligned} -->
-
-<!-- \) -->
-
-<!-- }; -->
-
-<!-- \node[modelbox, below=1cm of globalmodel] (localmodel) {% -->
-
-<!--   Local national modeling:\\ -->
-
-<!--   Estimate national parameters only, \\ -->
-
-<!--   fix parameter estimates at higher levels of the hierarchy \\i.e., $\mu_c^{(country)}$ with $\mu_c^{(country)} \sim N(\hat{\mu}_{s[c]}^{(subregion)}, \hat{\sigma}_{ country}^2).$ -->
-
-<!-- }; -->
-
-<!-- % --- Data arrow (down then right) --- -->
-
-<!-- \draw[arrowdata] (globaldata.south) -- (globalmodel.north); -->
-
-<!-- \draw[arrowdata] (globaldata.east) ++(0,0) -- ++(4.5,0) |- (localmodel.east) -->
-
-<!-- node[midway,above] {Data for one country}; -->
-
-<!-- % --- Parameter arrow --- -->
-
-<!-- \draw[arrowparam] (globalmodel.south) -- (localmodel.north); -->
-
-<!-- % --- Legend --- -->
-
-<!-- % \node[arrowparam, below=1.2cm of localmodel.west, anchor=west] (leg1) {};  -->
-
-<!-- % \node[right=0.3cm of leg1] {\textcolor{param}{$\rightarrow$ Parameter estimates}}; -->
-
-<!-- \node[below=1cm of localmodel](parameter) {\textcolor{param}{$\rightarrow$ Parameter estimates}}; -->
-
-<!-- \node[right=1cm of parameter] {\textcolor{data}{$\rightarrow$ Data}}; -->
-
-<!-- \end{tikzpicture} -->
-
-<!-- \end{adjustbox} -->
-
-<!-- \caption{Workflow for global and local national modeling. }\label{fig-workflow} -->
-
-<!-- \end{figure} -->
-
-<!-- ``` -->
 
 ![Workflow for global and local national modeling.](fig/workflow.jpg){#fig-workflow width="614"}
 
@@ -516,8 +166,6 @@ Implementation is based on a model matrix. For our model given by the equation a
 ## Operation
 
 `localhierarchy` is a publicly available R package stored on Github. For usage, installation of R (≥4.5.1), Stan (≥2.37.0), and CmdStanR (≥ 0.9.0) are required [@WeloveR; @stan2025; @cmdstanr_2025]. The `localhierarchy` package can be installed from the Github repository. Package dependencies are listed in the package DESCRIPTION file and will be automatically installed upon installing the main package. There are no minimum RAM, CPU, or HARDDRIVE requirements apart from what is necessary to store model runs, which varies case-by-case.
-
-<!-- The `localhierarchy` package can be installed with one of two methods: (1) direct install from Github repository using the `install_ github()` API from the devtools package (Wickham et al., 2020); (2) install from the package binary using the base R function `install.package()`. Package dependencies are listed in the package DESCRIPTION file and will be automatically installed upon installing the main package. There are no minimum RAM, CPU, or HARDDRIVE requirements apart from what is necessary to store model runs, which varies case-by-case. -->
 
 # Use case: National estimation {#sec-nationalusecase}
 
@@ -763,24 +411,6 @@ For local estimation of family planning indicators, the Bayesian model described
 
 ![Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in in Benin (BEN), Gambia (GMB), and Ghana (GHA). FPET estimates are shown in in colored lines (red for global, green for local), with shaded areas representing 90% credible intervals. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance.](fig/fpet_localglobal.jpg){#fig-allfits}
 
-<!-- ```{r} -->
-
-<!-- #| fig-height: 9 -->
-
-<!-- #| fig-width: 7 -->
-
-<!-- #| echo: false -->
-
-<!-- #| label: fig-allfits -->
-
-<!-- #| fig-cap: "Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in in Benin (BEN), Gambia (GMB), and Ghana (GHA). FPET estimates are shown in in colored lines (red for global, green for local), with shaded areas representing 90% credible intervals. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance." -->
-
-<!-- plots <- readRDS("outputfpet_localglobalfits.rds") -->
-
-<!-- plots[[1]] /  plots[[2]]/ plots[[3]] # Stack three plots vertically -->
-
-<!-- ``` -->
-
 \clearpage
 
 {{< pagebreak >}}
@@ -799,7 +429,7 @@ No data are associated with the software tool described in this article.
 
 ### Software availability {.unnumbered}
 
-The R package is available at [github.com/AlkemaLab/localhierarchy](https://github.com/AlkemaLab/localhierarchy). <!-- and Zenodo \[to do: add reference\]. --> This code is distributed under the BSD 3-Clause License. See the R package's LICENSE file for details.
+The R package is available at [github.com/AlkemaLab/localhierarchy](https://github.com/AlkemaLab/localhierarchy) [@localhierarchy]. This code is distributed under the MIT License. See the R package's LICENSE file for details.
 
 ### Grant information {.unnumbered}
 
@@ -844,14 +474,6 @@ The second Stan model excerpt concerns the specification of the $\eta$s (`mu_sta
 \end{align*} where $w_{0, \mu}$ refers to the prior standard deviation for $\sigma_k$, called `prior_sd_sigma_estimate` in the Stan model file. The `localhierarchy` Stan function `get_mu_star` is used to carry out this multiplication to obtain the $\eta$s. The arguments for `get_mu_star` include prior parameters $m_{0, \mu}$, `mu_scalarprior_mean`, and $s_{0, \mu}$, `mu_scalarprior_sd`, which refer to the (rescaled) prior mean and standard deviation of $\mu^{(\mathrm{global})}$, where $\mu^{(\mathrm{global})} = s_{0, \mu}(m_{0, \mu} + \gamma^{(\mathrm{global})})$. Combined with the standard normal prior on $\gamma^{(\mathrm{global})}$, the resulting prior on the intercept $\mu^{(\mathrm{global})}$ is given by: \begin{align*}
   \mu^{(\mathrm{global})} &\sim N(s_{0, \mu}\cdot m_{0, \mu}, s_{0, \mu}).
 \end{align*} All prior parameters ($m_{0, \mu}, s_{0, \mu}, w_{0, \mu}$) are added as input data to the Stan model.
-
-<!-- ```{r, eval = F} -->
-
-<!-- mu_raw[1] = mu_raw[1] + mu_prior_mean; -->
-
-<!--   vector[mu_raw_n_terms] mu_star = scale_blocks(mu_raw, mu_raw_n_terms, mu_sigmawpriorsd, mu_n_sigma + 1, mu_re_start, mu_re_end); -->
-
-<!-- ``` -->
 
 To allow for global and local models, additions `_estimate` and `_fixed` are used to allow for splitting the `mu_raw` vector into two parts, one for fixed and one for estimated parameters. Similarly, vector `mu_sigma` is also split into two parts, one part for fixed and one part for estimated parameters. Relevant Stan code is as follows:
 
