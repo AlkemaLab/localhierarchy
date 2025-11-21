@@ -1,0 +1,15 @@
+---
+title: "localhierarchy_article"
+author: "leontine"
+date: "2025-11-21"
+output: html_document
+---
+
+
+```{r}
+#| include: false
+library(localhierarchy)
+```
+
+# Introduction
+bla
