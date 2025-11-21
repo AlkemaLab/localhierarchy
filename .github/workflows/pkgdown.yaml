@@ -45,9 +45,8 @@ jobs:
         shell: Rscript {0}
 
       - name: Setup Quarto CLI
-        uses: quarto-dev/quarto-actions/setup-quarto@v2
+        uses: quarto-dev/quarto-actions/setup@v2
         with:
-          # optional: specify a version like "1.4.1"; omit to install the latest
           version: '1.4.1'
 
       - name: Build site
