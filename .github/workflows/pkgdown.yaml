@@ -34,7 +34,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          dependencies: NA
+          dependencies:
           extra-packages: |
             stan-dev/cmdstanr
             any::pkgdown
