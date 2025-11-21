@@ -8,6 +8,7 @@ inst/doc
 .exe
 **/.DS_Store
 /Meta/
+docs
 cache
 *.html
 *.pdf

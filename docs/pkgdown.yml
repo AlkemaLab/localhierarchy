@@ -1,9 +1,0 @@
-pandoc: 3.6.3
-pkgdown: 2.1.3
-pkgdown_sha: ~
-articles:
-  articles/localhierarchy_article: localhierarchy_article.html
-last_built: 2025-11-21T16:05Z
-urls:
-  reference: https://alkemalab.github.io/localhierarchy/reference
-  article: https://alkemalab.github.io/localhierarchy/articles
