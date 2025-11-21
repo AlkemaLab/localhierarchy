@@ -11,7 +11,7 @@ on:
 name: pkgdown.yaml
 
 permissions:
-contents: write
+  contents: write
 
 jobs:
   pkgdown:
