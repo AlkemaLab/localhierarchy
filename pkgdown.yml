@@ -3,7 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   articles/localhierarchy_article: localhierarchy_article.html
-last_built: 2025-11-21T23:06Z
+last_built: 2025-11-21T23:14Z
 urls:
   reference: https://alkemalab.github.io/localhierarchy/reference
   article: https://alkemalab.github.io/localhierarchy/articles

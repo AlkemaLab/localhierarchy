@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>localhierarchy_article • localhierarchy</title>
+<title>[Article] localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models • localhierarchy</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="localhierarchy_article">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="[Article] localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -33,7 +33,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/localhierarchy_article.html">localhierarchy_article</a></li>
+<li><a class="dropdown-item" href="../articles/localhierarchy_article.html">[Article] localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models</a></li>
   </ul>
 </li>
       </ul>
@@ -54,21 +54,1319 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>localhierarchy_article</h1>
-                        <h4 data-toc-skip class="author">leontine</h4>
+      <h1>[Article] localhierarchy: an R package to facilitate fitting of global and local Bayesian hierarchical models</h1>
+                        <h4 data-toc-skip class="author">Leontine Alkema
+(<a href="mailto:lalkema@umass.edu" class="email">lalkema@umass.edu</a>), Shauna Mooney, Evan Ray, and
+Herbert Susmann</h4>
             
-            <h4 data-toc-skip class="date">2025-11-21</h4>
+            <h4 data-toc-skip class="date">today</h4>
       
 
       <div class="d-none name"><code>localhierarchy_article.Rmd</code></div>
     </div>
 
     
+        <div class="abstract">
+      <p class="abstract">Abstract</p>
+      <p>Bayesian hierarchical models are widely used in global health
+      estimation, where data availability may vary across national or
+      subnational populations. Such models are typically fitted to a
+      global database, e.g., to produce national-level estimates for all
+      countries in the world or in some region. To facilitate analysis
+      at a local level, models are often desirable that are informed by
+      global models but can be fitted to just a subset of the data, such
+      as data for one country. We refer to such models as local models:
+      models that are derived from global hierarchical models but
+      adapted such that they can be fitted to the data from one
+      population alone.</p>
+      <p>We present the <code>localhierarchy</code> R package, which
+      provides functionality for fitting Bayesian hierarchical models in
+      settings where both global and local estimation is required. The
+      package provides R functions and Stan model components to support
+      global modeling, in which all parameters in hierarchical models
+      are estimated, and local modeling, in which parameters are
+      estimated for only one or a small number of populations, using
+      fixed values from a global model fit.</p>
+      <p>This article presents a practical introduction to the package
+      for the applied user and illustrates the package’s functionality
+      through examples for national estimation.</p>
+    </div>
     
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>bla</p>
+<p>In global health estimation, Bayesian hierarchical models have become
+a cornerstone methodology, enabling the integration of diverse data
+sources to produce reliable estimates across multiple populations and
+regions. For example, they are used to estimate and forecast family
+planning indicators for the FP2030 initiative <span class="citation">(Alkema et al. 2024)</span>, incidence of low birth
+weight <span class="citation">(Okwaraji et al. 2024)</span>, abortion
+and unintended pregnancies rates <span class="citation">(Bearak et al.
+2020)</span>, and maternal mortality by the United Nations Interagency
+Group <span class="citation">(Peterson et al. 2024)</span>. In these
+efforts, national or subnational estimates are often required for
+population-periods with limited data availability. In these contexts,
+Bayesian hierarchical models -— whether used directly or for specific
+components within larger modeling frameworks – are valuable because they
+facilitate the sharing of information across populations. Global
+modeling exercises typically fit Bayesian hierarchical models to
+comprehensive global databases, producing national-level estimates for
+all countries worldwide.</p>
+<p>To facilitate analysis of a single population, it is often desirable
+to use models that are informed by global models but can be fitted to
+just a subset of the data, such as data from a single country. We refer
+to these as local models: models derived from global hierarchical models
+but adapted to be fit using data from only one population. Beyond
+allowing model fitting to smaller, specific datasets, local models offer
+practical advantages such as faster computation, making it feasible for
+users to perform analyses quickly on their own computers. Additionally,
+local models enable estimates for different populations to be updated
+independently, for example, when new data become available. This
+approach has been used successfully in global estimation exercises for
+family planning and maternal mortality <span class="citation">(Alkema et
+al. 2024; Peterson et al. 2024)</span>.</p>
+<p>A key challenge in the use of local models in global health
+estimation is synchronizing codebases and data flows between global and
+local estimation approaches. Synchronization is important because
+fitting local models relies on parameter estimates from global models.
+Therefore, synchronization is necessary to ensure consistency across
+global and local models. This can be particularly challenging for
+modeling approaches that involve hierarchical estimation of multiple
+parameters, where the hierarchical structures may differ across
+parameters.</p>
+<p>This paper introduces the R package designed to address these
+challenges by supporting the development and fitting of Bayesian
+hierarchical models in settings requiring both global and local
+estimation. The package provides R functions and Stan functions and
+model blocks <span class="citation">(Stan Development Team 2025)</span>
+to facilitate specification of hierarchical models, to fit full global
+models, and to subsequently fit local models using fixed parameter
+values inferred from the global analysis. Through this framework, users
+can conveniently perform local inference informed by global context,
+streamlining workflows in global health estimation tasks.</p>
+<p>This article presents a practical introduction to the package <span class="citation">(Alkema et al. 2025)</span> along with illustrative
+case studies demonstrating its applicability. The article is organized
+as follows. The next section introduces the modeling approach and
+workflow used for estimating family planning indicators, motivating the
+need for the functionality of fitting global and local hierarchical
+models. The methods section introduces the package’s functionality for
+the estimation of one parameter at the national level. Finally, we
+return to the case study of family planning estimation to present
+illustrative results of the application of the setup in this
+context.</p>
+</div>
+<div class="section level2">
+<h2 id="sec-fpet">The Family Planning Estimation Tool (FPET)<a class="anchor" aria-label="anchor" href="#sec-fpet"></a>
+</h2>
+<p>To motivate the utility and use of the package, we focus on the
+Family Planning Estimation Tool (FPET) as an illustrative example <span class="citation">(Alkema et al. 2024)</span>. FPET is widely used to
+estimate key family planning indicators in countries and regions. Key
+indicators include modern contraceptive use, demand for family planning,
+and demand satisfied, referring to the ratio of modern contraceptive use
+to demand. Data on such indicators is available from household surveys
+and routine data systems. FPET estimates are obtained from fitting a
+Bayesian model to available data. An illustration of FPET estimates and
+available data is shown in <span class="citation">(<strong>fig-localfits?</strong>)</span> for three
+countries in Western Africa.</p>
+<div class="float" id="fig-localfits">
+<img src="fig/fp_local.jpg" alt="Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in Benin (BEN), Gambia (GMB), and Ghana (GHA). Graphs show modern contraceptive use, unmet need for modern methods, demand, and demand satisfied with modern methods. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance. FPET estimates are shown in black, with grey shaded areas representing 90% credible intervals."><div class="figcaption">Data, estimates, and forecasts from 1970 until
+2030 for FP indicators for married women in Benin (BEN), Gambia (GMB),
+and Ghana (GHA). Graphs show modern contraceptive use, unmet need for
+modern methods, demand, and demand satisfied with modern methods. Survey
+data are shown in colored dots with 95% confidence intervals that
+reflect total error variance. FPET estimates are shown in black, with
+grey shaded areas representing 90% credible intervals.</div>
+</div>
+<p>At its core, the Bayesian FPET model employs transition models for
+demand and demand satisfied to characterize the long-term trajectories
+of family planning indicators over time within a population <span class="citation">(Susmann and Alkema 2025)</span>, illustrated in <span class="citation">(<strong>fig-transition?</strong>)</span>. The
+transition model describes changes in an indicator in terms of three
+principal parameters: the rate of change, the timing of the transition,
+and the asymptotic level (the maximum attainable level for an
+indicator). To allow for population-specific variation in how family
+planning indicators evolve, the parameters of the transition model are
+population-specific.</p>
+<div class="float" id="fig-transition">
+<img src="fig/transition.png" width="476" alt="Schematic illustration of transition model used in the modeling of family planning indicators. The transition model describes changes in an indicator (here \eta_{c,t}) in terms of three principal parameters: the rate of change, the level in a reference year (here labeled with \Omega_c), and the asymptotic level (the maximum attainable level for an indicator (here labeled with \lambda_c). This figure has been reproduced with permission from Susmann and Alkema (2025)."><div class="figcaption">Schematic illustration of transition model used
+in the modeling of family planning indicators. The transition model
+describes changes in an indicator (here
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>η</mi><mrow><mi>c</mi><mo>,</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">\eta_{c,t}</annotation></semantics></math>)
+in terms of three principal parameters: the rate of change, the level in
+a reference year (here labeled with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Ω</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\Omega_c</annotation></semantics></math>),
+and the asymptotic level (the maximum attainable level for an indicator
+(here labeled with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>λ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\lambda_c</annotation></semantics></math>).
+This figure has been reproduced with permission from <span class="citation">Susmann and Alkema (2025)</span>.</div>
+</div>
+<p>Given limited country-specific information on some parameters,
+Bayesian hierarchical models are used to share information between
+populations, using hierarchical structures such as the one illustrated
+in <span class="citation">(<strong>fig-hierstruc?</strong>)</span>.
+Specifically for family planning estimation and forecasting, a
+hierarchical model is used to estimate the level of demand in a
+reference year and the asymptote of the transition of demand from low to
+high values. <span class="citation">(<strong>fig-level?</strong>)</span>
+shows estimates of the level in the reference year at the country level
+for countries in Western Africa, and for the groupings used in the
+hierarchical model. <span class="citation">(<strong>fig-asympt?</strong>)</span> shows estimates
+for the asymptote. These figures show variation in levels among
+countries in Western Africa, informed by country-specific data.
+Estimates of asymptotes are similar across countries in Western Africa
+because countries have not yet reached the end phase of their
+transition. The asymptotes of these Western African countries are
+informed by the estimate of the asymptote in sub-Saharan Africa through
+the hierarchical model.</p>
+<div class="float" id="fig-hierstruc">
+<img src="fig/worldregions.jpg" width="631" alt="Illustration of hierarchical grouping of countries in world regions."><div class="figcaption">Illustration of hierarchical grouping of
+countries in world regions.</div>
+</div>
+<div class="float" id="fig-level">
+<img src="fig/hier_level.jpg" width="629" alt="Estimates of the level of demand for family planning (on a transformed scale) for major world regions (top), smaller world regions (middle) and countries in Western Africa (bottom). Point estimates and 95% credible intervals are shown."><div class="figcaption">Estimates of the level of demand for family
+planning (on a transformed scale) for major world regions (top), smaller
+world regions (middle) and countries in Western Africa (bottom). Point
+estimates and 95% credible intervals are shown.</div>
+</div>
+<div class="float" id="fig-asympt">
+<img src="fig/hier_asymptote.jpg" width="652" alt="Estimates of the asymptote for demand for family planning (on a transformed scale) for major world regions (top) and countries in Western Africa (bottom). Point estimates and 95% credible intervals are shown."><div class="figcaption">Estimates of the asymptote for demand for family
+planning (on a transformed scale) for major world regions (top) and
+countries in Western Africa (bottom). Point estimates and 95% credible
+intervals are shown.</div>
+</div>
+<p>The workflow used in FPET to produce country-level estimates is as
+follows. First, the full Bayesian model is fit to a global data base of
+survey data. Data base compilation is carried out by the United Nations
+Population Division (see <a href="https://www.un.org/development/desa/pd/world-contraceptive-use" class="external-link">UNPD
+world contraceptive use website</a>) and the Track20 project (see <a href="https://www.track20.org/" class="external-link">www.track20.org</a>). The global model
+fit provides information on model parameters, including hierarchical
+parameters, e.g., estimates of asymptotes. Subsequently, a local model
+can be used to produce FP estimates based on the data from one country,
+using information from the global model fit. The technical details for
+this approach are given in the next section. We return to the
+application of estimating family planning indicators in <span class="citation">(<strong>sec-fpetnat?</strong>)</span>.</p>
+</div>
+<div class="section level2">
+<h2 id="methods">Methods<a class="anchor" aria-label="anchor" href="#methods"></a>
+</h2>
+<p>The modeling approach introduced in <code>localhierarchy</code> was
+motivated by applications like FPET that depend on hierarchical
+structures associated with national and subnational level estimation,
+requiring global and local models to be fit. In this section, we
+introduce the principle setup used for global and local hierarchical
+models in the context of national estimation. We use general notation
+and a specific example.</p>
+<div class="section level3">
+<h3 id="hierarchical-model-specification">Hierarchical model specification<a class="anchor" aria-label="anchor" href="#hierarchical-model-specification"></a>
+</h3>
+<p>Suppose we want to estimate a population parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>μ</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mu_r^{(l)}</annotation></semantics></math>
+of interest, referring to a population health indicator for region
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+at level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+of the hierarchy. For example, the indicator could refer to some
+population health indicator such as service coverage or morbidity or
+mortality-related outcomes. For a given level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>,
+index
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+refers to the population in a particular region indexed by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>,
+for example, a subnational region, a country, or a group of countries.
+We assume that
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>
+is unconstrained (possibly after a transformation has been applied) and
+consider the following general hierarchical model setup (see <span class="citation">(<strong>fig-hiermodel?</strong>)</span>):</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msubsup><mi>μ</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>∣</mo><msubsup><mi>μ</mi><msup><mi>r</mi><mi>′</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msub><mi>σ</mi><mi>l</mi></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>μ</mi><msup><mi>r</mi><mi>′</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msubsup><mi>σ</mi><mi>l</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> for </mtext><mspace width="0.333em"></mspace></mrow><mi>l</mi><mo>&gt;</mo><mn>0</mn><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+  \mu_{r}^{(l)} \mid \mu^{(l-1)}_{r^\prime}, \sigma_l &amp;\sim N(\mu^{(l-1)}_{r^\prime}, \sigma_l^2), \text{ for } l &gt; 0,
+\end{align*}</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>μ</mi><msup><mi>r</mi><mi>′</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mu^{(l-1)}_{r^\prime}</annotation></semantics></math>
+is the parameter value at one level higher in the hierarchy for the
+region
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>r</mi><mi>′</mi></msup><annotation encoding="application/x-tex">r^\prime</annotation></semantics></math>
+that contains unit
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>.
+The parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>l</mi></msub><annotation encoding="application/x-tex">\sigma_l</annotation></semantics></math>
+for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">l &gt; 0</annotation></semantics></math>
+describes variability of values of the parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>
+across geographic units at level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+of the hierarchy. At the top level of the hierarchy,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">l = 0</annotation></semantics></math>,
+only a single parameter is estimated.</p>
+<div class="float" id="fig-hiermodel">
+<img src="fig/hiermodel.jpg" width="613" alt="General specification of a hierarchical model."><div class="figcaption">General specification of a hierarchical
+model.</div>
+</div>
+<p>As a specific example, we consider the estimation of country-specific
+parameters, where countries are organized into subregions of countries
+(illustrated in Figure ). In this setting, using alternative notation
+for the same setup to indicate the level by name, the hierarchical model
+can be written as follows:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msubsup><mi>μ</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mtd><mtd columnalign="left" style="text-align: left"><mo>∣</mo><msubsup><mi>μ</mi><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msubsup><mi>σ</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mn>2</mn></msubsup></mtd><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>μ</mi><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msubsup><mi>σ</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msubsup><mi>μ</mi><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mtd><mtd columnalign="left" style="text-align: left"><mo>∣</mo><msubsup><mi>μ</mi><mrow><mi>w</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>s</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msubsup><mi>σ</mi><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mn>2</mn></msubsup></mtd><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>μ</mi><mrow><mi>w</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>s</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msubsup><mi>σ</mi><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msubsup><mi>μ</mi><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mtd><mtd columnalign="left" style="text-align: left"><mo>∣</mo><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>,</mo><msubsup><mi>σ</mi><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mn>2</mn></msubsup></mtd><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>,</mo><msubsup><mi>σ</mi><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{alignat}{2}
+  \mu_c^{(\mathrm{country})} &amp;\mid \mu_{s[c]}^{(\mathrm{subregion})}, \sigma_{ \mathrm{country}}^2 &amp;&amp;\sim N(\mu_{s[c]}^{(\mathrm{subregion})}, \sigma_{ \mathrm{country}}^2), \label{eq-countryhier} \\
+  \mu_s^{(\mathrm{subregion})} &amp;\mid \mu_{w[s]}^{(\mathrm{region})}, \sigma_{ \mathrm{subregion}}^2 &amp;&amp;\sim N(\mu_{w[s]}^{(\mathrm{region})}, \sigma_{\mathrm{subregion}}^2), \nonumber \\
+  \mu_w^{(\mathrm{region})} &amp;\mid \mu^{(\mathrm{global})}, \sigma_{ \mathrm{region}}^2 &amp;&amp;\sim N(\mu^{(\mathrm{global})}, \sigma_{ \mathrm{region}}^2), \nonumber
+\end{alignat}</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>C</mi></mrow><annotation encoding="application/x-tex">c =1,\dots,C</annotation></semantics></math>
+refers to the country index,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><mn>1</mn><mo>,</mo><mi>.</mi><mi>.</mi><mo>,</mo><mi>S</mi></mrow><annotation encoding="application/x-tex">s[c] = 1, .., S</annotation></semantics></math>
+to the subregion index of country
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><mn>1</mn><mo>,</mo><mi>.</mi><mi>.</mi><mo>,</mo><mi>W</mi></mrow><annotation encoding="application/x-tex">w[s[c]] = 1, .., W</annotation></semantics></math>
+to the region index of subregion
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">s[c]</annotation></semantics></math>.
+The parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">\mu^{(\mathrm{global})}</annotation></semantics></math>
+is the global mean for the parameter of interest, e.g., a global mean
+for service coverage or mortality. The parameters
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{ \mathrm{country}}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{ \mathrm{subregion}}</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{ \mathrm{region}}</annotation></semantics></math>
+describe variability in the parameter of interest across countries,
+subregions, and regions, respectively.</p>
+</div>
+<div class="section level3">
+<h3 id="local-hierarchical-models">Local hierarchical models<a class="anchor" aria-label="anchor" href="#local-hierarchical-models"></a>
+</h3>
+<p>We use the term local hierarchical models to refer to a hierarchical
+model in which a subset of parameters have been fixed at posterior mean
+estimates obtained from a fit of the model to a larger data set. A
+typical workflow for local estimation of national level outcomes is
+illustrated in <span class="citation">(<strong>fig-workflow?</strong>)</span>. For national
+estimation using the model given by Eq., the user starts by fitting a
+global model, using a global data base and estimating all parameters in
+a hierarchical model. In a local model, data from one country are used
+and parameters that are not country-specific are fixed using parameter
+estimates from the global model fit.</p>
+<div class="float" id="fig-workflow">
+<img src="fig/workflow.jpg" width="614" alt="Workflow for global and local national modeling."><div class="figcaption">Workflow for global and local national
+modeling.</div>
+</div>
+<p>A local model is derived from a global one by fixing parameters.
+Continuing with the specific example, an example local model to produce
+country estimates using data from one country alone has the following
+setup:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>μ</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\mu_c^{(\mathrm{country})} \sim N(\hat{\mu}_{s[c]}^{(\mathrm{subregion})}, \hat{\sigma}_{ \mathrm{country}}^2),</annotation></semantics></math>
+replacing the hierarchical mean and variances by point estimates
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\hat{\mu}_{s[c]}^{(\mathrm{subregion})}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mn>2</mn></msubsup><annotation encoding="application/x-tex">\hat{\sigma}_{\mathrm{country}}^2</annotation></semantics></math>,
+respectively. Details are given in the implementation section.</p>
+<p>The <code>localhierachy</code> package provides a general
+implementation of local models by facilitating the fixing of subsets of
+parameters. Continuing with the general notation introduced above, in
+the package, a local model for one parameter of level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+is derived by fixing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\sigma_k</annotation></semantics></math>
+for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><mi>l</mi></mrow><annotation encoding="application/x-tex">k=1, ..., l</annotation></semantics></math>
+and fixing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>μ</mi><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mu_{\cdot}^{(k)}</annotation></semantics></math>
+for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>.</mi><mi>.</mi><mo>,</mo><mi>l</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k = 1, .., l-1</annotation></semantics></math>
+at posterior means derived from a global fit. More generally, if a model
+was fitted using data up to level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>,
+the user can create a local model by fixing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\sigma_k</annotation></semantics></math>
+at all levels
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+up to some chosen level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>K</mi><mi>σ</mi></msub><annotation encoding="application/x-tex">K_{\sigma}</annotation></semantics></math>.
+Similarly, the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">\mu^{(k)}</annotation></semantics></math>
+parameters can be fixed at all levels
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+up to a level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>K</mi><mi>μ</mi></msub><mo>≤</mo><msub><mi>K</mi><mi>σ</mi></msub></mrow><annotation encoding="application/x-tex">K_{\mu} \leq K_{\sigma}</annotation></semantics></math>.</p>
+</div>
+<div class="section level3">
+<h3 id="sec-implementation">Implementation<a class="anchor" aria-label="anchor" href="#sec-implementation"></a>
+</h3>
+<p>The <code>localhierarchy</code> R package contains R functions and
+example Stan model files to fit global and local hierarchical models.
+The package is set up to allow for users to incorporate the global-local
+hierarchy setup into their own project. For a given parameter and
+hierarchical model specification, the package functions enable
+processing of data to produce Stan input data for global and local
+models, Stan model components that work for both global as well as local
+models, and R functions for post-processing of model outputs to check
+results and produce summary files of global models for use in local
+models.</p>
+<p>In a typical work flow, a user first fits a global model, followed by
+local ones. A worked example is given in the use case in <span class="citation">(<strong>sec-nationalusecase?</strong>)</span>. The
+global and local models in these examples are fitted using the
+<code>localhierarchy</code> wrapper function
+<code>fit_model_localhierarchy</code>, using its arguments to specify a
+hierarchical model, data, and, for local fits, the output of the global
+model. The wrapper function calls R functions to process data and
+prepare Stan input data, read in a Stan model, fit the model, and
+post-process the results.</p>
+<p>The package includes a user-friendly specification of hierarchical
+model structures, and associated specification of fixed parameters for
+local runs. A worked example is given in <span class="citation">(<strong>sec-nationalusecase?</strong>)</span>.
+Briefly, if a user wants to specify a hierarchical model with the levels
+world, regions, subregion, and country,
+<!-- country parameters $\mu_c^{(\mathrm{country})} =  s_{global}\cdot \gamma_{global} + \sigma_{ region}\cdot \gamma_{r[s[c]]]}^{(
+egion)} + \sigma_{ subregion}\cdot\gamma_{s[c]}^{(\mathrm{subregion})} + \sigma_{ country}\cdot\gamma_{ c}$,  -->
+using a dataset with information on these groupings, with naming
+<code>region</code>, <code>subregion</code>, and <code>country</code>,
+in the R functions, the user can specify the hierarchical model as
+follows:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hierarchical_level</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"intercept"</span>,  <span class="st">"region"</span>, <span class="st">"subregion"</span>, <span class="st">"country"</span><span class="op">)</span></span></code></pre></div>
+<p>The first level is the intercept, which is the global mean, followed
+by the region, subregion, and country levels. The user can then specify
+a local model for one country by fixing parameters at different levels,
+using the <code>hierarchical_sigmas_fixed</code> and
+<code>hierarchical_terms_fixed</code> arguments in the
+<code>fit_model_localhierarchy</code> function. For example, if the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+parameters are to be fixed up to the country level and if the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>
+terms are to be fixed up to the subregion, the user can encode this as
+follows:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hierarchical_sigmas_fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"intercept"</span>,  <span class="st">"region"</span>, <span class="st">"subregion"</span>, <span class="st">"country"</span><span class="op">)</span></span>
+<span><span class="va">hierarchical_terms_fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"intercept"</span>,  <span class="st">"region"</span>, <span class="st">"subregion"</span><span class="op">)</span></span></code></pre></div>
+<p>Note that even though there is no
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+at the intercept level, this term is always included in the
+<code>hierarchical_sigmas_fixed</code> vector.</p>
+<p>The Stan implementation of the model uses a non-centered
+parameterization. In general notation, for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">l&gt;0</annotation></semantics></math>,
+a non-centered parameterization refers to writing mean parameters as
+deviations from higher-level group means:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msubsup><mi>μ</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>+</mo><msub><mi>σ</mi><mi>l</mi></msub><mo>⋅</mo><msubsup><mi>γ</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+  \mu_r^{(l)} &amp;= \mu^{(l-1)} + \sigma_l \cdot \gamma_{r}^{(l)},
+\end{align*}</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>γ</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\gamma_r^{(l)} \sim N(0, 1)</annotation></semantics></math>.
+Applied sequentially, and if
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msub><mi>s</mi><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mu^{(0)} \sim N(0,s_{\mathrm{global}})</annotation></semantics></math>
+with prior standard deviation
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>s</mi><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow></msub><annotation encoding="application/x-tex">s_{\mathrm{global}}</annotation></semantics></math>,
+we get
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msubsup><mi>μ</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mi>s</mi><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow></msub><mo>⋅</mo><msup><mi>γ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>+</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>l</mi></munderover><msub><mi>σ</mi><mi>k</mi></msub><mo>⋅</mo><msubsup><mi>γ</mi><msup><mi>r</mi><mi>′</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+  \mu_r^{(l)} &amp;= s_{\mathrm{global}}\cdot\gamma^{(0)} + \sum_{k=1}^{l} \sigma_k \cdot \gamma_{r^\prime}^{(k)},
+\end{align*}</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>r</mi><mi>′</mi></msup><annotation encoding="application/x-tex">r^\prime</annotation></semantics></math>
+now refers more generally to the index of the unit containing the
+lower-level group. For the specific example of country parameters, the
+non-centered parameterization is given by
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msubsup><mi>μ</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>=</mo><msub><mi>s</mi><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow></msub><mo>⋅</mo><msup><mi>γ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>+</mo><msub><mi>σ</mi><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>⋅</mo><msubsup><mi>γ</mi><mrow><mi>w</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="false" form="postfix">]</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>+</mo><msub><mi>σ</mi><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>⋅</mo><msubsup><mi>γ</mi><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>+</mo><msub><mi>σ</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow></msub><mo>⋅</mo><msubsup><mi>γ</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+  \mu_c^{(\mathrm{country})} =  s_{\mathrm{global}} \cdot {\gamma}^{(\mathrm{global})} + {\sigma}_{\mathrm{region}}\cdot {\gamma}_{w[s[c]]]}^{(\mathrm{region})} + {\sigma}_{\mathrm{subregion}}\cdot{\gamma}_{s[c]}^{(\mathrm{subregion})} + {\sigma}_{\mathrm{country}}\cdot\gamma_{c}^{(\mathrm{country})}.
+\end{align*}</annotation></semantics></math></p>
+<p>Implementation is based on a model matrix. For our model given by the
+equation above, the following matrix multiplication is used to obtain
+the vector of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>μ</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mu_c^{(\mathrm{country})}</annotation></semantics></math>s:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>μ</mi><mn>1</mn><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><msubsup><mi>μ</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>M</mi><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>η</mi><mn>1</mn></msub><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><msub><mi>η</mi><mrow><mn>1</mn><mo>+</mo><mi>R</mi><mo>+</mo><mi>S</mi><mo>+</mo><mi>C</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>′</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">(\mu_1^{(\mathrm{country})}, ..., \mu_c^{(\mathrm{country})}) = M\cdot (\eta_1, ..., \eta_{1+R+S+C})',</annotation></semantics></math>
+where matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
+is a sparse matrix with 1s and 0s, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>η</mi><mn>1</mn></msub><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><msub><mi>η</mi><mrow><mn>1</mn><mo>+</mo><mi>R</mi><mo>+</mo><mi>S</mi><mo>+</mo><mi>C</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\eta_1, ..., \eta_{1+R+S+C})</annotation></semantics></math>
+refers to the vector of the product of the standard deviation terms and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
+terms, i.e.,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>η</mi><mn>1</mn></msub><mo>=</mo><msub><mi>s</mi><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow></msub><mo>⋅</mo><msub><mi>γ</mi><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow></msub><mo>,</mo><msub><mi>η</mi><mn>2</mn></msub><mo>=</mo><msub><mi>σ</mi><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>⋅</mo><msubsup><mi>γ</mi><mn>1</mn><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><msub><mi>η</mi><mrow><mn>1</mn><mo>+</mo><mi>W</mi><mo>+</mo><mi>S</mi><mo>+</mo><mi>C</mi></mrow></msub><mo>=</mo><msub><mi>σ</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow></msub><mo>⋅</mo><msubsup><mi>γ</mi><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup></mrow><annotation encoding="application/x-tex">\eta_1 = s_{\mathrm{global}}\cdot \gamma_{\mathrm{global}}, \eta_2 = \sigma_{ \mathrm{region}} \cdot \gamma_{ 1}^{(\mathrm{region})}, ..., \eta_{1+W+S+C} = \sigma_{ \mathrm{country}}\cdot\gamma_{ C}^{(\mathrm{country})}</annotation></semantics></math>.
+When estimating a subset of parameters in a local model, the values of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>s
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>s
+are fixed to point estimates (posterior means) from a global fit. For
+example, for a local national model, we get
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mi>c</mi></msub><mo>=</mo><msub><mi>s</mi><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow></msub><mo>⋅</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow></msub><mo>+</mo><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>⋅</mo><msubsup><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mrow><mi>w</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="false" form="postfix">]</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>+</mo><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>⋅</mo><msubsup><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>c</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>+</mo><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow></msub><mo>⋅</mo><msubsup><mi>γ</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+  \mu_c = s_{\mathrm{global}} \cdot \hat{\gamma}_{\mathrm{global}} + 
+          \hat{\sigma}_{ \mathrm{region}} \cdot \hat{\gamma}_{w[s[c]]]}^{(\mathrm{region})} + 
+          \hat{\sigma}_{ \mathrm{subregion}} \cdot \hat{\gamma}_{s[c]}^{(\mathrm{subregion})} + 
+          \hat{\sigma}_{ \mathrm{country}} \cdot \gamma_{c}^{(\mathrm{country})}.
+\end{align*}</annotation></semantics></math></p>
+</div>
+<div class="section level3">
+<h3 id="operation">Operation<a class="anchor" aria-label="anchor" href="#operation"></a>
+</h3>
+<p><code>localhierarchy</code> is a publicly available R package stored
+on Github. For usage, installation of R (≥4.5.1), Stan (≥2.37.0), and
+CmdStanR (≥ 0.9.0) are required <span class="citation">(R Core Team
+2025; Stan Development Team 2025; Gabry et al. 2025)</span>. The
+<code>localhierarchy</code> package can be installed from the Github
+repository. Package dependencies are listed in the package DESCRIPTION
+file and will be automatically installed upon installing the main
+package. There are no minimum RAM, CPU, or HARDDRIVE requirements apart
+from what is necessary to store model runs, which varies
+case-by-case.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="sec-nationalusecase">Use case: National estimation<a class="anchor" aria-label="anchor" href="#sec-nationalusecase"></a>
+</h2>
+<p>We present a detailed use case of the <code>localhierarchy</code>
+package using simulated data, followed by an application of that
+functionality in FPET.</p>
+<div class="section level3">
+<h3 id="detailed-example-using-simulated-data">Detailed example using simulated data<a class="anchor" aria-label="anchor" href="#detailed-example-using-simulated-data"></a>
+</h3>
+<div class="section level4">
+<h4 id="simulation-setup">Simulation setup<a class="anchor" aria-label="anchor" href="#simulation-setup"></a>
+</h4>
+<p>The simulation setup is as follows: For national level estimation, we
+consider countries to be grouped in the world, i.e.,
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>μ</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">|</mo><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>,</mo><msub><mi>σ</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow></msub><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>,</mo><msubsup><mi>σ</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">\mu_c^{(\mathrm{country})}|\mu^{(\mathrm{global})}, \sigma_{ \mathrm{country}} \sim N(\mu^{(\mathrm{global})}, \sigma_{ \mathrm{country}}^2).</annotation></semantics></math>
+The likelihood function for national data is given by a normal
+likelihood with constant variance:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>y</mi><mi>i</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">|</mo><msubsup><mi>μ</mi><mrow><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msubsup><mi>σ</mi><mi>y</mi><mn>2</mn></msubsup><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>μ</mi><mrow><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><msubsup><mi>σ</mi><mi>y</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">y_i^{(\mathrm{country})}|\mu_{c[i]}^{(\mathrm{country})}, \sigma_y^2 \sim N(\mu_{c[i]}^{(\mathrm{country})}, \sigma_y^2),</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">c[i]</annotation></semantics></math>
+refers to the country of country observation
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>.
+We chose simple normal densities as data generating mechanisms in the
+simulation, to focus the modeling on the hierarchical model and the
+<code>localhierarchy</code> functionality as opposed to the data model
+aspects of modeling. In practice, the data model can be set by the user
+to reflect actual data generating mechanisms, for example, by using a
+binomial likelihood, considering transformed outcomes, or accounting for
+sampling errors for observations that were obtained from a complex
+survey design.</p>
+<p>Simulated data were generated using the
+<code>simulate_multilevel_data</code> function. We simulate a set of
+model parameters, setting
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\mu^{(\mathrm{global})} = 0</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">y</mi></mrow></msub><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\sigma_{\mathrm{country}} = 0.5</annotation></semantics></math>,
+creating 30 countries, and national data, using
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mi>y</mi></msub><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">\sigma_y = 0.1</annotation></semantics></math>.</p>
+<p>In the simulated data, <code>level1</code> refers to the country
+level. The data sets contain the simulated parameters (<code>eta</code>;
+the deviation away from the global mean) and data (<code>y</code>):</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dat_nat</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">level1</span>,  <span class="va">mu_global</span>, <span class="va">level1_eta</span>, <span class="va">y</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6,000 × 4</span></span></span>
+<span><span class="co">##    level1 mu_global level1_eta     y</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> 1              0      0.293 0.179</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> 1              0      0.293 0.323</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> 1              0      0.293 0.356</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> 1              0      0.293 0.279</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> 1              0      0.293 0.254</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> 1              0      0.293 0.258</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> 1              0      0.293 0.479</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> 1              0      0.293 0.178</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> 1              0      0.293 0.206</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> 1              0      0.293 0.190</span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ 5,990 more rows</span></span></span></code></pre>
+</div>
+<div class="section level4">
+<h4 id="model-fitting">Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
+</h4>
+<p>We can fit global and local models using the
+<code>fit_model_localhierarchy</code> wrapper function, as shown later
+in this section. We first provide implementation details, using the main
+functions of the package and excerpts from the Stan model.</p>
+<p>For model fitting, the first step is to specify a hierarchical
+structure, using <code>intercept</code> and names included in the survey
+data. For national level estimation, <code>level1</code> is the name
+used in the data:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hierarchical_level</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"intercept"</span>,  <span class="st">"level1"</span><span class="op">)</span></span></code></pre></div>
+<p>Input data are processed using the function
+<code>get_geo_unit_index_data</code>. This function obtains unique
+hierarchical groupings from the input data and assigns an index
+<code>c</code> to each unique grouping:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">geo_unit_index</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_geo_unit_index_data.html">get_geo_unit_index_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">dat_nat</span>,</span>
+<span>  hierarchical_levels <span class="op">=</span> <span class="va">hierarchical_level</span>,</span>
+<span>  area <span class="op">=</span> <span class="st">"level1"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">geo_unit_index</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 30 × 2</span></span></span>
+<span><span class="co">##    level1     c</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> 1          1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> 2          2</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> 3          3</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> 4          4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> 5          5</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> 6          6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> 7          7</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> 8          8</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> 9          9</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> 10        10</span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ 20 more rows</span></span></span></code></pre>
+<p>The second step in the processing is to create a hierarchical data
+object, using the function <code>hierarchical_data</code>. This function
+outputs a list with various components associated with the
+parameterization of the hierarchical parameters, used in the Stan model
+and for further post-processing:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hier_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hierarchical_data.html">hierarchical_data</a></span><span class="op">(</span><span class="va">geo_unit_index</span>, <span class="va">hierarchical_level</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">hier_data</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "model_matrix" "n_terms"      "n_re"         "re_start"     "re_end"</span></span></code></pre>
+<p>Elements include the model matrix and other elements are used to make
+a link between columns in the model matrix, or equivalently, indices in
+the vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>,
+and the hierarchical groupings. The model matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>,
+as introduced in <span class="citation">(<strong>sec-implementation?</strong>)</span>, is as
+follows:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">hier_data</span><span class="op">$</span><span class="va">model_matrix</span><span class="op">$</span><span class="va">matrix</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 30 31</span></span></code></pre>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hier_data</span><span class="op">$</span><span class="va">model_matrix</span><span class="op">$</span><span class="va">matrix</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span></span>
+<span><span class="co">##  [1,]    1    1    0    0    0    0    0    0    0     0</span></span>
+<span><span class="co">##  [2,]    1    0    1    0    0    0    0    0    0     0</span></span>
+<span><span class="co">##  [3,]    1    0    0    1    0    0    0    0    0     0</span></span>
+<span><span class="co">##  [4,]    1    0    0    0    1    0    0    0    0     0</span></span>
+<span><span class="co">##  [5,]    1    0    0    0    0    1    0    0    0     0</span></span>
+<span><span class="co">##  [6,]    1    0    0    0    0    0    1    0    0     0</span></span>
+<span><span class="co">##  [7,]    1    0    0    0    0    0    0    1    0     0</span></span>
+<span><span class="co">##  [8,]    1    0    0    0    0    0    0    0    1     0</span></span>
+<span><span class="co">##  [9,]    1    0    0    0    0    0    0    0    0     1</span></span>
+<span><span class="co">## [10,]    1    0    0    0    0    0    0    0    0     0</span></span></code></pre>
+<p>All of this information is passed to the function
+<code>hierarchical_param_stan_data</code> to produce inputs needed in
+the Stan model fitting. This function outputs a named list with Stan
+input data relevant to the hierarchical setup:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hier_stan_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hierarchical_param_stan_data.html">hierarchical_param_stan_data</a></span><span class="op">(</span></span>
+<span>  param_name <span class="op">=</span> <span class="st">"mu"</span>,</span>
+<span>  param_data <span class="op">=</span> <span class="va">hier_data</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">hier_stan_data</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] "mu_raw_n_terms"          "mu_re_start"            </span></span>
+<span><span class="co">##  [3] "mu_re_end"               "mu_model_matrix"        </span></span>
+<span><span class="co">##  [5] "mu_n_sigma"              "mu_raw_n_terms_fixed"   </span></span>
+<span><span class="co">##  [7] "mu_raw_n_terms_estimate" "mu_raw_fixed"           </span></span>
+<span><span class="co">##  [9] "mu_n_sigma_fixed"        "mu_n_sigma_estimate"    </span></span>
+<span><span class="co">## [11] "mu_sigma_fixed"</span></span></code></pre>
+<p>For example, in this setting, we only have to estimate one
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>μ</mi></msub><annotation encoding="application/x-tex">\sigma_{\mu}</annotation></semantics></math>,
+and no
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>μ</mi></msub><annotation encoding="application/x-tex">\sigma_{\mu}</annotation></semantics></math>
+is fixed, as recorded in the <code>n_sigma_estimate</code> and
+<code>n_sigma_fixed</code> elements of the Stan input data:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hier_stan_data</span><span class="op">$</span><span class="va">mu_n_sigma_estimate</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 1</span></span></code></pre>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hier_stan_data</span><span class="op">$</span><span class="va">mu_n_sigma_fixed</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 0</span></span></code></pre>
+<p>We can use the function <code>fit_model_localhierarchy</code> to fit
+the model as specified so far. Details are included in the appendix
+(<span class="citation">(<strong>sec-helpfilefitmodel?</strong>)</span>). The
+argument <code>runstep</code> is used to define the type of model,
+setting it to <code>"global_national"</code> results in fitting a model
+to all data without fixing any parameters. Other arguments include the
+hierarchical level specification, the area, and survey data. When
+calling the function, print statements are used to inform the user of
+key points related to the model fit:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">global_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_model_localhierarchy.html">fit_model_localhierarchy</a></span><span class="op">(</span></span>
+<span>  runstep <span class="op">=</span> <span class="st">"global_national"</span>,</span>
+<span>  hierarchical_level <span class="op">=</span> <span class="va">hierarchical_level</span>,</span>
+<span>  area <span class="op">=</span> <span class="st">"level1"</span>,</span>
+<span>  survey_df <span class="op">=</span> <span class="va">dat_nat</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "We do a global fit."</span></span>
+<span><span class="co">## [1] "We don't fix anything"</span></span>
+<span><span class="co">## [1] "Hierarchical levels used for this run:"</span></span>
+<span><span class="co">## [1] "intercept" "level1"   </span></span>
+<span><span class="co">## [1] "Hierarchical terms fixed:"</span></span>
+<span><span class="co">## NULL</span></span>
+<span><span class="co">## [1] "Hierarchical sigmas fixed:"</span></span>
+<span><span class="co">## NULL</span></span></code></pre>
+<p>When doing model fitting, the same Stan model is used for both global
+and local models. Excerpts from the Stan model are included in Appendix
+1.</p>
+<p>The <code>global_fit</code> object includes posterior samples and
+other metadata about the fit.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">global_fit</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "stan_data"          "geo_unit_index"     "y"                 </span></span>
+<span><span class="co">## [4] "area"               "hierarchical_level" "mu_data"           </span></span>
+<span><span class="co">## [7] "stan_model"         "samples"            "post_summ"</span></span></code></pre>
+<p>The <code>post_summ</code> object contains posterior means for
+relevant model parameters. For example:</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">global_fit</span><span class="op">$</span><span class="va">post_summ</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">variable_no_index</span> <span class="op">==</span> <span class="st">"mu_sigma"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
+<span><span class="co">##   variable    postmean variable_no_index</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> mu_sigma[1]    0.492 mu_sigma</span></span></code></pre>
+<p>A local fit can be estimated by passing on the global fit object to
+the wrapper function and including data for countries of interest. Here
+we do local runs for all countries, by including the entire data set,
+and specify what to fix using the <code>runstep</code> argument:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_local</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_model_localhierarchy.html">fit_model_localhierarchy</a></span><span class="op">(</span></span>
+<span>  runstep <span class="op">=</span> <span class="st">"local_national"</span>,</span>
+<span>  global_fit <span class="op">=</span> <span class="va">global_fit</span>,</span>
+<span>  area <span class="op">=</span> <span class="st">"level1"</span>,</span>
+<span>  survey_df <span class="op">=</span> <span class="va">dat_nat</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "We use a global fit, and take selected or all settings from there."</span></span>
+<span><span class="co">## [1] "For hierarchical terms, we fix things up to the 2nd-lowest level."</span></span>
+<span><span class="co">## [1] "For sigma terms, we fix up to lowest level."</span></span>
+<span><span class="co">## [1] "We fix data model parameters."</span></span>
+<span><span class="co">## [1] "Hierarchical levels used for this run:"</span></span>
+<span><span class="co">## [1] "intercept" "level1"   </span></span>
+<span><span class="co">## [1] "Hierarchical terms fixed:"</span></span>
+<span><span class="co">## [1] "intercept"</span></span>
+<span><span class="co">## [1] "Hierarchical sigmas fixed:"</span></span>
+<span><span class="co">## [1] "intercept" "level1"</span></span></code></pre>
+<p>When doing a local national run with
+<code>runstep = "local_national"</code>, the hierarchical levels are
+taken from the global fit, and non-country-specific parameters are
+fixed. This is indicated in the print statements above. In the wrapper
+function, relevant code excerpts for <code>"local_national"</code> runs
+are as follows:</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hierarchical_level</span> <span class="op">&lt;-</span> <span class="va">global_fit</span><span class="op">$</span><span class="va">hierarchical_level</span></span>
+<span><span class="va">hierarchical_level_terms_fixed</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">hierarchical_level</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">hierarchical_level</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">hierarchical_level_sigmas_fixed</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">hierarchical_level</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">hierarchical_level</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+<p>When doing a local fit, the same R functions and Stan model are used
+as introduced above but Stan input data is updated to fix a subset of
+parameters. Specifically, when producing Stan input data, the following
+function call is used:</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hier_stan_data_local</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hierarchical_param_stan_data.html">hierarchical_param_stan_data</a></span><span class="op">(</span></span>
+<span>  param_name <span class="op">=</span> <span class="st">"mu"</span>,</span>
+<span>  param_data <span class="op">=</span> <span class="va">hier_data</span>, </span>
+<span>  <span class="co"># information to fix parameters </span></span>
+<span>  global_fit <span class="op">=</span> <span class="va">global_fit</span>,</span>
+<span>  hierarchical_terms_fixed <span class="op">=</span> <span class="va">hierarchical_level_terms_fixed</span>, </span>
+<span>  hierarchical_sigmas_fixed <span class="op">=</span> <span class="va">hierarchical_level_sigmas_fixed</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Above, the arguments <code>hierarchical_terms_fixed</code> and
+<code>hierarchical_sigmas_fixed</code> are used to fix the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>
+at the intercept-level and the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>s
+up to and including the country-level. Indeed, when comparing the
+outputs of this function call to the one for a global fit, we find that
+the country
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+is fixed at the value from the global fit:</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hier_stan_data_local</span><span class="op">$</span><span class="va">mu_n_sigma_fixed</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 1</span></span></code></pre>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hier_stan_data_local</span><span class="op">$</span><span class="va">mu_n_sigma_estimate</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 0</span></span></code></pre>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hier_stan_data_local</span><span class="op">$</span><span class="va">mu_sigma_fixed</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 0.4915359</span></span></code></pre>
+<p>In addition to fixing parameters of hierarchical models, other
+non-country-specific parameters can be fixed as well. In this example,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>y</mi></msub><annotation encoding="application/x-tex">\sigma_y</annotation></semantics></math>
+is a global parameter that is fixed at the posterior mean from the
+global run for use in local runs.</p>
+</div>
+<div class="section level4">
+<h4 id="processing-model-fits">Processing model fits<a class="anchor" aria-label="anchor" href="#processing-model-fits"></a>
+</h4>
+<p>The package includes several functions to produce and check outputs.
+The function <code>posterior_summary_hierparam</code> is used to
+summarize posterior draws for hierarchical parameters, to produce
+summaries of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>
+at any level of interest. It takes a fitted model object and a parameter
+name as input and returns a list with each entry referring one level,
+and the results (e.g., estimates for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>
+estimates) for that level. Here we obtain these results for the global
+and local model:</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_global</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/posterior_summary_hierparam_localhierarchy.html">posterior_summary_hierparam_localhierarchy</a></span><span class="op">(</span></span>
+<span>  fit <span class="op">=</span> <span class="va">global_fit</span>, parname <span class="op">=</span> <span class="st">"mu"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "Calculating posterior summary for hierarchical parameters"</span></span>
+<span><span class="co">## [1] "This can take a little while"</span></span></code></pre>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_local</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/posterior_summary_hierparam_localhierarchy.html">posterior_summary_hierparam_localhierarchy</a></span><span class="op">(</span></span>
+<span>  fit <span class="op">=</span> <span class="va">fit_local</span>, parname <span class="op">=</span> <span class="st">"mu"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "Calculating posterior summary for hierarchical parameters"</span></span>
+<span><span class="co">## [1] "This can take a little while"</span></span></code></pre>
+<p>Example output for the global model is as follows:</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_local</span><span class="op">$</span><span class="va">level1</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 90 × 3</span></span></span>
+<span><span class="co">##    name      val quant</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> 1      0.278  0.025</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> 1      0.293  0.5  </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> 1      0.306  0.975</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> 2      0.334  0.025</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> 2      0.348  0.5  </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> 2      0.361  0.975</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> 3     -<span style="color: #BB0000;">0.077</span><span style="color: #BB0000; text-decoration: underline;">9</span> 0.025</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> 3     -<span style="color: #BB0000;">0.064</span><span style="color: #BB0000; text-decoration: underline;">0</span> 0.5  </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> 3     -<span style="color: #BB0000;">0.049</span><span style="color: #BB0000; text-decoration: underline;">7</span> 0.975</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> 4     -<span style="color: #BB0000;">0.248</span>  0.025</span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ 80 more rows</span></span></span></code></pre>
+<p>The column <code>name</code> includes the country names, given by
+simple indices in this simulation. The column <code>quant</code> above
+refers to posterior means and upper and lower bounds of 95% credible
+intervals. We can create plots to show outputs, for example for the
+first 4 countries:</p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_posterior_summaries_localhierarchy.html">plot_posterior_summaries_localhierarchy</a></span><span class="op">(</span></span>
+<span>  res <span class="op">=</span> <span class="va">res_global</span>, </span>
+<span>  modelname1 <span class="op">=</span> <span class="st">"global"</span>,</span>
+<span>  hierarchy_select <span class="op">=</span> <span class="st">"level1"</span>,</span>
+<span>  areas_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">res_local</span><span class="op">$</span><span class="va">level1</span><span class="op">$</span><span class="va">name</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plots</span><span class="op">$</span><span class="va">level1</span></span></code></pre></div>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" width="700"></p>
+<p>By plotting results from global and local models, we can check how
+estimates compare and how values have been fixed in the local runs. For
+example, here we see how country estimates compare between global and
+local models:</p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_posterior_summaries_localhierarchy.html">plot_posterior_summaries_localhierarchy</a></span><span class="op">(</span></span>
+<span>  res <span class="op">=</span> <span class="va">res_local</span>, </span>
+<span>  modelname1 <span class="op">=</span> <span class="st">"local"</span>,</span>
+<span>  res2 <span class="op">=</span> <span class="va">res_global</span>, </span>
+<span>  modelname2 <span class="op">=</span> <span class="st">"global"</span>, </span>
+<span>  hierarchy_select <span class="op">=</span> <span class="st">"level1"</span>,</span>
+<span>  areas_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">res_local</span><span class="op">$</span><span class="va">level1</span><span class="op">$</span><span class="va">name</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plots</span><span class="op">$</span><span class="va">level1</span></span></code></pre></div>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" width="700"></p>
+<p>Estimates are similar, as expected.</p>
+<p>When visualizing higher levels, we see how parameters were fixed in
+the local model:</p>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_posterior_summaries_localhierarchy.html">plot_posterior_summaries_localhierarchy</a></span><span class="op">(</span></span>
+<span>  res <span class="op">=</span> <span class="va">res_local</span>, </span>
+<span>  modelname1 <span class="op">=</span> <span class="st">"local"</span>,</span>
+<span>  res2 <span class="op">=</span> <span class="va">res_global</span>, </span>
+<span>  modelname2 <span class="op">=</span> <span class="st">"global"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plots</span><span class="op">$</span><span class="va">intercept</span> </span></code></pre></div>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-23-1.png" class="r-plt" width="700"></p>
+<p>We can also create plots for the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>s
+(<code>mu_raw</code>s):</p>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_muraw_localhierarchy.html">plot_muraw_localhierarchy</a></span><span class="op">(</span>fit <span class="op">=</span> <span class="va">global_fit</span>, parname <span class="op">=</span> <span class="st">"mu"</span><span class="op">)</span></span></code></pre></div>
+<p>This gives a list with plots, including summary plots and plots with
+priors and posteriors. For example, the figures below show the first 30
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>s,
+followed by the prior-posterior densities for the first
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
+(referring to the intercept).</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plots</span><span class="op">[[</span><span class="st">"summary_plots"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-25-1.png" class="r-plt" width="700"></p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plots</span><span class="op">[[</span><span class="st">"plots_allmuraw"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Multiple drawing groups in `geom_function()`</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Did you use the correct <span style="color: #00BB00;">group</span>, <span style="color: #00BB00;">colour</span>, or <span style="color: #00BB00;">fill</span> aesthetics?</span></span></code></pre>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-26-1.png" class="r-plt" width="700"></p>
+<p>Plots with prior and posterior densities of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>s
+can be produced as well:</p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_prior_post_sigmas_localhierarchy.html">plot_prior_post_sigmas_localhierarchy</a></span><span class="op">(</span>fit <span class="op">=</span> <span class="va">global_fit</span>, parname <span class="op">=</span> <span class="st">"mu"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Multiple drawing groups in `geom_function()`</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Did you use the correct <span style="color: #00BB00;">group</span>, <span style="color: #00BB00;">colour</span>, or <span style="color: #00BB00;">fill</span> aesthetics?</span></span></code></pre>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" width="700"></p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="sec-fpetnat">Application: National estimation of family planning indicators using
+FPET<a class="anchor" aria-label="anchor" href="#sec-fpetnat"></a>
+</h3>
+<p>For family planning estimation, a local model fitting approach was
+motivated by the need to enable country monitoring and evaluation
+(M&amp;E) officers to produce estimates for their countries, as part of
+the Track20 project <span class="citation">(Alkema et al. 2024)</span>.
+The Track20 project works to build the capacity of countries to generate
+and use data to inform their programming, improve impact, and accelerate
+progress toward their FP goals. One of the pillars of this approach is
+the cultivation of a network of M&amp;E officers dedicated to increasing
+the quality and use of FP data. We developed the family planning
+estimation tool (FPET) as a local version of a global family planning
+model, for use by the M&amp;E officers.</p>
+<p>For local estimation of family planning indicators, the Bayesian
+model described in <span class="citation">(<strong>sec-fpet?</strong>)</span> is used.
+Specifically, hierarchical models are used for estimation of transition
+model parameters. The workflow used for estimating family planning
+indicators at the national level is based on model fitting in several
+steps, including the estimation of long-term trends in the first step,
+the estimation of all model parameters related to modern contraceptive
+use in a second step, the addition of information on the use of
+traditional methods of contraception in a third step, followed by local
+model fitting to produce estimates for all indicators of interest. The
+<code>localhierarchy</code> functionality is incorporated in the family
+planning modeling code base such that all steps are run with the same
+code base, and parameters can be passed from one model fit to another.
+Full details on this workflow and model specification are described
+elsewhere <span class="citation">(Alkema et al. 2024)</span>. As an
+illustration, <span class="citation">(<strong>fig-allfits?</strong>)</span> shows global and
+local fits for modern contraceptive use, demand, and demand satisfied
+for selected countries in Western Africa. The global fit in red
+corresponds closely to the local fits, shown in green.</p>
+<div class="float" id="fig-allfits">
+<img src="fig/fpet_localglobal.jpg" alt="Data, estimates, and forecasts from 1970 until 2030 for FP indicators for married women in in Benin (BEN), Gambia (GMB), and Ghana (GHA). FPET estimates are shown in in colored lines (red for global, green for local), with shaded areas representing 90% credible intervals. Survey data are shown in colored dots with 95% confidence intervals that reflect total error variance."><div class="figcaption">Data, estimates, and forecasts from 1970 until
+2030 for FP indicators for married women in in Benin (BEN), Gambia
+(GMB), and Ghana (GHA). FPET estimates are shown in in colored lines
+(red for global, green for local), with shaded areas representing 90%
+credible intervals. Survey data are shown in colored dots with 95%
+confidence intervals that reflect total error variance.</div>
+</div>
+<p>{{&lt; pagebreak &gt;}}</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="conclusions">Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
+</h2>
+<p>Bayesian hierarchical models are widely used in global health
+estimation, where data availability may vary across national or
+subnational populations. For analysis at a local level, local models are
+often of interest, referring to models that are derived from global
+hierarchical models but adapted such that they can be fitted to the data
+from one population alone. To that end, we introduced the
+<code>localhierarchy</code> R package, which provides functionality for
+fitting Bayesian hierarchical models in settings where both global and
+local estimation is required.</p>
+<p>We have used the <code>localhierarchy</code> functionality in
+multiple projects. We discussed the estimation of family planning
+indicators, for which country M&amp;E officers use the local model to
+produce estimates at the national and subnational level. In this area,
+M&amp;E officers have successfully used local models to produce national
+estimates since 2014. Availability of a local modeling tool has enabled
+users to do additional analyses and check sensitivity of estimates to
+specific data sources or data quality assumptions. In addition to
+fitting the model to survey data, users of the local family planning
+model can also incorporate additional data from routine information
+systems (e.g., the number of contraceptive commodities supplied at
+family planning facilities, see <span class="citation">(Mooney et al.
+2024)</span>). These use cases illustrate the value of local models to
+enable local analysis.</p>
+<p>More recently, we have used the <code>localhierarchy</code> approach
+and functionality for estimating coverage indicators for the
+<em>Countdown to 2030 for Women’s, Children’s and Adolescents’ Health
+initiative.</em> This initiative focuses on “tracking progress of
+life-saving interventions for Reproductive, Maternal, Newborn, Child and
+Adolescent Health and Nutrition” in low- and middle-income countries,
+see <a href="https://www.%20countdown2030.org/" class="external-link">www.
+countdown2030.org</a>. By developing the <code>localhierarchy</code>
+package and providing use cases in this paper, we hope that this work
+can be useful for other global health modelers, to consider local
+modeling in their own work.</p>
+<div class="section level4">
+<h4 class="unnumbered" id="data-availability-statement">Data availability statement<a class="anchor" aria-label="anchor" href="#data-availability-statement"></a>
+</h4>
+<p>No data are associated with the software tool described in this
+article.</p>
+</div>
+<div class="section level4">
+<h4 class="unnumbered" id="software-availability">Software availability<a class="anchor" aria-label="anchor" href="#software-availability"></a>
+</h4>
+<p>The R package is available at <a href="https://github.com/AlkemaLab/localhierarchy" class="external-link">github.com/AlkemaLab/localhierarchy</a>
+<span class="citation">(Alkema et al. 2025)</span>. This code is
+distributed under the MIT License. See the R package’s LICENSE file for
+details.</p>
+</div>
+<div class="section level4">
+<h4 class="unnumbered" id="grant-information">Grant information<a class="anchor" aria-label="anchor" href="#grant-information"></a>
+</h4>
+<p>This work was supported, in whole or in part, by the Gates Foundation
+(INV-00844 and OPP1192802). Under the grant conditions of the
+Foundation, a Creative Commons Attribution 4.0 Generic License has
+already been assigned to the Author Accepted Manuscript version that
+might arise from this submission.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="appendix">Appendix<a class="anchor" aria-label="anchor" href="#appendix"></a>
+</h2>
+<div class="section level3">
+<h3 id="appendix-i-excerpts-from-the-stan-model">Appendix I: Excerpts from the Stan model<a class="anchor" aria-label="anchor" href="#appendix-i-excerpts-from-the-stan-model"></a>
+</h3>
+<p>The same Stan model is used for both global and local models.
+Excerpts are given in this section to explain key components.</p>
+<p>The first excerpt starts at the end in terms of model specification
+and concerns the specification of the hierarchical parameters
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\mu_c</annotation></semantics></math>,
+using the <code>localhierarchy</code> Stan function
+<code>get_mu</code>:</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a>data {</span>
+<span id="cb51-2"><a href="#cb51-2" tabindex="-1"></a>  matrix[n_geounit, mu_raw_n_terms] mu_model_matrix;</span>
+<span id="cb51-3"><a href="#cb51-3" tabindex="-1"></a>}</span>
+<span id="cb51-4"><a href="#cb51-4" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" tabindex="-1"></a>transformed data {</span>
+<span id="cb51-6"><a href="#cb51-6" tabindex="-1"></a>  vector[<span class="fu">rows</span>(<span class="fu">csr_extract_w</span>(mu_model_matrix))] mu_model_matrix_w     </span>
+<span id="cb51-7"><a href="#cb51-7" tabindex="-1"></a>              <span class="ot">=</span> <span class="fu">csr_extract_w</span>(mu_model_matrix);</span>
+<span id="cb51-8"><a href="#cb51-8" tabindex="-1"></a>  array[<span class="fu">size</span>(<span class="fu">csr_extract_v</span>(mu_model_matrix))] int mu_model_matrix_v  </span>
+<span id="cb51-9"><a href="#cb51-9" tabindex="-1"></a>              <span class="ot">=</span> <span class="fu">csr_extract_v</span>(mu_model_matrix);</span>
+<span id="cb51-10"><a href="#cb51-10" tabindex="-1"></a>  array[<span class="fu">size</span>(<span class="fu">csr_extract_u</span>(mu_model_matrix))] int mu_model_matrix_u  </span>
+<span id="cb51-11"><a href="#cb51-11" tabindex="-1"></a>              <span class="ot">=</span> <span class="fu">csr_extract_u</span>(mu_model_matrix);</span>
+<span id="cb51-12"><a href="#cb51-12" tabindex="-1"></a>}</span>
+<span id="cb51-13"><a href="#cb51-13" tabindex="-1"></a></span>
+<span id="cb51-14"><a href="#cb51-14" tabindex="-1"></a>transformed parameters {</span>
+<span id="cb51-15"><a href="#cb51-15" tabindex="-1"></a> vector[n_geounit] mu <span class="ot">=</span> <span class="fu">get_mu</span>(</span>
+<span id="cb51-16"><a href="#cb51-16" tabindex="-1"></a>    mu_star,</span>
+<span id="cb51-17"><a href="#cb51-17" tabindex="-1"></a>    mu_raw_n_terms,</span>
+<span id="cb51-18"><a href="#cb51-18" tabindex="-1"></a>    n_geounit,</span>
+<span id="cb51-19"><a href="#cb51-19" tabindex="-1"></a>    mu_model_matrix_w, mu_model_matrix_v, mu_model_matrix_u);</span>
+<span id="cb51-20"><a href="#cb51-20" tabindex="-1"></a>}</span></code></pre></div>
+<p>Here we use that
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>μ</mi><mn>1</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>c</mi><mi>o</mi><mi>u</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><msubsup><mi>μ</mi><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>c</mi><mi>o</mi><mi>u</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>M</mi><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>η</mi><mn>1</mn></msub><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><msub><mi>η</mi><mi>C</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">(\mu_1^{(country)}, ..., \mu_C^{(country)}) = M \cdot (\eta_1, ..., \eta_C)</annotation></semantics></math>,
+where matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
+is a sparse matrix with 1s and 0s, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>η</mi><mn>1</mn></msub><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><msub><mi>η</mi><mi>c</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\eta_1, ..., \eta_c)</annotation></semantics></math>
+refers to the vector with products of standard deviation and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
+terms. The function <code>get_mu</code> calculates the vector of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>μ</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>c</mi><mi>o</mi><mi>u</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mu_c^{(country)}</annotation></semantics></math>s
+from the vector of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>s
+(<code>mu_star</code> in the Stan model) and a decomposition of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
+into different parts
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>U</mi><annotation encoding="application/x-tex">U</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math>.
+This implementation uses the sparse representation of the model matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
+with Stan functions <code>csr_matrix_times_vector</code> and
+<code>crs_extract</code>.</p>
+<p>The second Stan model excerpt concerns the specification of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>s
+(<code>mu_star</code>). This vector is obtained by multiplying the
+parameter vector of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>s,
+which is referred to as <code>mu_raw</code> in the Stan model by their
+respective standard deviation, i.e.,
+<!-- the vector containing $s_{\mathrm{global}}$ (labeled `mu_scalarprior_mean` in the Stan model) and  -->
+the parameter vector of stacked
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>s
+(labeled <code>mu_sigma</code> in the Stan model). The model block
+contains the prior for the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>s
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\sigma_{k}</annotation></semantics></math>s,
+given by
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msup><mi>γ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>σ</mi><mi>k</mi></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mtext mathvariant="normal">Half-Normal</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msub><mi>w</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+  \gamma^{(k)} &amp;\sim N(0,1),\\
+  \sigma_{k} &amp;\sim \text{Half-Normal}(0, w_{0, \mu}),
+\end{align*}</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><annotation encoding="application/x-tex">w_{0, \mu}</annotation></semantics></math>
+refers to the prior standard deviation for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\sigma_k</annotation></semantics></math>,
+called <code>prior_sd_sigma_estimate</code> in the Stan model file. The
+<code>localhierarchy</code> Stan function <code>get_mu_star</code> is
+used to carry out this multiplication to obtain the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>s.
+The arguments for <code>get_mu_star</code> include prior parameters
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><annotation encoding="application/x-tex">m_{0, \mu}</annotation></semantics></math>,
+<code>mu_scalarprior_mean</code>, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>s</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><annotation encoding="application/x-tex">s_{0, \mu}</annotation></semantics></math>,
+<code>mu_scalarprior_sd</code>, which refer to the (rescaled) prior mean
+and standard deviation of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">\mu^{(\mathrm{global})}</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>=</mo><msub><mi>s</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>m</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><mo>+</mo><msup><mi>γ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mu^{(\mathrm{global})} = s_{0, \mu}(m_{0, \mu} + \gamma^{(\mathrm{global})})</annotation></semantics></math>.
+Combined with the standard normal prior on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>γ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">\gamma^{(\mathrm{global})}</annotation></semantics></math>,
+the resulting prior on the intercept
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">\mu^{(\mathrm{global})}</annotation></semantics></math>
+is given by:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msup><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></msup></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>s</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><mo>⋅</mo><msub><mi>m</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><mo>,</mo><msub><mi>s</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+  \mu^{(\mathrm{global})} &amp;\sim N(s_{0, \mu}\cdot m_{0, \mu}, s_{0, \mu}).
+\end{align*}</annotation></semantics></math> All prior parameters
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><mo>,</mo><msub><mi>s</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub><mo>,</mo><msub><mi>w</mi><mrow><mn>0</mn><mo>,</mo><mi>μ</mi></mrow></msub></mrow><annotation encoding="application/x-tex">m_{0, \mu}, s_{0, \mu}, w_{0, \mu}</annotation></semantics></math>)
+are added as input data to the Stan model.</p>
+<p>To allow for global and local models, additions
+<code>_estimate</code> and <code>_fixed</code> are used to allow for
+splitting the <code>mu_raw</code> vector into two parts, one for fixed
+and one for estimated parameters. Similarly, vector
+<code>mu_sigma</code> is also split into two parts, one part for fixed
+and one part for estimated parameters. Relevant Stan code is as
+follows:</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a>data {</span>
+<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span> terms of hierarchical model</span>
+<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a>  int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">0</span><span class="sc">&gt;</span> mu_raw_n_terms;</span>
+<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a>  int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">0</span><span class="sc">&gt;</span> mu_raw_n_terms_fixed;</span>
+<span id="cb52-5"><a href="#cb52-5" tabindex="-1"></a>  int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">0</span><span class="sc">&gt;</span> mu_raw_n_terms_estimate;</span>
+<span id="cb52-6"><a href="#cb52-6" tabindex="-1"></a>  int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">0</span><span class="sc">&gt;</span> mu_n_sigma;</span>
+<span id="cb52-7"><a href="#cb52-7" tabindex="-1"></a>  int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">0</span><span class="sc">&gt;</span> mu_n_sigma_fixed;</span>
+<span id="cb52-8"><a href="#cb52-8" tabindex="-1"></a>  int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">0</span><span class="sc">&gt;</span> mu_n_sigma_estimate;</span>
+<span id="cb52-9"><a href="#cb52-9" tabindex="-1"></a>  array[mu_n_sigma <span class="sc">+</span> <span class="dv">1</span>] int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">1</span>, upper<span class="ot">=</span>mu_raw_n_terms<span class="sc">&gt;</span> mu_re_start;</span>
+<span id="cb52-10"><a href="#cb52-10" tabindex="-1"></a>  array[mu_n_sigma <span class="sc">+</span> <span class="dv">1</span>] int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">1</span>, upper<span class="ot">=</span>mu_raw_n_terms<span class="sc">&gt;</span> mu_re_end;</span>
+<span id="cb52-11"><a href="#cb52-11" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span> values of fixed parameters</span>
+<span id="cb52-12"><a href="#cb52-12" tabindex="-1"></a>  vector[mu_raw_n_terms_fixed] mu_raw_fixed;</span>
+<span id="cb52-13"><a href="#cb52-13" tabindex="-1"></a>  vector<span class="sc">&lt;</span>lower<span class="ot">=</span>verysmallnumber<span class="sc">&gt;</span>[mu_n_sigma_fixed] mu_sigma_fixed;</span>
+<span id="cb52-14"><a href="#cb52-14" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span> prior parameters</span>
+<span id="cb52-15"><a href="#cb52-15" tabindex="-1"></a>  real<span class="sc">&lt;</span>lower <span class="ot">=</span> verysmallnumber<span class="sc">&gt;</span> mu_scalarprior_sd;</span>
+<span id="cb52-16"><a href="#cb52-16" tabindex="-1"></a>  real mu_scalarprior_mean;</span>
+<span id="cb52-17"><a href="#cb52-17" tabindex="-1"></a>  real<span class="sc">&lt;</span>lower <span class="ot">=</span> verysmallnumber<span class="sc">&gt;</span> mu_prior_sd_sigma_estimate;</span>
+<span id="cb52-18"><a href="#cb52-18" tabindex="-1"></a>}</span>
+<span id="cb52-19"><a href="#cb52-19" tabindex="-1"></a></span>
+<span id="cb52-20"><a href="#cb52-20" tabindex="-1"></a>parameters {</span>
+<span id="cb52-21"><a href="#cb52-21" tabindex="-1"></a>  vector[mu_raw_n_terms_estimate] mu_raw_estimate;</span>
+<span id="cb52-22"><a href="#cb52-22" tabindex="-1"></a>  vector<span class="sc">&lt;</span>lower<span class="ot">=</span>verysmallnumber<span class="sc">&gt;</span>[mu_n_sigma_estimate] mu_sigma_estimate;</span>
+<span id="cb52-23"><a href="#cb52-23" tabindex="-1"></a>}</span>
+<span id="cb52-24"><a href="#cb52-24" tabindex="-1"></a></span>
+<span id="cb52-25"><a href="#cb52-25" tabindex="-1"></a>transformed parameters {</span>
+<span id="cb52-26"><a href="#cb52-26" tabindex="-1"></a> vector[mu_raw_n_terms] mu_star <span class="ot">=</span> <span class="fu">get_mu_star</span>(</span>
+<span id="cb52-27"><a href="#cb52-27" tabindex="-1"></a>    mu_n_sigma, mu_n_sigma_fixed, mu_n_sigma_estimate,</span>
+<span id="cb52-28"><a href="#cb52-28" tabindex="-1"></a>    mu_sigma_fixed, mu_sigma_estimate,</span>
+<span id="cb52-29"><a href="#cb52-29" tabindex="-1"></a>    mu_scalarprior_mean,</span>
+<span id="cb52-30"><a href="#cb52-30" tabindex="-1"></a>    mu_scalarprior_sd,</span>
+<span id="cb52-31"><a href="#cb52-31" tabindex="-1"></a>    mu_raw_n_terms, mu_raw_n_terms_fixed, mu_raw_n_terms_estimate,</span>
+<span id="cb52-32"><a href="#cb52-32" tabindex="-1"></a>    mu_raw_fixed, mu_raw_estimate,</span>
+<span id="cb52-33"><a href="#cb52-33" tabindex="-1"></a>    mu_re_start, mu_re_end);</span>
+<span id="cb52-34"><a href="#cb52-34" tabindex="-1"></a>}</span>
+<span id="cb52-35"><a href="#cb52-35" tabindex="-1"></a>model {</span>
+<span id="cb52-36"><a href="#cb52-36" tabindex="-1"></a>  <span class="fu">to_vector</span>(mu_raw_estimate) <span class="sc">~</span> <span class="fu">std_normal</span>();</span>
+<span id="cb52-37"><a href="#cb52-37" tabindex="-1"></a>  <span class="fu">to_vector</span>(mu_sigma_estimate) <span class="sc">~</span> <span class="fu">normal</span>(<span class="dv">0</span>, mu_prior_sd_sigma_estimate);</span>
+<span id="cb52-38"><a href="#cb52-38" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="sec-helpfilefitmodel">Appendix II: Documentation of the
+<code>fit_model_localhierarchy</code> function<a class="anchor" aria-label="anchor" href="#sec-helpfilefitmodel"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th><strong>Argument</strong></th>
+<th><strong>Description</strong></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>survey_df</code></strong></td>
+<td>Tibble with survey data</td>
+</tr>
+<tr class="even">
+<td><strong><code>y</code></strong></td>
+<td>Column name of outcome, defaults to
+<strong><code>y</code></strong>.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>area</code></strong></td>
+<td>Column name of the area of each observation (used as geounit; iso or
+subnational region)</td>
+</tr>
+<tr class="even">
+<td><strong><code>area_select</code></strong></td>
+<td>Area name to use for local run (e.g., iso code or subnational region
+name)</td>
+</tr>
+<tr class="odd">
+<td><strong><code>runstep</code></strong></td>
+<td>Type of run, defines which model fitting step to perform (see
+Details for options).</td>
+</tr>
+<tr class="even">
+<td><strong><code>global_fit</code></strong></td>
+<td>Optional global fit object, used to obtain fixed values for some
+parameters in the current fit (see Details).</td>
+</tr>
+<tr class="odd">
+<td><strong><code>hierarchical_level</code></strong></td>
+<td>Vector specifying hierarchical structure used for mu. Should list
+elements in hierarchical order from <code>intercept</code> downward (see
+Details for examples).</td>
+</tr>
+<tr class="even">
+<td><strong><code>add_subnational_hierarchy</code></strong></td>
+<td>Level that’s added to the hierarchy for subnational analysis,
+defaults to <code>subnat</code>.</td>
+</tr>
+<tr class="odd">
+<td><strong><code>use_globalsubnat_fromnat</code></strong></td>
+<td>Logical; for local subnational runs, whether to use the global fit
+derived from national data (requires
+<strong><code>fit_globalsubnat_fromnat</code></strong> in
+<strong><code>global_fit</code></strong> if TRUE).</td>
+</tr>
+<tr class="even">
+<td><strong><code>mu_isvector</code></strong></td>
+<td>Logical, TRUE if mu is a vector, defaults to FALSE</td>
+</tr>
+<tr class="odd">
+<td><strong><code>chains</code></strong></td>
+<td>Number of chains to run (sampling parameter)</td>
+</tr>
+<tr class="even">
+<td><strong><code>iter_sampling</code></strong></td>
+<td>Number of posterior samples to draw (sampling parameter)</td>
+</tr>
+<tr class="odd">
+<td><strong><code>iter_warmup</code></strong></td>
+<td>Number of warmup iterations (sampling parameter)</td>
+</tr>
+<tr class="even">
+<td><strong><code>compile_model</code></strong></td>
+<td>Boolean indicator of whether to compile the Stan model</td>
+</tr>
+<tr class="odd">
+<td><strong><code>force_recompile</code></strong></td>
+<td>Boolean indicator of whether to force recompilation of the Stan
+model</td>
+</tr>
+<tr class="even">
+<td><strong><code>seed</code></strong></td>
+<td>Random seed</td>
+</tr>
+<tr class="odd">
+<td><strong><code>refresh</code></strong></td>
+<td>Number of iterations between progress updates</td>
+</tr>
+<tr class="even">
+<td><strong><code>adapt_delta</code></strong></td>
+<td>Target acceptance rate for the No-U-Turn Sampler</td>
+</tr>
+<tr class="odd">
+<td><strong><code>max_treedepth</code></strong></td>
+<td>Maximum tree depth for the No-U-Turn Sampler</td>
+</tr>
+</tbody>
+</table>
+<div class="section level4">
+<h4 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a>
+</h4>
+<p>The <code>fit_model_localhierarchy</code> function fits the toy
+example for hierarchical models/seq fitting. The argument
+<code>runstep</code> determines the type of run to perform. The
+following run steps are supported:</p>
+<ul>
+<li><p>“global_national”: Fit the global model.</p></li>
+<li><p>“local_national”: Fit the model to data from a single country,
+using a global_national fit.</p></li>
+<li><p>“global_subnational”: Fit the model to global database with
+subnational data, using a global_national fit.</p></li>
+<li><p>“local_subnational”: Fit the model to subnational data from a
+single country or region, using a global_subnational fit. This is also
+explained in the documentation folder.</p></li>
+</ul>
+<p>Details on hierarchical set ups used The package allows the structure
+of the hierarchical prior to be configured by the user through the
+<code>hierarchical_level</code> argument. These arguments expect a
+character vector that specifies a nesting hierarchical structure. Each
+element of the vector must be either “intercept” or a column name in the
+survey dataset, where “intercept” will add a global intercept for the
+parameter. The vector must be in descending order in terms of the
+hierarchy: that is, it starts with “intercept” and proceeds down the
+hierarchy.</p>
+<p>For example, suppose we are fitting country-level data, where the
+dataset has columns “name_country”, “name_sub_region”, and “name_region”
+containing the name of the country, sub-region, and region that each
+observation belongs to. To specify that parameter mu should be fitted
+with a hierarchical model in which countries are nested within
+sub-regions within regions within world, we would use the argument
+<code>hierarchical_level = c("intercept", "name_region", "name_sub_region", "name_country")</code>.</p>
+<p>Optionally, model parameters can be fixed to values from a previous
+model fit provided via the <code>global_fit</code> argument. In a
+typical use case, the <code>global_fit</code> will have been fit to data
+from many geographic units (e.g., all countries), while the current fit
+uses data from a smaller number of locations. When using a global_fit to
+fix parameter values, what exactly is fixed is determined by the runstep
+and global_fit combi. see options in function</p>
+</div>
+<div class="section level4">
+<h4 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a>
+</h4>
+<p>List that contains samples, stan_data, other information relevant to
+model fit (arguments), and for global fits, point estimates of relevant
+parameters (post_summ). For subnational global fits, the list includes
+fit_globalsubnat_fromnat, which is the global fit with additional
+subnational sigmas added to the postsum object.</p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-localhierarchy" class="csl-entry">
+Alkema, Leontine, Shauna Mooney, Evan Ray, and Herbert Susmann. 2025.
+<em>Localhierarchy: An r Package to Facilitate Fitting of Global and
+Local Bayesian Hierarchical Models</em>. <a href="https://alkemalab.github.io/localhierarchy/">https://alkemalab.github.io/localhierarchy/</a>.
+</div>
+<div id="ref-alkema_2024evol" class="csl-entry">
+Alkema, Leontine, Herbert Susmann, Evan Ray, Shauna Mooney, Niamh
+Cahill, Kristin Bietsch, A. A. Jayachandran, et al. 2024.
+<span>“Statistical <span>Demography</span> <span>Meets</span>
+<span>Ministry</span> of <span>Health</span>: <span>The</span>
+<span>Case</span> of the <span>Family</span> <span>Planning</span>
+<span>Estimation</span> <span>Tool</span>.”</span> arXiv. <a href="https://doi.org/10.48550/arXiv.2501.00007" class="external-link">https://doi.org/10.48550/arXiv.2501.00007</a>.
+</div>
+<div id="ref-bearak_unintended_2020" class="csl-entry">
+Bearak, Jonathan, Anna Popinchalk, Bela Ganatra, Ann-Beth Moller, Ozge
+Tuncalp, Cynthia Beavin, Lorraine Kwok, and Leontine Alkema. 2020.
+<span>“Unintended Pregnancy and Abortion by Income, Region, and the
+Legal Status of Abortion: Estimates from a Comprehensive Model for
+1990–2019.”</span> <em>The Lancet Global Health</em> 8 (9): e1152–61. <a href="https://doi.org/10.1016/S2214-109X(20)30315-6" class="external-link">https://doi.org/10.1016/S2214-109X(20)30315-6</a>.
+</div>
+<div id="ref-cmdstanr_2025" class="csl-entry">
+Gabry, Jonah, Rok Češnovar, Andrew Johnson, and Steve Bronder. 2025.
+<em>Cmdstanr: R Interface to ’CmdStan’</em>. <a href="https://mc-stan.org/cmdstanr/" class="external-link">https://mc-stan.org/cmdstanr/</a>.
+</div>
+<div id="ref-mooney_emu" class="csl-entry">
+Mooney, Shauna, Leontine Alkema, Emily Sonneveldt, Kristin Bietsch,
+Jessica Williamson, and Niamh Cahill. 2024. <span>“Enhancing the Use of
+Family Planning Service Statistics Using a Bayesian Modelling Approach
+to Inform Estimates of Modern Contraceptive Use in Low- and
+Middle-Income Countries,”</span> December. <a href="https://doi.org/10.48550/arXiv.2412.08606" class="external-link">https://doi.org/10.48550/arXiv.2412.08606</a>.
+</div>
+<div id="ref-okwaraji_national_2024" class="csl-entry">
+Okwaraji, Yemisrach B., Julia Krasevec, Ellen Bradley, Joel Conkle,
+Gretchen A. Stevens, Giovanna Gatica-Domínguez, Eric O. Ohuma, et al.
+2024. <span>“National, Regional, and Global Estimates of Low Birthweight
+in 2020, with Trends from 2000: A Systematic Analysis.”</span> <em>The
+Lancet</em> 403 (10431): 1071–80. <a href="https://doi.org/10.1016/S0140-6736(23)01198-4" class="external-link">https://doi.org/10.1016/S0140-6736(23)01198-4</a>.
+</div>
+<div id="ref-peterson_bayesian_2024" class="csl-entry">
+Peterson, Emily N., Greg Guranich, Jenny A. Cresswell, and Leontine
+Alkema. 2024. <span>“A <span>Bayesian</span> <span>Approach</span> to
+<span>Estimate</span> <span>Maternal</span> <span>Mortality</span>
+<span>Globally</span> <span>Using</span> <span>National</span>
+<span>Civil</span> <span>Registration</span> <span>Vital</span>
+<span>Statistics</span> <span>Data</span> <span>Accounting</span> for
+<span>Reporting</span> <span>Errors</span>.”</span> <em>Statistics and
+Public Policy</em> 11 (1): 2286313. <a href="https://doi.org/10.1080/2330443X.2023.2286313" class="external-link">https://doi.org/10.1080/2330443X.2023.2286313</a>.
+</div>
+<div id="ref-WeloveR" class="csl-entry">
+R Core Team. 2025. <em>R: A Language and Environment for Statistical
+Computing</em>. Vienna, Austria: R Foundation for Statistical Computing.
+<a href="https://www.R-project.org/" class="external-link">https://www.R-project.org/</a>.
+</div>
+<div id="ref-stan2025" class="csl-entry">
+Stan Development Team. 2025. <span>“Stan Modeling Language Users Guide
+and Reference Manual, 2.37.”</span> <a href="https://mc-stan.org" class="external-link">https://mc-stan.org</a>.
+</div>
+<div id="ref-susmann_flexible_2025" class="csl-entry">
+Susmann, Herbert, and Leontine Alkema. 2025. <span>“Flexible Modelling
+of Demographic Transition Processes with a <span>Bayesian</span>
+Hierarchical <span>B</span>-Splines Model.”</span> <em>Journal of the
+Royal Statistical Society Series C: Applied Statistics</em>. <a href="https://doi.org/10.1093/jrsssc/qlaf026" class="external-link">https://doi.org/10.1093/jrsssc/qlaf026</a>.
+</div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
