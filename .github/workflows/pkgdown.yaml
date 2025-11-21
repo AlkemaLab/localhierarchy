@@ -37,9 +37,6 @@ jobs:
           dependencies:
           extra-packages: |
             stan-dev/cmdstanr
-            any::pkgdown
-            local::.
-          needs: website
 
       - name: Build Cmdstan
         run: |
