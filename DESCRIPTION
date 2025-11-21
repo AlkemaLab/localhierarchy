@@ -7,7 +7,7 @@ Authors@R: c(person("Leontine", "Alkema", email = "lalkema@umass.edu", role = c(
               person("Evan", "Ray", role = c("aut")),
               person("Herbert", "Susmann", email = "herbps10@gmail.com", role = c("aut"))
             )
-Year: 2025
+Date: 2025-11-21
 Description: The LocalHierarchy package implements a flexible set up to estimate parameters hierarchically 
     and to carry out local model fits, whereby higher-level parameters are fixed.  
 License: MIT + file LICENSE
