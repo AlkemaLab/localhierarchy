@@ -56,7 +56,7 @@ citation("localhierarchy")
 #>   Alkema L, Mooney S, Ray E, Susmann H (2025). _localhierarchy: An R
 #>   package to facilitate fitting of global and local Bayesian
 #>   hierarchical models_. R package version 0.9,
-#>   <https://alkemalab.github.io/localhierarchy/>.
+#>   <https://github.com/AlkemaLab/localhierarchy>.
 #> 
 #> A BibTeX entry for LaTeX users is
 #> 
@@ -65,7 +65,7 @@ citation("localhierarchy")
 #>     author = {Leontine Alkema and Shauna Mooney and Evan Ray and Herbert Susmann},
 #>     year = {2025},
 #>     note = {R package version 0.9},
-#>     url = {https://alkemalab.github.io/localhierarchy/},
+#>     url = {https://github.com/AlkemaLab/localhierarchy},
 #>   }
 ```
 
