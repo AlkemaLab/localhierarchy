@@ -30,7 +30,7 @@ through examples for national estimation.
 
 ## Installation
 
-- `localhierarchy` depends on `cmdstanr:` Instructions for installing
+- `localhierarchy` depends on `cmdstanr`: Instructions for installing
   `cmdstanr` are available in their [Getting
   started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) guide.
 
@@ -68,3 +68,8 @@ citation("localhierarchy")
 #>     url = {https://alkemalab.github.io/localhierarchy/},
 #>   }
 ```
+
+## Funding
+
+This work was supported, in whole or in part, by the Bill & Melinda
+Gates Foundation (INV-00844).

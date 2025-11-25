@@ -8,7 +8,7 @@ Authors@R: c(person("Leontine", "Alkema", email = "lalkema@umass.edu", role = c(
               person("Herbert", "Susmann", email = "herbps10@gmail.com", role = c("aut"))
             )
 Date: 2025-11-21
-Description: The LocalHierarchy package implements a flexible set up to estimate parameters hierarchically 
+Description: The localhierarchy package implements a flexible set up to estimate parameters hierarchically 
     and to carry out local model fits, whereby higher-level parameters are fixed.  
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -29,7 +29,8 @@ Imports:
     tidybayes,
     readr,
     glue
-URL: https://alkemalab.github.io/localhierarchy/
+URL: https://github.com/AlkemaLab/localhierarchy, https://alkemalab.github.io/localhierarchy/
+BugReports: https://github.com/AlkemaLab/localhierarchy/issues
 Suggests: 
     bayesplot,
     cmdstanr,

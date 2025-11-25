@@ -24,7 +24,7 @@ The article on this website presents a practical introduction to the package for
 
 ## Installation
 
--   `localhierarchy` depends on `cmdstanr:` Instructions for installing `cmdstanr` are available in their [Getting started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) guide.
+-   `localhierarchy` depends on `cmdstanr`: Instructions for installing `cmdstanr` are available in their [Getting started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) guide.
 
 -   Install `localhierarchy` from Github: `remotes::install_github("AlkemaLab/localhierarchy")`
 
@@ -39,3 +39,6 @@ Please cite as follows:
 ```{r}
 citation("localhierarchy")
 ```
+
+## Funding
+This work was supported, in whole or in part, by the Bill & Melinda Gates Foundation (INV-00844).

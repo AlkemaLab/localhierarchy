@@ -6,12 +6,14 @@
 \alias{localhierarchy-package}
 \title{localhierarchy: An R package to facilitate fitting of global and local Bayesian hierarchical models}
 \description{
-The LocalHierarchy package implements a flexible set up to estimate parameters hierarchically and to carry out local model fits, whereby higher-level parameters are fixed.
+The localhierarchy package implements a flexible set up to estimate parameters hierarchically and to carry out local model fits, whereby higher-level parameters are fixed.
 }
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://github.com/AlkemaLab/localhierarchy}
   \item \url{https://alkemalab.github.io/localhierarchy/}
+  \item Report bugs at \url{https://github.com/AlkemaLab/localhierarchy/issues}
 }
 
 }
