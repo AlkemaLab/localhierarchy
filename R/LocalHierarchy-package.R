@@ -6,8 +6,6 @@
 #' @import ggplot2
 #' @importFrom bayesplot mcmc_dens_overlay
 #' @importFrom bayesplot mcmc_intervals
-#' @importFrom cmdstanr cmdstan_model
-#' @importFrom cmdstanr read_cmdstan_csv
 #' @importFrom posterior as_draws_list
 #' @importFrom purrr list_flatten
 #' @importFrom purrr map

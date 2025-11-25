@@ -73,7 +73,6 @@
 #' of locations.
 #' When using a global_fit to fix parameter values, what exactly is fixed is determined by the runstep and global_fit combi.
 #'
-#' @importFrom cmdstanr cmdstan_model
 #' @importFrom tibble tibble
 #' @import dplyr
 #'
