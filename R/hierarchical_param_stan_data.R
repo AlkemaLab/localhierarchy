@@ -114,13 +114,13 @@ hierarchical_param_stan_data <- function(param_name,
     if (!is_matrix){
       results_sigma <- rep(NA, n_sigma_fixed)
       # here index k used for etas [not dimension of parvector]
-      for (k in 1:n_sigma_fixed){
+      for (k in seq_len(n_sigma_fixed)){
         results_sigma[k] <- global_fit$post_summ %>%
           filter(variable == paste0(param_name, "_sigma[", k, "]")) %>%
           pull(postmean)
       }
       results_eta <- rep(NA, length(index_local$column))
-      for (k in 1:length(index_local$column)){
+      for (k in seq_len(length(index_local$column))){
         results_eta[k] <- global_fit$post_summ %>%
           filter(variable == paste0(param_name, "_raw[", indices_for_local[k], "]")) %>%
           pull(postmean)
