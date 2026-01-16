@@ -832,7 +832,7 @@ first 4 countries:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">plots</span><span class="op">$</span><span class="va">level1</span></span></code></pre></div>
-<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" width="700"></p>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" alt="" width="700"></p>
 <p>By plotting results from global and local models, we can check how
 estimates compare and how values have been fixed in the local runs. For
 example, here we see how country estimates compare between global and
@@ -848,7 +848,7 @@ local models:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">plots</span><span class="op">$</span><span class="va">level1</span></span></code></pre></div>
-<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" width="700"></p>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" alt="" width="700"></p>
 <p>Estimates are similar, as expected.</p>
 <p>When visualizing higher levels, we see how parameters were fixed in
 the local model:</p>
@@ -861,7 +861,7 @@ the local model:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">plots</span><span class="op">$</span><span class="va">intercept</span> </span></code></pre></div>
-<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-23-1.png" class="r-plt" width="700"></p>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-23-1.png" class="r-plt" alt="" width="700"></p>
 <p>We can also create plots for the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>s
 (<code>mu_raw</code>s):</p>
@@ -875,12 +875,12 @@ followed by the prior-posterior densities for the first
 (referring to the intercept).</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plots</span><span class="op">[[</span><span class="st">"summary_plots"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-25-1.png" class="r-plt" width="700"></p>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-25-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plots</span><span class="op">[[</span><span class="st">"plots_allmuraw"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Multiple drawing groups in `geom_function()`</span></span>
 <span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Did you use the correct <span style="color: #00BB00;">group</span>, <span style="color: #00BB00;">colour</span>, or <span style="color: #00BB00;">fill</span> aesthetics?</span></span></code></pre>
-<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-26-1.png" class="r-plt" width="700"></p>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-26-1.png" class="r-plt" alt="" width="700"></p>
 <p>Plots with prior and posterior densities of the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>s
 can be produced as well:</p>
@@ -888,7 +888,7 @@ can be produced as well:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_prior_post_sigmas_localhierarchy.html">plot_prior_post_sigmas_localhierarchy</a></span><span class="op">(</span>fit <span class="op">=</span> <span class="va">global_fit</span>, parname <span class="op">=</span> <span class="st">"mu"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Multiple drawing groups in `geom_function()`</span></span>
 <span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Did you use the correct <span style="color: #00BB00;">group</span>, <span style="color: #00BB00;">colour</span>, or <span style="color: #00BB00;">fill</span> aesthetics?</span></span></code></pre>
-<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" width="700"></p>
+<p><img src="localhierarchy_article_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level3">
