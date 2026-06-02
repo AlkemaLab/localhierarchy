@@ -4,8 +4,6 @@
 ## usethis namespace: start
 #' @import dplyr
 #' @import ggplot2
-#' @importFrom bayesplot mcmc_dens_overlay
-#' @importFrom bayesplot mcmc_intervals
 #' @importFrom posterior as_draws_list
 #' @importFrom purrr list_flatten
 #' @importFrom purrr map

@@ -17,7 +17,6 @@
 #' @export
 #'
 #' @importFrom posterior as_draws_list
-#' @importFrom bayesplot mcmc_dens_overlay
 #'
 plot_muraw_localhierarchy <- function(fit, parname, morethan1param = FALSE,
                         nresultsperpage = 30){
@@ -47,7 +46,7 @@ plot_muraw_localhierarchy <- function(fit, parname, morethan1param = FALSE,
       } else {
         i_end <- i + (nresultsperpage-1)
       }
-      summary_plots[[j]] <- mcmc_intervals(samp, pars = parnames[i:i_end])
+      summary_plots[[j]] <- bayesplot::mcmc_intervals(samp, pars = parnames[i:i_end])
       j <- j + 1
     }
     return(summary_plots)
@@ -100,7 +99,7 @@ plot_prior_post_sigmas_localhierarchy <- function(fit, parname){
   parnames <- dimnames(samp)[[3]]
   # yes that's a convoluted way to get either the number of parameters for multiparam setting, or number of sigmas otherwise
   max_korlevel <- max(unlist(map(strsplit(parnames, split = ","), function(x) as.numeric(readr::parse_number(rev(x)[1])))))
-  p <- mcmc_dens_overlay(samp,
+  p <- bayesplot::mcmc_dens_overlay(samp,
                          facet_args = list(nrow = max_korlevel)) +
     stat_function(fun = dtruncnorm, color = "red",
                   args = list(a = 0, mean = 0,
