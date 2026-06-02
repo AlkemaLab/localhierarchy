@@ -1,7 +1,7 @@
 Package: localhierarchy
 Type: Package
 Title: An R package to facilitate fitting of global and local Bayesian hierarchical models
-Version: 0.9
+Version: 0.91
 Authors@R: c(person("Leontine", "Alkema", email = "lalkema@umass.edu", role = c("aut", "cre")),
               person("Shauna", "Mooney", role = c("aut")),
               person("Evan", "Ray", role = c("aut")),
