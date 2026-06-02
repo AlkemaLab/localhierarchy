@@ -46,6 +46,7 @@ on package website, at
 Please cite as follows:
 
 ``` r
+
 citation("localhierarchy")
 #> To cite package 'localhierarchy' in publications use:
 #> 
